@@ -1,9 +1,11 @@
 {
   "name": "my-blog",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "wrangler pages dev .",
-    "deploy": "wrangler pages deploy ."
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "node --test test/api.test.mjs"
   },
   "devDependencies": {
     "wrangler": "^4.43.0"
