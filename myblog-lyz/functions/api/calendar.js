@@ -7,19 +7,19 @@ export async function onRequest(context) {
 
   try {
     if (request.method === "GET") {
-      const calendar = await readKVJson(env.BLOG_DATA, KEY, {});
+      const calendar = await readKVJson(env, KEY, {});
       return json(calendar);
     }
 
     if (request.method === "PUT") {
       const calendar = await parseJsonBody(request);
       if (!calendar) return json({ error: "Invalid JSON" }, 400);
-      await writeKVJson(env.BLOG_DATA, KEY, calendar);
+      await writeKVJson(env, KEY, calendar);
       return json({ success: true });
     }
 
     if (request.method === "DELETE") {
-      await writeKVJson(env.BLOG_DATA, KEY, {});
+      await writeKVJson(env, KEY, {});
       return json({ success: true });
     }
 

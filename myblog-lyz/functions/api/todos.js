@@ -7,23 +7,23 @@ export async function onRequest(context) {
 
   try {
     if (request.method === "GET") {
-      const todos = await readKVJson(env.BLOG_DATA, KEY, {});
+      const todos = await readKVJson(env, KEY, {});
       return json(todos);
     }
 
     if (request.method === "PUT") {
       const body = await parseJsonBody(request);
       if (!body || !body.date) return json({ error: "Invalid JSON" }, 400);
-      const todos = await readKVJson(env.BLOG_DATA, KEY, {});
+      const todos = await readKVJson(env, KEY, {});
       todos[body.date] = body.data;
-      await writeKVJson(env.BLOG_DATA, KEY, todos);
+      await writeKVJson(env, KEY, todos);
       return json({ success: true });
     }
 
     if (request.method === "DELETE") {
       const body = await parseJsonBody(request);
       if (!body || !body.date) return json({ error: "Invalid JSON" }, 400);
-      const todos = await readKVJson(env.BLOG_DATA, KEY, {});
+      const todos = await readKVJson(env, KEY, {});
 
       if (body.todoId !== undefined && todos[body.date]) {
         todos[body.date].todos = (todos[body.date].todos || []).filter((todo) => todo.id !== body.todoId);
@@ -31,7 +31,7 @@ export async function onRequest(context) {
         delete todos[body.date];
       }
 
-      await writeKVJson(env.BLOG_DATA, KEY, todos);
+      await writeKVJson(env, KEY, todos);
       return json({ success: true });
     }
 

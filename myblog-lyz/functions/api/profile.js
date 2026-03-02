@@ -12,14 +12,14 @@ export async function onRequest(context) {
 
   try {
     if (request.method === "GET") {
-      const profile = await readKVJson(env.BLOG_DATA, KEY, defaultProfile);
+      const profile = await readKVJson(env, KEY, defaultProfile);
       return json(profile);
     }
 
     if (request.method === "PUT") {
       const profile = await parseJsonBody(request);
       if (!profile) return json({ error: "Invalid JSON" }, 400);
-      await writeKVJson(env.BLOG_DATA, KEY, profile);
+      await writeKVJson(env, KEY, profile);
       return json({ success: true });
     }
 

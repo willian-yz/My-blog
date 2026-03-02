@@ -5,8 +5,3 @@ compatibility_date = "2026-01-01"
 [assets]
 directory = "."
 binding = "ASSETS"
-
-[[kv_namespaces]]
-binding = "BLOG_DATA"
-id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
-preview_id = "REPLACE_WITH_YOUR_PREVIEW_KV_NAMESPACE_ID"

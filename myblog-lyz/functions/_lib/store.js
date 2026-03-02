@@ -2,6 +2,26 @@ export const jsonHeaders = {
   "Content-Type": "application/json; charset=utf-8",
 };
 
+const memoryState = globalThis.__BLOG_MEMORY_KV__ || (globalThis.__BLOG_MEMORY_KV__ = new Map());
+
+const memoryKV = {
+  async get(key, options = {}) {
+    if (!memoryState.has(key)) return null;
+    const raw = memoryState.get(key);
+    if (options.type === "json") {
+      try {
+        return JSON.parse(raw);
+      } catch {
+        return null;
+      }
+    }
+    return raw;
+  },
+  async put(key, value) {
+    memoryState.set(key, value);
+  },
+};
+
 export function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -9,13 +29,17 @@ export function json(data, status = 200) {
   });
 }
 
-export async function readKVJson(kv, key, fallbackValue) {
-  const value = await kv.get(key, { type: "json" });
+export function getStore(env) {
+  return env?.BLOG_DATA ?? memoryKV;
+}
+
+export async function readKVJson(env, key, fallbackValue) {
+  const value = await getStore(env).get(key, { type: "json" });
   return value ?? fallbackValue;
 }
 
-export async function writeKVJson(kv, key, value) {
-  await kv.put(key, JSON.stringify(value));
+export async function writeKVJson(env, key, value) {
+  await getStore(env).put(key, JSON.stringify(value));
 }
 
 export async function parseJsonBody(request) {
