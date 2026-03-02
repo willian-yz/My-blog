@@ -67,3 +67,14 @@ npm run test
 - 看 DevTools 的 `/api/posts`、`/api/photos` 请求是否 200。
 - 500：通常是 KV 命名空间 ID 未正确配置。
 - 404：通常是部署配置不对，没把 API 路由接入。
+
+## Cloudflare Pages / CI 注意事项
+
+如果你的仓库根目录是 `My-blog/`，应用代码在 `myblog-lyz/` 子目录，
+且 CI 使用 `npx wrangler versions upload`（在仓库根目录执行），
+则需要在仓库根目录也存在 `wrangler.toml`，并指向：
+
+- `main = "myblog-lyz/worker.js"`
+- `assets.directory = "myblog-lyz"`
+
+否则会出现 `Missing entry-point to Worker script or to assets directory`。
