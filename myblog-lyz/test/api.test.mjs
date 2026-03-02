@@ -136,6 +136,26 @@ test("D1 binding persists diary data and can be read after reload", async () => 
   assert.equal(getRes.body[0].id, 99);
 });
 
+
+
+test("trash API can store and restore deleted post metadata", async () => {
+  const env = makeEnv();
+  const item = { id: 501, title: "deleted", deletedAt: Date.now() };
+
+  const addRes = await call(env, "/api/trash", "POST", item);
+  assert.equal(addRes.status, 200);
+
+  const getRes = await call(env, "/api/trash");
+  assert.equal(getRes.status, 200);
+  assert.equal(getRes.body.length, 1);
+  assert.equal(getRes.body[0].id, 501);
+
+  const delRes = await call(env, "/api/trash", "DELETE", { id: 501 });
+  assert.equal(delRes.status, 200);
+
+  const getRes2 = await call(env, "/api/trash");
+  assert.equal(getRes2.body.length, 0);
+});
 test("non-api requests are served by ASSETS", async () => {
   const env = makeEnv();
   const request = new Request("https://example.com/");

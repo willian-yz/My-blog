@@ -1184,6 +1184,10 @@
         <ul class="post-list" id="post-list">
           <div class="loading-msg">加载中...</div>
         </ul>
+        <div id="trash-bin" style="margin-top:1rem;border-top:1px dashed #ddd;padding-top:0.8rem;">
+          <p class="section-label" style="margin:0 0 0.5rem 0;">回收站（7天后自动清理）</p>
+          <div id="trash-list" style="font-size:0.85rem;color:var(--muted);">暂无已删除文章</div>
+        </div>
       </div>
     </div>
   </div>
@@ -1532,11 +1536,14 @@
   <button class="audio-edit-btn" onclick="toggleAudioUrlPanel()" title="修改音频链接">&#9998;</button>
   <button class="audio-close-btn" onclick="hideAudioPlayer()" title="隐藏播放器">&#10005;</button>
 </div>
+<div id="audio-external-wrap" style="display:none;padding:0.5rem 0.8rem 0 0.8rem;background:#111;">
+  <iframe id="audio-external-frame" title="external-audio" style="width:100%;height:220px;border:0;border-radius:8px;background:#000;"></iframe>
+</div>
 <button class="player-sidebar-toggle" id="player-sidebar-toggle" onclick="showAudioPlayer()">&#9835;</button>
 
 <!-- Audio URL Panel -->
 <div class="audio-url-panel" id="audio-url-panel">
-  <label>音频链接 (MP3/OGG/WAV)</label>
+  <label>音频链接（支持 MP3/MP4/外部链接，如 Bilibili）</label>
   <input type="text" id="audio-url-input" placeholder="输入音频链接地址...">
   <button onclick="applyAudioUrl()">应用</button>
 </div>
@@ -1546,6 +1553,7 @@
 <script>
   // ─── State ───
   var posts = [];
+  var deletedPosts = [];
   var profile = { name: '我的名字', bio: '欢迎来到我的小角落。这里是我记录生活、分享想法的地方。\n喜欢文字、旅行和一切有趣的事物。', avatar: '' };
   var calendarData = {};
   var todosData = {};
@@ -1635,7 +1643,8 @@
         apiFetch('/api/calendar'),
         apiFetch('/api/todos'),
         apiFetch('/api/photos'),
-        apiFetch('/api/books')
+        apiFetch('/api/books'),
+        apiFetch('/api/trash')
       ]);
       posts = results[0] || [];
       profile = results[1] || profile;
@@ -1643,13 +1652,17 @@
       todosData = results[3] || {};
       photosData = results[4] || [];
       booksData = results[5] || [];
+      deletedPosts = results[6] || [];
+      purgeExpiredTrash();
       renderList();
+      renderTrashBin();
       renderProfile();
       updateStats();
       renderPhotoWall();
     } catch (e) {
       console.error('Failed to load data:', e);
       renderList();
+      renderTrashBin();
       renderProfile();
       updateStats();
       renderPhotoWall();
@@ -1687,6 +1700,62 @@
     var div = document.createElement('div');
     div.appendChild(document.createTextNode(text));
     return div.innerHTML;
+  }
+
+  function renderTrashBin() {
+    var el = document.getElementById('trash-list');
+    if (!el) return;
+    if (!deletedPosts || deletedPosts.length === 0) {
+      el.innerHTML = "暂无已删除文章";
+      return;
+    }
+    deletedPosts.sort(function(a, b) { return (b.deletedAt || 0) - (a.deletedAt || 0); });
+    var html = "";
+    for (var i = 0; i < deletedPosts.length; i++) {
+      var p = deletedPosts[i];
+      var d = p.deletedAt ? new Date(p.deletedAt) : new Date();
+      html += "<div style=\"display:flex;justify-content:space-between;gap:0.5rem;padding:0.35rem 0;border-bottom:1px solid #f0f0f0;\">" +
+        "<span style=\"overflow:hidden;text-overflow:ellipsis;white-space:nowrap;\">" + escapeHtml(p.title || "未命名文章") + " <em style=\"color:#999;\">" + d.toLocaleDateString() + "</em></span>" +
+        "<span><button onclick=\"restorePost(" + p.id + ")\" style=\"border:1px solid #ddd;background:#fff;border-radius:8px;padding:2px 8px;cursor:pointer;\">恢复</button></span>" +
+        "</div>";
+    }
+    el.innerHTML = html;
+  }
+
+  async function restorePost(id) {
+    var post = deletedPosts.find(function(p){ return p.id === id; });
+    if (!post) return;
+    var restoreData = Object.assign({}, post);
+    delete restoreData.deletedAt;
+    try {
+      await apiFetch('/api/posts', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(restoreData) });
+      await apiFetch('/api/trash', { method:'DELETE', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: id }) });
+      posts.push(restoreData);
+      deletedPosts = deletedPosts.filter(function(p){ return p.id !== id; });
+      renderList();
+      renderTrashBin();
+    } catch (e) {
+      alert('恢复失败，请稍后再试。');
+    }
+  }
+
+  async function purgeExpiredTrash() {
+    if (!deletedPosts || deletedPosts.length === 0) return;
+    var now = Date.now();
+    var keep = [];
+    var expiredIds = [];
+    for (var i = 0; i < deletedPosts.length; i++) {
+      var item = deletedPosts[i];
+      if (item.deletedAt && now - item.deletedAt > 7 * 24 * 60 * 60 * 1000) expiredIds.push(item.id);
+      else keep.push(item);
+    }
+    if (expiredIds.length === 0) return;
+    deletedPosts = keep;
+    try {
+      for (var j = 0; j < expiredIds.length; j++) {
+        await apiFetch('/api/trash', { method:'DELETE', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: expiredIds[j] }) });
+      }
+    } catch (e) {}
   }
 
   // ─── Open Post ───
@@ -1735,17 +1804,28 @@
 
   // ─── Delete Current Post ───
   async function deleteCurrentPost() {
-    if (!confirm('确定要删除这篇文章吗？此操作不可撤销。')) return;
+    if (!confirm('确定要删除这篇文章吗？文章会进入回收站并在7天后自动清理。')) return;
+
+    var target = posts.find(function(p) { return p.id === currentPostId; });
+    if (!target) return;
 
     try {
+      var trashItem = Object.assign({}, target, { deletedAt: Date.now() });
+      await apiFetch('/api/trash', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(trashItem)
+      });
       await apiFetch('/api/posts', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: currentPostId })
       });
       posts = posts.filter(function(p) { return p.id !== currentPostId; });
+      deletedPosts.push(trashItem);
+      renderTrashBin();
       currentPostId = null;
-      alert('文章已删除。');
+      alert('文章已移入回收站。');
       showView('list', document.querySelectorAll('nav button')[0]);
     } catch (e) {
       alert('删除失败，请稍后再试。');
@@ -2165,10 +2245,22 @@
   }
 
   // ─── Audio Player ───
+  function isDirectAudioUrl(url) {
+    return /\.(mp3|wav|ogg|m4a|aac|flac|mp4|webm)(\?|#|$)/i.test(url);
+  }
+
+  function parseBilibiliEmbedUrl(url) {
+    var m = url.match(/\/video\/(BV[0-9A-Za-z]+)/i);
+    if (!m) return null;
+    return 'https://player.bilibili.com/player.html?bvid=' + m[1] + '&autoplay=1';
+  }
+
   function initAudioPlayer() {
-    var savedUrl = localStorage.getItem('audioPlayerUrl') || '';
+    var savedConfig = null;
+    try { savedConfig = JSON.parse(localStorage.getItem('audioPlayerConfig') || 'null'); } catch(e) {}
+    var savedUrl = localStorage.getItem('audioPlayerUrl') || (savedConfig && savedConfig.url) || '';
     if (savedUrl) {
-      loadAudioUrl(savedUrl);
+      loadAudioUrl(savedUrl, savedConfig && savedConfig.mode);
     }
     var audio = document.getElementById('audio-element');
     audio.volume = 0.7;
@@ -2176,21 +2268,54 @@
     audio.addEventListener('ended', function() {
       document.getElementById('audio-play-btn').innerHTML = '&#9654;';
     });
-    audio.addEventListener('loadedmetadata', function() {
-      document.getElementById('audio-track-name').textContent = '&#9835; ' + (savedUrl.split('/').pop() || '音频播放中');
-    });
     document.body.classList.add('has-audio-player');
   }
 
-  function loadAudioUrl(url) {
+  function loadAudioUrl(url, forcedMode) {
     var audio = document.getElementById('audio-element');
-    audio.src = url;
-    document.getElementById('audio-track-name').textContent = '&#9835; ' + (url.split('/').pop() || '音频');
+    var externalFrame = document.getElementById('audio-external-frame');
+    var externalWrap = document.getElementById('audio-external-wrap');
+    var mode = forcedMode || (isDirectAudioUrl(url) ? 'audio' : 'external');
+
+    if (mode === 'audio') {
+      audio.src = url;
+      audio.style.display = '';
+      externalWrap.style.display = 'none';
+      externalFrame.src = '';
+      document.getElementById('audio-track-name').textContent = '&#9835; ' + (url.split('/').pop() || '音频');
+    } else {
+      var embed = parseBilibiliEmbedUrl(url) || url;
+      audio.pause();
+      audio.src = '';
+      audio.style.display = 'none';
+      externalWrap.style.display = 'block';
+      externalFrame.src = embed;
+      document.getElementById('audio-track-name').textContent = '外部音频源已加载';
+      document.getElementById('audio-time').textContent = '外部链接模式';
+      document.getElementById('audio-progress-fill').style.width = '0%';
+    }
+
     localStorage.setItem('audioPlayerUrl', url);
+    localStorage.setItem('audioPlayerConfig', JSON.stringify({ url: url, mode: mode }));
   }
 
   function toggleAudioPlay() {
     var audio = document.getElementById('audio-element');
+    var cfg = null;
+    try { cfg = JSON.parse(localStorage.getItem('audioPlayerConfig') || 'null'); } catch(e) {}
+    var mode = (cfg && cfg.mode) || 'audio';
+
+    if (mode === 'external') {
+      var frame = document.getElementById('audio-external-frame');
+      if (!frame.src) {
+        toggleAudioUrlPanel();
+        return;
+      }
+      frame.src = frame.src;
+      document.getElementById('audio-play-btn').innerHTML = '&#10074;&#10074;';
+      return;
+    }
+
     if (!audio.src) {
       toggleAudioUrlPanel();
       return;
@@ -2244,8 +2369,13 @@
     if (!url) return;
     loadAudioUrl(url);
     document.getElementById('audio-url-panel').classList.remove('show');
-    var audio = document.getElementById('audio-element');
-    audio.play().catch(function() {});
+
+    var cfg = null;
+    try { cfg = JSON.parse(localStorage.getItem('audioPlayerConfig') || 'null'); } catch(e) {}
+    if (cfg && cfg.mode === 'audio') {
+      var audio = document.getElementById('audio-element');
+      audio.play().catch(function() {});
+    }
     document.getElementById('audio-play-btn').innerHTML = '&#10074;&#10074;';
   }
 
@@ -2555,19 +2685,31 @@
 
   async function savePhotos() {
     try {
-      // Save entire array
-      await fetch('/api/photos', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: -1 }) });
-      // Re-save by replacing: simpler to just PUT each, but let's overwrite
-      // Actually, let's use a smarter approach: save all at once by updating each
-      for (var i = 0; i < photosData.length; i++) {
+      var existing = await apiFetch('/api/photos');
+      var existingMap = {};
+      for (var i = 0; i < existing.length; i++) existingMap[existing[i].id] = true;
+
+      for (var j = 0; j < photosData.length; j++) {
+        var method = existingMap[photosData[j].id] ? 'PUT' : 'POST';
         await apiFetch('/api/photos', {
-          method: 'PUT',
+          method: method,
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(photosData[i])
+          body: JSON.stringify(photosData[j])
         });
       }
+
+      var currentMap = {};
+      for (var k = 0; k < photosData.length; k++) currentMap[photosData[k].id] = true;
+      for (var x = 0; x < existing.length; x++) {
+        if (!currentMap[existing[x].id]) {
+          await apiFetch('/api/photos', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: existing[x].id })
+          });
+        }
+      }
     } catch (e) {
-      // Fallback: try POST for any new ones
       console.error('Failed to save photos:', e);
     }
   }
