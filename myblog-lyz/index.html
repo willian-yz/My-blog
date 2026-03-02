@@ -553,9 +553,9 @@
 
     #audio-external-wrap {
       position: fixed;
-      right: 20px;
-      bottom: 86px;
-      width: min(420px, calc(100vw - 24px));
+      bottom: calc(50% - 130px);
+      right: 42px;
+      width: min(320px, calc(100vw - 64px));
       z-index: 999;
       border-radius: 10px;
       box-shadow: 0 6px 20px rgba(0,0,0,0.25);
@@ -565,12 +565,13 @@
 
     .polar-bear-widget {
       position: fixed;
-      right: 14px;
-      top: 42%;
-      width: 120px;
-      height: 180px;
-      z-index: 20;
+      right: 10px;
+      top: 38%;
+      width: 128px;
+      height: 188px;
+      z-index: 1200;
       pointer-events: none;
+      filter: drop-shadow(0 6px 12px rgba(0,0,0,0.18));
     }
     .bear-body {
       position: absolute; bottom: 0; left: 20px;
@@ -1093,6 +1094,8 @@
     }
     .pw-toolbar-btn:hover { border-color: var(--ink); }
     .pw-toolbar-btn.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+    .pw-container.bg-drag-mode { cursor: grab; }
+    .pw-container.bg-drag-mode:active { cursor: grabbing; }
     .pw-bg-settings {
       display: none; padding: 0.8rem; background: #fff;
       border: 1px solid var(--line); border-radius: 6px;
@@ -1191,7 +1194,8 @@
           <button class="pw-add-btn" onclick="document.getElementById('photo-input').click()">+ 添加</button>
         </div>
         <div class="pw-toolbar">
-          <button class="pw-toolbar-btn" id="pw-drag-toggle" onclick="togglePhotoDragMode()">拖拽模式</button>
+          <button class="pw-toolbar-btn" id="pw-drag-toggle" onclick="togglePhotoDragMode()">照片拖拽</button>
+          <button class="pw-toolbar-btn" id="pw-bg-drag-toggle" onclick="togglePhotoBgDragMode()">背景拖拽</button>
           <button class="pw-toolbar-btn" id="pw-bg-toggle" onclick="togglePwBgSettings()">背景设置</button>
         </div>
         <div class="pw-bg-settings" id="pw-bg-settings">
@@ -1643,13 +1647,16 @@
 
   // Photo wall drag state
   var pwDragMode = (localStorage.getItem('pwDragMode') || '1') === '1';
+  var pwBgDragMode = (localStorage.getItem('pwBgDragMode') || '0') === '1';
   var pwDragTarget = null;
   var pwDragOffsetX = 0;
   var pwDragOffsetY = 0;
   var pwBgSettings = {
     color: '#faf7f2',
     width: 300,
-    height: 300
+    height: 300,
+    offsetX: 0,
+    offsetY: 0
   };
 
   // Planner state
@@ -2355,7 +2362,7 @@
       audio.pause();
       audio.src = '';
       audio.style.display = 'none';
-      externalWrap.style.display = 'block';
+      externalWrap.style.display = document.getElementById('audio-player-bar').classList.contains('hidden') ? 'none' : 'block';
       externalFrame.src = embed;
       showAudioPlayer();
       document.getElementById('audio-track-name').textContent = '外部音频源已加载';
@@ -2449,6 +2456,7 @@
 
   function hideAudioPlayer() {
     document.getElementById('audio-player-bar').classList.add('hidden');
+    document.getElementById('audio-external-wrap').style.display = 'none';
     document.getElementById('player-sidebar-toggle').classList.add('show');
     document.getElementById('audio-url-panel').classList.remove('show');
     document.body.classList.remove('has-audio-player');
@@ -2457,6 +2465,11 @@
   function showAudioPlayer() {
     document.getElementById('audio-player-bar').classList.remove('hidden');
     document.getElementById('player-sidebar-toggle').classList.remove('show');
+    var cfg = null;
+    try { cfg = JSON.parse(localStorage.getItem('audioPlayerConfig') || 'null'); } catch(e) {}
+    if (cfg && cfg.mode === 'external') {
+      document.getElementById('audio-external-wrap').style.display = 'block';
+    }
     document.body.classList.add('has-audio-player');
   }
 
@@ -3503,6 +3516,8 @@
         pwBgSettings.color = s.color || '#faf7f2';
         pwBgSettings.width = s.width || 300;
         pwBgSettings.height = s.height || 300;
+        pwBgSettings.offsetX = typeof s.offsetX === 'number' ? s.offsetX : 0;
+        pwBgSettings.offsetY = typeof s.offsetY === 'number' ? s.offsetY : 0;
       }
     } catch(e) {}
   }
@@ -3538,6 +3553,9 @@
 
     var container = document.getElementById('photo-wall-container');
     container.style.backgroundColor = color;
+    container.style.backgroundImage = 'radial-gradient(rgba(0,0,0,0.06) 1px, transparent 1px)';
+    container.style.backgroundSize = '22px 22px';
+    container.style.backgroundPosition = pwBgSettings.offsetX + 'px ' + pwBgSettings.offsetY + 'px';
     container.style.minHeight = height + 'px';
 
     var sidebar = document.querySelector('.photo-wall-sidebar');
@@ -3553,13 +3571,64 @@
     loadPwBgSettings();
     var dragBtn = document.getElementById('pw-drag-toggle');
     if (dragBtn) dragBtn.classList.toggle('active', pwDragMode);
+    var bgDragBtn = document.getElementById('pw-bg-drag-toggle');
+    if (bgDragBtn) bgDragBtn.classList.toggle('active', pwBgDragMode);
     var container = document.getElementById('photo-wall-container');
     if (container) {
       container.style.backgroundColor = pwBgSettings.color;
+      container.style.backgroundImage = 'radial-gradient(rgba(0,0,0,0.06) 1px, transparent 1px)';
+      container.style.backgroundSize = '22px 22px';
+      container.style.backgroundPosition = pwBgSettings.offsetX + 'px ' + pwBgSettings.offsetY + 'px';
+      container.classList.toggle('bg-drag-mode', pwBgDragMode);
       container.style.minHeight = pwBgSettings.height + 'px';
+      bindPhotoWallBgDrag(container);
     }
     var sidebar = document.querySelector('.photo-wall-sidebar');
     if (sidebar) sidebar.style.width = pwBgSettings.width + 'px';
+  }
+
+
+  function togglePhotoBgDragMode() {
+    pwBgDragMode = !pwBgDragMode;
+    localStorage.setItem('pwBgDragMode', pwBgDragMode ? '1' : '0');
+    var btn = document.getElementById('pw-bg-drag-toggle');
+    if (btn) btn.classList.toggle('active', pwBgDragMode);
+    var container = document.getElementById('photo-wall-container');
+    if (container) container.classList.toggle('bg-drag-mode', pwBgDragMode);
+  }
+
+  function bindPhotoWallBgDrag(container) {
+    if (!container || container.__bgDragBound) return;
+    container.__bgDragBound = true;
+    var dragging = false;
+    var startX = 0, startY = 0, origX = 0, origY = 0;
+
+    container.addEventListener('pointerdown', function(e) {
+      if (!pwBgDragMode) return;
+      if (e.target !== container) return;
+      dragging = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      origX = pwBgSettings.offsetX || 0;
+      origY = pwBgSettings.offsetY || 0;
+      container.setPointerCapture(e.pointerId);
+    });
+
+    container.addEventListener('pointermove', function(e) {
+      if (!dragging) return;
+      pwBgSettings.offsetX = origX + (e.clientX - startX);
+      pwBgSettings.offsetY = origY + (e.clientY - startY);
+      container.style.backgroundPosition = pwBgSettings.offsetX + 'px ' + pwBgSettings.offsetY + 'px';
+    });
+
+    function endDrag() {
+      if (!dragging) return;
+      dragging = false;
+      savePwBgSettings();
+    }
+
+    container.addEventListener('pointerup', endDrag);
+    container.addEventListener('pointercancel', endDrag);
   }
 
   function togglePhotoDragMode() {
