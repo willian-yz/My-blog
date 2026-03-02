@@ -1,0 +1,7 @@
+name = "my-blog"
+main = "myblog-lyz/worker.js"
+compatibility_date = "2026-01-01"
+
+[assets]
+directory = "myblog-lyz"
+binding = "ASSETS"

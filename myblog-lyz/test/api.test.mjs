@@ -1,0 +1,184 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+
+import worker from "../worker.js";
+
+class InMemoryKV {
+  constructor() {
+    this.map = new Map();
+  }
+
+  async get(key, options = {}) {
+    if (!this.map.has(key)) return null;
+    const raw = this.map.get(key);
+    if (options.type === "json") return JSON.parse(raw);
+    return raw;
+  }
+
+  async put(key, value) {
+    this.map.set(key, value);
+  }
+}
+
+class MockD1 {
+  constructor() {
+    this.map = new Map();
+    this.initialized = false;
+  }
+
+  async exec(sql) {
+    if (sql.includes("CREATE TABLE IF NOT EXISTS blog_kv")) {
+      this.initialized = true;
+    }
+  }
+
+  prepare(sql) {
+    const db = this;
+    return {
+      bind(...args) {
+        return {
+          async first() {
+            if (sql.startsWith("SELECT value FROM blog_kv WHERE key = ?")) {
+              const key = args[0];
+              if (!db.map.has(key)) return null;
+              return { value: db.map.get(key) };
+            }
+            return null;
+          },
+          async run() {
+            if (sql.startsWith("INSERT INTO blog_kv")) {
+              const [key, value] = args;
+              db.map.set(key, value);
+            }
+            return { success: true };
+          },
+        };
+      },
+    };
+  }
+}
+
+function makeEnv(overrides = {}) {
+  return {
+    BLOG_DATA: new InMemoryKV(),
+    ASSETS: {
+      fetch: async () => new Response("asset", { status: 200 }),
+    },
+    ...overrides,
+  };
+}
+
+async function call(env, path, method = "GET", body) {
+  const init = { method, headers: {} };
+  if (body !== undefined) {
+    init.headers["Content-Type"] = "application/json";
+    init.body = JSON.stringify(body);
+  }
+
+  const request = new Request(`https://example.com${path}`, init);
+  const res = await worker.fetch(request, env, {});
+  return { status: res.status, body: await res.json() };
+}
+
+test("posts API can save and read diary entries", async () => {
+  const env = makeEnv();
+  const entry = { id: 1, title: "diary", content: "hello" };
+
+  const createRes = await call(env, "/api/posts", "POST", entry);
+  assert.equal(createRes.status, 200);
+
+  const getRes = await call(env, "/api/posts");
+  assert.equal(getRes.status, 200);
+  assert.equal(getRes.body.length, 1);
+  assert.equal(getRes.body[0].content, "hello");
+});
+
+test("posts API recovers if existing data type is corrupted", async () => {
+  const env = makeEnv();
+  await env.BLOG_DATA.put("posts", JSON.stringify({ broken: true }));
+
+  const createRes = await call(env, "/api/posts", "POST", { id: 2, title: "new" });
+  assert.equal(createRes.status, 200);
+
+  const getRes = await call(env, "/api/posts");
+  assert.equal(getRes.status, 200);
+  assert.equal(Array.isArray(getRes.body), true);
+  assert.equal(getRes.body.length, 1);
+  assert.equal(getRes.body[0].id, 2);
+});
+
+test("photos API can save and read photos", async () => {
+  const env = makeEnv();
+  const photo = { id: 7, url: "https://img.example/p.jpg", caption: "test" };
+
+  const createRes = await call(env, "/api/photos", "POST", photo);
+  assert.equal(createRes.status, 200);
+  assert.equal(createRes.body.ok, true);
+
+  const getRes = await call(env, "/api/photos");
+  assert.equal(getRes.status, 200);
+  assert.equal(getRes.body.length, 1);
+  assert.equal(getRes.body[0].id, 7);
+});
+
+test("D1 binding persists diary data and can be read after reload", async () => {
+  const db = new MockD1();
+  const env = makeEnv({ BLOG_DB: db, BLOG_DATA: undefined });
+
+  const createRes = await call(env, "/api/posts", "POST", { id: 99, title: "from-d1" });
+  assert.equal(createRes.status, 200);
+  assert.equal(db.initialized, true);
+
+  const envAfterReload = makeEnv({ BLOG_DB: db, BLOG_DATA: undefined });
+  const getRes = await call(envAfterReload, "/api/posts");
+  assert.equal(getRes.status, 200);
+  assert.equal(getRes.body.length, 1);
+  assert.equal(getRes.body[0].id, 99);
+});
+
+
+
+test("trash API can store and restore deleted post metadata", async () => {
+  const env = makeEnv();
+  const item = { id: 501, title: "deleted", deletedAt: Date.now() };
+
+  const addRes = await call(env, "/api/trash", "POST", item);
+  assert.equal(addRes.status, 200);
+
+  const getRes = await call(env, "/api/trash");
+  assert.equal(getRes.status, 200);
+  assert.equal(getRes.body.length, 1);
+  assert.equal(getRes.body[0].id, 501);
+
+  const delRes = await call(env, "/api/trash", "DELETE", { id: 501 });
+  assert.equal(delRes.status, 200);
+
+  const getRes2 = await call(env, "/api/trash");
+  assert.equal(getRes2.body.length, 0);
+});
+
+
+test("version endpoint exposes build version", async () => {
+  const env = makeEnv();
+  const request = new Request("https://example.com/api/version");
+  const res = await worker.fetch(request, env, {});
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  assert.equal(typeof body.version, "string");
+  assert.equal(body.version.includes("hotfix"), true);
+});
+
+test("index response has anti-cache header", async () => {
+  const env = makeEnv();
+  const request = new Request("https://example.com/");
+  const res = await worker.fetch(request, env, {});
+  assert.equal(res.status, 200);
+  assert.equal((res.headers.get("cache-control") || "").includes("no-store"), true);
+});
+test("non-api requests are served by ASSETS", async () => {
+  const env = makeEnv();
+  const request = new Request("https://example.com/");
+  const res = await worker.fetch(request, env, {});
+  assert.equal(res.status, 200);
+  assert.equal(await res.text(), "asset");
+});
