@@ -20,12 +20,51 @@ class InMemoryKV {
   }
 }
 
-function makeEnv() {
+class MockD1 {
+  constructor() {
+    this.map = new Map();
+    this.initialized = false;
+  }
+
+  async exec(sql) {
+    if (sql.includes("CREATE TABLE IF NOT EXISTS blog_kv")) {
+      this.initialized = true;
+    }
+  }
+
+  prepare(sql) {
+    const db = this;
+    return {
+      bind(...args) {
+        return {
+          async first() {
+            if (sql.startsWith("SELECT value FROM blog_kv WHERE key = ?")) {
+              const key = args[0];
+              if (!db.map.has(key)) return null;
+              return { value: db.map.get(key) };
+            }
+            return null;
+          },
+          async run() {
+            if (sql.startsWith("INSERT INTO blog_kv")) {
+              const [key, value] = args;
+              db.map.set(key, value);
+            }
+            return { success: true };
+          },
+        };
+      },
+    };
+  }
+}
+
+function makeEnv(overrides = {}) {
   return {
     BLOG_DATA: new InMemoryKV(),
     ASSETS: {
       fetch: async () => new Response("asset", { status: 200 }),
     },
+    ...overrides,
   };
 }
 
@@ -80,6 +119,21 @@ test("photos API can save and read photos", async () => {
   assert.equal(getRes.status, 200);
   assert.equal(getRes.body.length, 1);
   assert.equal(getRes.body[0].id, 7);
+});
+
+test("D1 binding persists diary data and can be read after reload", async () => {
+  const db = new MockD1();
+  const env = makeEnv({ BLOG_DB: db, BLOG_DATA: undefined });
+
+  const createRes = await call(env, "/api/posts", "POST", { id: 99, title: "from-d1" });
+  assert.equal(createRes.status, 200);
+  assert.equal(db.initialized, true);
+
+  const envAfterReload = makeEnv({ BLOG_DB: db, BLOG_DATA: undefined });
+  const getRes = await call(envAfterReload, "/api/posts");
+  assert.equal(getRes.status, 200);
+  assert.equal(getRes.body.length, 1);
+  assert.equal(getRes.body[0].id, 99);
 });
 
 test("non-api requests are served by ASSETS", async () => {

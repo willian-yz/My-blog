@@ -19,18 +19,18 @@ npm install
 npx wrangler login
 ```
 
-## 可选但强烈建议：绑定 KV（用于持久化）
+## 推荐：绑定 D1 database（用于持久化）
 
-如果不绑定 KV，应用会退回到内存存储（重启后数据会丢失）。
+你已经创建了 `myblog_database`，现在只需要把它绑定给 Worker：
 
-创建 KV：
+1. Cloudflare Dashboard → Workers & Pages → 你的 `my-blog` Worker。
+2. Settings → Bindings → Add binding → 选择 **D1 database**。
+3. Binding 名称填写：`BLOG_DB`（必须是这个名字）。
+4. Database 选择你创建的：`myblog_database`。
 
-```bash
-npx wrangler kv namespace create BLOG_DATA
-npx wrangler kv namespace create BLOG_DATA --preview
-```
+完成后，日记/图片会写入 D1（会自动创建 `blog_kv` 表），刷新页面后仍可读取。
 
-然后在 Cloudflare Dashboard 的 Worker 绑定里添加 `BLOG_DATA`（KV Namespace）。
+> 兼容逻辑：优先使用 `BLOG_DB`（D1）；其次 `BLOG_DATA`（KV）；都没有时使用内存（不持久）。
 
 ## 关键：Cloudflare Pages 构建设置（修复 build 报错）
 
