@@ -551,6 +551,50 @@
     .player-sidebar-toggle:hover { width: 38px; }
     .player-sidebar-toggle.show { display: flex; }
 
+    #audio-external-wrap {
+      position: fixed;
+      right: 20px;
+      bottom: 86px;
+      width: min(420px, calc(100vw - 24px));
+      z-index: 999;
+      border-radius: 10px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+      overflow: hidden;
+    }
+    #audio-external-frame { width: 100%; height: 235px; border: 0; }
+
+    .polar-bear-widget {
+      position: fixed;
+      right: 14px;
+      top: 42%;
+      width: 120px;
+      height: 180px;
+      z-index: 20;
+      pointer-events: none;
+    }
+    .bear-body {
+      position: absolute; bottom: 0; left: 20px;
+      width: 80px; height: 110px; border-radius: 42px;
+      background: linear-gradient(#9ad89f, #70b876);
+      border: 2px solid #4b8f54;
+    }
+    .bear-head {
+      position: absolute; top: 22px; left: 24px;
+      width: 72px; height: 66px; border-radius: 40px;
+      background: #f5fff7; border: 2px solid #4b8f54;
+    }
+    .bear-ear { position: absolute; width: 20px; height: 20px; border-radius: 50%; background: #f5fff7; border: 2px solid #4b8f54; top: 12px; }
+    .bear-ear.left { left: 22px; }
+    .bear-ear.right { right: 16px; }
+    .bear-eye { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: #2b3b2e; top: 52px; }
+    .bear-eye.left { left: 48px; }
+    .bear-eye.right { left: 66px; }
+    .bear-nose { position: absolute; width: 10px; height: 8px; border-radius: 50%; background: #2b3b2e; left: 57px; top: 61px; }
+    .bear-sweat {
+      position: absolute; left: 83px; top: 46px; color: #4f96ff;
+      font-size: 16px; transform: rotate(15deg);
+    }
+
     /* ─── Planner View ─── */
     .planner-container { max-width: 700px; }
     .planner-header {
@@ -1536,8 +1580,8 @@
   <button class="audio-edit-btn" onclick="toggleAudioUrlPanel()" title="修改音频链接">&#9998;</button>
   <button class="audio-close-btn" onclick="hideAudioPlayer()" title="隐藏播放器">&#10005;</button>
 </div>
-<div id="audio-external-wrap" style="display:none;padding:0.5rem 0.8rem 0 0.8rem;background:#111;">
-  <iframe id="audio-external-frame" title="external-audio" style="width:100%;height:220px;border:0;border-radius:8px;background:#000;"></iframe>
+<div id="audio-external-wrap" style="display:none;">
+  <iframe id="audio-external-frame" title="external-audio" allow="autoplay; fullscreen" referrerpolicy="no-referrer-when-downgrade"></iframe>
 </div>
 <button class="player-sidebar-toggle" id="player-sidebar-toggle" onclick="showAudioPlayer()">&#9835;</button>
 
@@ -1546,6 +1590,18 @@
   <label>音频链接（支持 MP3/MP4/外部链接，如 Bilibili）</label>
   <input type="text" id="audio-url-input" placeholder="输入音频链接地址...">
   <button onclick="applyAudioUrl()">应用</button>
+</div>
+
+
+<div class="polar-bear-widget" aria-hidden="true">
+  <div class="bear-ear left"></div>
+  <div class="bear-ear right"></div>
+  <div class="bear-head"></div>
+  <div class="bear-eye left"></div>
+  <div class="bear-eye right"></div>
+  <div class="bear-nose"></div>
+  <div class="bear-sweat">💧</div>
+  <div class="bear-body"></div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -1586,7 +1642,7 @@
   };
 
   // Photo wall drag state
-  var pwDragMode = false;
+  var pwDragMode = (localStorage.getItem('pwDragMode') || '1') === '1';
   var pwDragTarget = null;
   var pwDragOffsetX = 0;
   var pwDragOffsetY = 0;
@@ -1716,7 +1772,7 @@
       var d = p.deletedAt ? new Date(p.deletedAt) : new Date();
       html += "<div style=\"display:flex;justify-content:space-between;gap:0.5rem;padding:0.35rem 0;border-bottom:1px solid #f0f0f0;\">" +
         "<span style=\"overflow:hidden;text-overflow:ellipsis;white-space:nowrap;\">" + escapeHtml(p.title || "未命名文章") + " <em style=\"color:#999;\">" + d.toLocaleDateString() + "</em></span>" +
-        "<span><button onclick=\"restorePost(" + p.id + ")\" style=\"border:1px solid #ddd;background:#fff;border-radius:8px;padding:2px 8px;cursor:pointer;\">恢复</button></span>" +
+        "<span style=\"display:flex;gap:6px;\"><button onclick=\"restorePost(" + p.id + ")\" style=\"border:1px solid #ddd;background:#fff;border-radius:8px;padding:2px 8px;cursor:pointer;\">恢复</button><button onclick=\"deleteTrashPost(" + p.id + ")\" style=\"border:1px solid #f0caca;background:#fff7f7;color:#a44;border-radius:8px;padding:2px 8px;cursor:pointer;\">删除</button></span>" +
         "</div>";
     }
     el.innerHTML = html;
@@ -1736,6 +1792,17 @@
       renderTrashBin();
     } catch (e) {
       alert('恢复失败，请稍后再试。');
+    }
+  }
+
+  async function deleteTrashPost(id) {
+    if (!confirm('确定彻底删除这条回收站记录吗？')) return;
+    try {
+      await apiFetch('/api/trash', { method:'DELETE', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: id }) });
+      deletedPosts = deletedPosts.filter(function(p){ return p.id !== id; });
+      renderTrashBin();
+    } catch (e) {
+      alert('删除失败，请稍后再试。');
     }
   }
 
@@ -2250,9 +2317,9 @@
   }
 
   function parseBilibiliEmbedUrl(url) {
-    var m = url.match(/\/video\/(BV[0-9A-Za-z]+)/i);
+    var m = url.match(/\/video\/(BV[0-9A-Za-z]+)/i) || url.match(/[?&]bvid=(BV[0-9A-Za-z]+)/i);
     if (!m) return null;
-    return 'https://player.bilibili.com/player.html?bvid=' + m[1] + '&autoplay=1';
+    return 'https://player.bilibili.com/player.html?bvid=' + m[1] + '&page=1&high_quality=1&autoplay=1';
   }
 
   function initAudioPlayer() {
@@ -2290,6 +2357,7 @@
       audio.style.display = 'none';
       externalWrap.style.display = 'block';
       externalFrame.src = embed;
+      showAudioPlayer();
       document.getElementById('audio-track-name').textContent = '外部音频源已加载';
       document.getElementById('audio-time').textContent = '外部链接模式';
       document.getElementById('audio-progress-fill').style.width = '0%';
@@ -3483,6 +3551,8 @@
 
   function initPwBgFromSettings() {
     loadPwBgSettings();
+    var dragBtn = document.getElementById('pw-drag-toggle');
+    if (dragBtn) dragBtn.classList.toggle('active', pwDragMode);
     var container = document.getElementById('photo-wall-container');
     if (container) {
       container.style.backgroundColor = pwBgSettings.color;
@@ -3494,6 +3564,7 @@
 
   function togglePhotoDragMode() {
     pwDragMode = !pwDragMode;
+    localStorage.setItem('pwDragMode', pwDragMode ? '1' : '0');
     var btn = document.getElementById('pw-drag-toggle');
     btn.classList.toggle('active', pwDragMode);
     renderPhotoWall();
