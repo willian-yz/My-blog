@@ -553,47 +553,54 @@
 
     #audio-external-wrap {
       position: fixed;
-      bottom: calc(50% - 130px);
-      right: 42px;
-      width: min(320px, calc(100vw - 64px));
+      right: 38px;
+      bottom: calc(50% - 86px);
+      width: min(250px, calc(100vw - 70px));
       z-index: 999;
       border-radius: 10px;
       box-shadow: 0 6px 20px rgba(0,0,0,0.25);
       overflow: hidden;
+      background: #111;
     }
-    #audio-external-frame { width: 100%; height: 235px; border: 0; }
+    #audio-external-frame { width: 100%; height: 148px; border: 0; }
 
     .polar-bear-widget {
       position: fixed;
       right: 10px;
-      top: 38%;
-      width: 128px;
-      height: 188px;
-      z-index: 1200;
+      top: 30%;
+      width: 170px;
+      height: 250px;
+      z-index: 3000;
       pointer-events: none;
-      filter: drop-shadow(0 6px 12px rgba(0,0,0,0.18));
+      filter: drop-shadow(0 10px 18px rgba(0,0,0,0.25));
+      opacity: 0.98;
     }
     .bear-body {
-      position: absolute; bottom: 0; left: 20px;
-      width: 80px; height: 110px; border-radius: 42px;
-      background: linear-gradient(#9ad89f, #70b876);
-      border: 2px solid #4b8f54;
+      position: absolute; bottom: 8px; left: 28px;
+      width: 110px; height: 150px; border-radius: 55px;
+      background: linear-gradient(#9fe7a8, #69b774);
+      border: 3px solid #4b8f54;
     }
     .bear-head {
-      position: absolute; top: 22px; left: 24px;
-      width: 72px; height: 66px; border-radius: 40px;
-      background: #f5fff7; border: 2px solid #4b8f54;
+      position: absolute; top: 20px; left: 34px;
+      width: 100px; height: 88px; border-radius: 50px;
+      background: #f5fff7; border: 3px solid #4b8f54;
     }
-    .bear-ear { position: absolute; width: 20px; height: 20px; border-radius: 50%; background: #f5fff7; border: 2px solid #4b8f54; top: 12px; }
-    .bear-ear.left { left: 22px; }
-    .bear-ear.right { right: 16px; }
-    .bear-eye { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: #2b3b2e; top: 52px; }
-    .bear-eye.left { left: 48px; }
-    .bear-eye.right { left: 66px; }
-    .bear-nose { position: absolute; width: 10px; height: 8px; border-radius: 50%; background: #2b3b2e; left: 57px; top: 61px; }
+    .bear-ear { position: absolute; width: 28px; height: 28px; border-radius: 50%; background: #f5fff7; border: 3px solid #4b8f54; top: 6px; }
+    .bear-ear.left { left: 30px; }
+    .bear-ear.right { right: 28px; }
+    .bear-eye { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: #2b3b2e; top: 58px; }
+    .bear-eye.left { left: 66px; }
+    .bear-eye.right { left: 92px; }
+    .bear-nose { position: absolute; width: 14px; height: 10px; border-radius: 50%; background: #2b3b2e; left: 80px; top: 72px; }
     .bear-sweat {
-      position: absolute; left: 83px; top: 46px; color: #4f96ff;
-      font-size: 16px; transform: rotate(15deg);
+      position: absolute; left: 118px; top: 58px; color: #4f96ff;
+      font-size: 20px; transform: rotate(15deg);
+      animation: bearSweat 1.8s ease-in-out infinite;
+    }
+    @keyframes bearSweat {
+      0%, 100% { transform: translateY(0) rotate(15deg); }
+      50% { transform: translateY(3px) rotate(15deg); }
     }
 
     /* ─── Planner View ─── */
@@ -1094,7 +1101,7 @@
     }
     .pw-toolbar-btn:hover { border-color: var(--ink); }
     .pw-toolbar-btn.active { background: var(--ink); color: #fff; border-color: var(--ink); }
-    .pw-container.bg-drag-mode { cursor: grab; }
+    .pw-container.bg-drag-mode { cursor: grab; touch-action: none; user-select: none; }
     .pw-container.bg-drag-mode:active { cursor: grabbing; }
     .pw-bg-settings {
       display: none; padding: 0.8rem; background: #fff;
@@ -2326,7 +2333,7 @@
   function parseBilibiliEmbedUrl(url) {
     var m = url.match(/\/video\/(BV[0-9A-Za-z]+)/i) || url.match(/[?&]bvid=(BV[0-9A-Za-z]+)/i);
     if (!m) return null;
-    return 'https://player.bilibili.com/player.html?bvid=' + m[1] + '&page=1&high_quality=1&autoplay=1';
+    return 'https://player.bilibili.com/player.html?bvid=' + m[1] + '&page=1&high_quality=1&autoplay=1&loop=1';
   }
 
   function initAudioPlayer() {
@@ -2339,8 +2346,11 @@
     var audio = document.getElementById('audio-element');
     audio.volume = 0.7;
     audio.addEventListener('timeupdate', updateAudioProgress);
+    audio.loop = true;
     audio.addEventListener('ended', function() {
-      document.getElementById('audio-play-btn').innerHTML = '&#9654;';
+      if (!audio.loop) {
+        document.getElementById('audio-play-btn').innerHTML = '&#9654;';
+      }
     });
     document.body.classList.add('has-audio-player');
   }
@@ -3605,13 +3615,14 @@
 
     container.addEventListener('pointerdown', function(e) {
       if (!pwBgDragMode) return;
-      if (e.target !== container) return;
+      if (e.target.closest('.polaroid') || e.target.closest('button') || e.target.closest('input')) return;
       dragging = true;
       startX = e.clientX;
       startY = e.clientY;
       origX = pwBgSettings.offsetX || 0;
       origY = pwBgSettings.offsetY || 0;
-      container.setPointerCapture(e.pointerId);
+      if (container.setPointerCapture) container.setPointerCapture(e.pointerId);
+      e.preventDefault();
     });
 
     container.addEventListener('pointermove', function(e) {
@@ -3621,14 +3632,18 @@
       container.style.backgroundPosition = pwBgSettings.offsetX + 'px ' + pwBgSettings.offsetY + 'px';
     });
 
-    function endDrag() {
+    function endDrag(e) {
       if (!dragging) return;
       dragging = false;
       savePwBgSettings();
+      if (e && container.releasePointerCapture) {
+        try { container.releasePointerCapture(e.pointerId); } catch (_) {}
+      }
     }
 
     container.addEventListener('pointerup', endDrag);
     container.addEventListener('pointercancel', endDrag);
+    container.addEventListener('pointerleave', endDrag);
   }
 
   function togglePhotoDragMode() {
