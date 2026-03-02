@@ -1,7 +1,11 @@
 {
   "name": "my-blog",
   "private": true,
-  "dependencies": {
-    "@netlify/blobs": "^8.1.0"
+  "scripts": {
+    "dev": "wrangler pages dev .",
+    "deploy": "wrangler pages deploy ."
+  },
+  "devDependencies": {
+    "wrangler": "^4.43.0"
   }
 }
