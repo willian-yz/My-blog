@@ -564,216 +564,20 @@
     }
     #audio-external-frame { width: 100%; height: 148px; border: 0; }
 
-    .polar-bear-widget {
+    .bear-image-widget {
       position: fixed;
       right: 8px;
       bottom: 18px;
       width: 230px;
-      height: 280px;
       z-index: 3200;
       pointer-events: none;
-      filter: drop-shadow(0 18px 24px rgba(0,0,0,0.22));
       user-select: none;
     }
-    .bear-plush {
-      position: absolute;
-      inset: 0;
-      border-radius: 26px;
-      background: radial-gradient(circle at 50% 14%, rgba(255,255,255,0.86), rgba(242,246,241,0.65) 40%, rgba(232,239,230,0.25));
-    }
-    .bear-head {
-      position: absolute;
-      width: 172px;
-      height: 145px;
-      left: 29px;
-      top: 12px;
-      border-radius: 50%;
-      background:
-        repeating-linear-gradient(100deg, rgba(255,255,255,0.11), rgba(255,255,255,0.11) 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px),
-        linear-gradient(170deg, #d8f5bf 0%, #c3eba6 100%);
-      border: 2px solid #a6d089;
-      box-shadow: inset 0 -10px 18px rgba(124,176,97,0.22);
-    }
-    .bear-ear {
-      position: absolute;
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      top: 4px;
-      background: linear-gradient(#d6f2be, #bde39f);
-      border: 2px solid #9fca85;
-      box-shadow: inset 0 -6px 10px rgba(118,165,96,0.24);
-    }
-    .bear-ear.left { left: 18px; }
-    .bear-ear.right { right: 18px; }
-    .bear-ear:after {
-      content: '';
-      position: absolute;
-      inset: 12px;
-      border-radius: 50%;
-      background: linear-gradient(#64b955, #4a9c44);
-      opacity: .75;
-    }
-    .bear-face {
-      position: absolute;
-      width: 136px;
-      height: 94px;
-      left: 47px;
-      top: 54px;
-      border-radius: 48px;
-      background: linear-gradient(#85dc7e, #6bca63);
-      border: 2px solid #63b65a;
-      box-shadow: inset 0 -8px 12px rgba(54,132,53,0.2);
-    }
-    .bear-eye {
-      position: absolute;
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 32% 30%, #fff 0 18%, rgba(255,255,255,0.25) 20%, #111 55% 100%);
-      top: 78px;
-      box-shadow: 0 2px 0 rgba(0,0,0,0.2);
-    }
-    .bear-eye.left { left: 58px; }
-    .bear-eye.right { right: 58px; }
-    .bear-brow {
-      position: absolute;
-      width: 30px;
-      height: 12px;
-      border-top: 8px solid #2d342c;
-      border-radius: 50%;
-      top: 62px;
-    }
-    .bear-brow.left { left: 56px; transform: rotate(-12deg); }
-    .bear-brow.right { right: 56px; transform: rotate(12deg); }
-    .bear-nose {
-      position: absolute;
-      width: 32px;
-      height: 20px;
-      left: 99px;
-      top: 108px;
-      border-radius: 50% 50% 55% 55%;
-      background: radial-gradient(circle at 34% 25%, rgba(255,255,255,0.8), rgba(255,255,255,0.1) 30%, #1f2321 68%);
-    }
-    .bear-mouth {
-      position: absolute;
-      left: 82px;
-      top: 121px;
-      width: 66px;
-      height: 38px;
-      border-radius: 0 0 30px 30px;
-      background: #1b1f1b;
-      overflow: hidden;
-    }
-    .bear-mouth:before {
-      content: '';
-      position: absolute;
-      left: 14px;
-      right: 14px;
-      bottom: 4px;
-      height: 16px;
-      border-radius: 14px;
-      background: linear-gradient(#ff8cab, #ff6f94);
-    }
-    .bear-mouth:after {
-      content: '';
-      position: absolute;
-      right: 14px;
-      top: 2px;
-      width: 9px;
-      height: 9px;
-      border-radius: 0 0 8px 8px;
-      background: #fff;
-      transform: rotate(15deg);
-    }
-    .bear-cheek {
-      position: absolute;
-      width: 24px;
-      height: 15px;
-      border-radius: 50%;
-      background: rgba(255, 124, 124, 0.42);
-      top: 112px;
-      filter: blur(.2px);
-    }
-    .bear-cheek.left { left: 42px; }
-    .bear-cheek.right { right: 42px; }
-    .bear-body {
-      position: absolute;
-      width: 138px;
-      height: 116px;
-      left: 46px;
-      top: 146px;
-      border-radius: 58% 58% 54% 54%;
-      background:
-        repeating-linear-gradient(98deg, rgba(255,255,255,0.09), rgba(255,255,255,0.09) 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px),
-        linear-gradient(170deg, #d5f4bc 0%, #bde9a0 100%);
-      border: 2px solid #9ecb82;
-      box-shadow: inset 0 -8px 12px rgba(95,152,73,0.2);
-    }
-    .bear-arm {
-      position: absolute;
-      width: 52px;
-      height: 76px;
-      border-radius: 36px;
-      top: 170px;
-      background: linear-gradient(#d6f2bc, #b9e79a);
-      border: 2px solid #98c87c;
-    }
-    .bear-arm.left { left: 24px; transform: rotate(20deg); }
-    .bear-arm.right { right: 24px; transform: rotate(-20deg); }
-    .bear-leg {
-      position: absolute;
-      width: 58px;
-      height: 58px;
-      border-radius: 50%;
-      bottom: 6px;
-      background: linear-gradient(#d7f3be, #bce8a0);
-      border: 2px solid #9ac77e;
-      box-shadow: inset 0 -6px 10px rgba(109,162,88,0.2);
-    }
-    .bear-leg.left { left: 38px; }
-    .bear-leg.right { right: 38px; }
-    .bear-paw {
-      position: absolute;
-      width: 36px;
-      height: 28px;
-      border-radius: 40px;
-      left: 10px;
-      top: 14px;
-      background: rgba(105,196,100,0.42);
-      border: 1px solid rgba(80,155,74,0.35);
-    }
-    .bear-patch {
-      position: absolute;
-      border-radius: 6px;
-      border: 2px solid rgba(89,115,88,0.38);
-      box-shadow: inset 0 -4px 8px rgba(0,0,0,0.15);
-    }
-    .bear-patch.blue { width: 28px; height: 20px; left: 38px; top: 194px; background: #8bc7d4; transform: rotate(-16deg); }
-    .bear-patch.brown { width: 26px; height: 20px; right: 46px; top: 204px; background: #a37843; transform: rotate(14deg); }
-    .bear-stitch {
-      position: absolute;
-      width: 30px;
-      height: 1px;
-      border-top: 2px dashed rgba(67,84,65,0.6);
-    }
-    .bear-stitch.s1 { left: 39px; top: 203px; transform: rotate(-16deg); }
-    .bear-stitch.s2 { right: 44px; top: 213px; transform: rotate(14deg); }
-    .bear-sweat {
-      position: absolute;
-      background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.92), rgba(169,226,255,0.58) 44%, rgba(87,168,255,0.26));
-      border: 1px solid rgba(92,152,224,0.45);
-      border-radius: 46% 46% 56% 56%;
-      animation: bearSweat 1.9s ease-in-out infinite;
-      opacity: 0.95;
-    }
-    .bear-sweat.big { width: 19px; height: 24px; left: 142px; top: 30px; }
-    .bear-sweat.mid { width: 14px; height: 18px; left: 120px; top: 54px; animation-delay: .2s; }
-    .bear-sweat.left { width: 13px; height: 16px; left: 34px; top: 74px; animation-delay: .45s; }
-    .bear-sweat.cheek { width: 12px; height: 15px; left: 150px; top: 95px; animation-delay: .62s; }
-    @keyframes bearSweat {
-      0%, 100% { transform: translateY(0) rotate(14deg); }
-      50% { transform: translateY(6px) rotate(14deg); }
+    .bear-image-widget img {
+      width: 100%;
+      height: auto;
+      display: block;
+      filter: drop-shadow(0 18px 24px rgba(0,0,0,0.22));
     }
     .app-version-badge {
       position: fixed;
@@ -1790,35 +1594,10 @@
 </div>
 
 
-<div class="polar-bear-widget" aria-hidden="true">
-  <div class="bear-plush"></div>
-  <div class="bear-ear left"></div>
-  <div class="bear-ear right"></div>
-  <div class="bear-head"></div>
-  <div class="bear-face"></div>
-  <div class="bear-face-tint"></div>
-  <div class="bear-brow left"></div>
-  <div class="bear-brow right"></div>
-  <div class="bear-eye left"></div>
-  <div class="bear-eye right"></div>
-  <div class="bear-nose"></div>
-  <div class="bear-mouth"></div>
-  <div class="bear-cheek left"></div>
-  <div class="bear-cheek right"></div>
-  <div class="bear-body"></div>
-  <div class="bear-arm left"></div>
-  <div class="bear-arm right"></div>
-  <div class="bear-leg left"><div class="bear-paw"></div></div>
-  <div class="bear-leg right"><div class="bear-paw"></div></div>
-  <div class="bear-patch blue"></div>
-  <div class="bear-patch brown"></div>
-  <div class="bear-stitch s1"></div>
-  <div class="bear-stitch s2"></div>
-  <div class="bear-sweat big"></div>
-  <div class="bear-sweat mid"></div>
-  <div class="bear-sweat left"></div>
-  <div class="bear-sweat cheek"></div>
+<div class="bear-image-widget" aria-hidden="true">
+  <img src="green_plush_bear_cutout.svg" alt="">
 </div>
+
 <div class="app-version-badge" id="app-version-badge">build local</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
