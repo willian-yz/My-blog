@@ -567,17 +567,22 @@
     .bear-image-widget {
       position: fixed;
       right: 8px;
-      bottom: 18px;
+      top: 50%;
+      transform: translateY(-50%);
       width: 230px;
       z-index: 3200;
-      pointer-events: none;
+      pointer-events: auto;
       user-select: none;
+      cursor: grab;
+      touch-action: none;
     }
+    .bear-image-widget.dragging { cursor: grabbing; }
     .bear-image-widget img {
       width: 100%;
       height: auto;
       display: block;
       filter: drop-shadow(0 18px 24px rgba(0,0,0,0.22));
+      pointer-events: none;
     }
     .app-version-badge {
       position: fixed;
@@ -1660,6 +1665,55 @@
   (function showBuildVersion(){
     var el = document.getElementById('app-version-badge');
     if (el) el.textContent = "build " + APP_BUILD;
+  })();
+
+  (function initBearDrag() {
+    var bear = document.querySelector('.bear-image-widget');
+    if (!bear) return;
+
+    var drag = {
+      active: false,
+      pointerId: null,
+      startY: 0,
+      startTop: 0
+    };
+
+    bear.addEventListener('pointerdown', function (e) {
+      drag.active = true;
+      drag.pointerId = e.pointerId;
+      drag.startY = e.clientY;
+
+      var rect = bear.getBoundingClientRect();
+      bear.style.top = rect.top + 'px';
+      bear.style.transform = 'none';
+      drag.startTop = rect.top;
+
+      bear.classList.add('dragging');
+      bear.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    });
+
+    bear.addEventListener('pointermove', function (e) {
+      if (!drag.active || e.pointerId !== drag.pointerId) return;
+
+      var deltaY = e.clientY - drag.startY;
+      var nextTop = drag.startTop + deltaY;
+      var maxTop = window.innerHeight - bear.offsetHeight;
+      if (nextTop < 0) nextTop = 0;
+      if (nextTop > maxTop) nextTop = maxTop;
+
+      bear.style.top = nextTop + 'px';
+    });
+
+    function stopDrag(e) {
+      if (!drag.active || e.pointerId !== drag.pointerId) return;
+      drag.active = false;
+      bear.classList.remove('dragging');
+      bear.releasePointerCapture(e.pointerId);
+    }
+
+    bear.addEventListener('pointerup', stopDrag);
+    bear.addEventListener('pointercancel', stopDrag);
   })();
 
   // ─── Splash Screen Logic ───
