@@ -603,6 +603,20 @@
       50% { transform: translateY(3px) rotate(15deg); }
     }
 
+    .app-version-badge {
+      position: fixed;
+      right: 10px;
+      bottom: 8px;
+      z-index: 4000;
+      font-size: 10px;
+      color: #888;
+      background: rgba(255,255,255,0.85);
+      border: 1px solid #ddd;
+      border-radius: 999px;
+      padding: 2px 8px;
+      pointer-events: none;
+    }
+
     /* ─── Planner View ─── */
     .planner-container { max-width: 700px; }
     .planner-header {
@@ -1614,11 +1628,13 @@
   <div class="bear-sweat">💧</div>
   <div class="bear-body"></div>
 </div>
+<div class="app-version-badge" id="app-version-badge">build local</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/epubjs@0.3.93/dist/epub.min.js"></script>
 <script>
   // ─── State ───
+  var APP_BUILD = "2026-03-02-b386d2a-hotfix";
   var posts = [];
   var deletedPosts = [];
   var profile = { name: '我的名字', bio: '欢迎来到我的小角落。这里是我记录生活、分享想法的地方。\n喜欢文字、旅行和一切有趣的事物。', avatar: '' };
@@ -1670,6 +1686,11 @@
   var plannerYear = new Date().getFullYear();
   var plannerMonth = new Date().getMonth();
   var plannerSelectedDate = new Date().toISOString().slice(0, 10);
+
+  (function showBuildVersion(){
+    var el = document.getElementById('app-version-badge');
+    if (el) el.textContent = "build " + APP_BUILD;
+  })();
 
   // ─── Splash Screen Logic ───
   setTimeout(function() {

@@ -79,3 +79,14 @@ npm run test
 - `assets.directory = "myblog-lyz"`
 
 否则会出现 `Missing entry-point to Worker script or to assets directory`。
+
+
+## 线上与本地不一致时的检查（重点）
+
+如果你发现 workers.dev 页面和本地代码不一致（例如小熊/音频小窗没出现），请按下面确认：
+
+1. 打开 `https://你的域名/`，在响应头检查 `x-my-blog-version`。
+2. 页面右下角会显示 `build ...` 版本号。
+3. 若版本不是最新，说明是旧部署或缓存：重新触发 deploy。
+
+> 现在 `index.html` 响应已设置 `Cache-Control: no-store`，可避免长期命中旧缓存。

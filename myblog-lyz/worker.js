@@ -7,6 +7,8 @@ import { onRequest as photosHandler } from "./functions/api/photos.js";
 import { onRequest as booksHandler } from "./functions/api/books.js";
 import { onRequest as trashHandler } from "./functions/api/trash.js";
 
+const BUILD_VERSION = "2026-03-02-b386d2a-hotfix";
+
 const routes = {
   "/api/posts": postsHandler,
   "/api/profile": profileHandler,
@@ -15,6 +17,7 @@ const routes = {
   "/api/photos": photosHandler,
   "/api/books": booksHandler,
   "/api/trash": trashHandler,
+  "/api/version": async () => json({ version: BUILD_VERSION }),
 };
 
 export default {
@@ -30,6 +33,18 @@ export default {
       return json({ error: "Not found" }, 404);
     }
 
-    return env.ASSETS.fetch(request);
+    const assetResponse = await env.ASSETS.fetch(request);
+    if (url.pathname === "/" || url.pathname === "/index.html") {
+      const headers = new Headers(assetResponse.headers);
+      headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
+      headers.set("x-my-blog-version", BUILD_VERSION);
+      return new Response(assetResponse.body, {
+        status: assetResponse.status,
+        statusText: assetResponse.statusText,
+        headers,
+      });
+    }
+
+    return assetResponse;
   },
 };

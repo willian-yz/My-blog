@@ -156,6 +156,25 @@ test("trash API can store and restore deleted post metadata", async () => {
   const getRes2 = await call(env, "/api/trash");
   assert.equal(getRes2.body.length, 0);
 });
+
+
+test("version endpoint exposes build version", async () => {
+  const env = makeEnv();
+  const request = new Request("https://example.com/api/version");
+  const res = await worker.fetch(request, env, {});
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  assert.equal(typeof body.version, "string");
+  assert.equal(body.version.includes("hotfix"), true);
+});
+
+test("index response has anti-cache header", async () => {
+  const env = makeEnv();
+  const request = new Request("https://example.com/");
+  const res = await worker.fetch(request, env, {});
+  assert.equal(res.status, 200);
+  assert.equal((res.headers.get("cache-control") || "").includes("no-store"), true);
+});
 test("non-api requests are served by ASSETS", async () => {
   const env = makeEnv();
   const request = new Request("https://example.com/");
