@@ -57,3 +57,12 @@ export function methodNotAllowed() {
 export function internalError(error) {
   return json({ error: error instanceof Error ? error.message : String(error) }, 500);
 }
+
+
+export function ensureArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+export function ensureObject(value) {
+  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+}

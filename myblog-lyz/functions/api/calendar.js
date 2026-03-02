@@ -1,4 +1,4 @@
-import { internalError, json, methodNotAllowed, parseJsonBody, readKVJson, writeKVJson } from "../_lib/store.js";
+import { ensureObject, internalError, json, methodNotAllowed, parseJsonBody, readKVJson, writeKVJson } from "../_lib/store.js";
 
 const KEY = "calendar";
 
@@ -7,7 +7,7 @@ export async function onRequest(context) {
 
   try {
     if (request.method === "GET") {
-      const calendar = await readKVJson(env, KEY, {});
+      const calendar = ensureObject(await readKVJson(env, KEY, {}));
       return json(calendar);
     }
 

@@ -1,4 +1,4 @@
-import { internalError, json, methodNotAllowed, parseJsonBody, readKVJson, writeKVJson } from "../_lib/store.js";
+import { ensureObject, internalError, json, methodNotAllowed, parseJsonBody, readKVJson, writeKVJson } from "../_lib/store.js";
 
 const KEY = "profile";
 const defaultProfile = {
@@ -12,7 +12,7 @@ export async function onRequest(context) {
 
   try {
     if (request.method === "GET") {
-      const profile = await readKVJson(env, KEY, defaultProfile);
+      const profile = { ...defaultProfile, ...ensureObject(await readKVJson(env, KEY, defaultProfile)) };
       return json(profile);
     }
 

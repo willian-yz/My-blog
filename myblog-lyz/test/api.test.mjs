@@ -54,6 +54,20 @@ test("posts API can save and read diary entries", async () => {
   assert.equal(getRes.body[0].content, "hello");
 });
 
+test("posts API recovers if existing data type is corrupted", async () => {
+  const env = makeEnv();
+  await env.BLOG_DATA.put("posts", JSON.stringify({ broken: true }));
+
+  const createRes = await call(env, "/api/posts", "POST", { id: 2, title: "new" });
+  assert.equal(createRes.status, 200);
+
+  const getRes = await call(env, "/api/posts");
+  assert.equal(getRes.status, 200);
+  assert.equal(Array.isArray(getRes.body), true);
+  assert.equal(getRes.body.length, 1);
+  assert.equal(getRes.body[0].id, 2);
+});
+
 test("photos API can save and read photos", async () => {
   const env = makeEnv();
   const photo = { id: 7, url: "https://img.example/p.jpg", caption: "test" };
