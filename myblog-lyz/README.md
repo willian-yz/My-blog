@@ -1,39 +1,40 @@
-# My Blog（Cloudflare Workers 迁移版）
+# My Blog（Cloudflare 部署说明）
 
-这个项目已经改为 Cloudflare Workers + KV。
-
-> 你的线上地址是 `*.workers.dev`，因此这里使用 Worker 路由（`worker.js`）来处理 `/api/*`，并通过 `ASSETS` 提供静态页面。
+这个项目支持两种方式：
+- **Cloudflare Pages（推荐 Git 自动部署）**
+- **Cloudflare Workers（手动 wrangler deploy）**
 
 ## 目录说明
 
 - `index.html`：前端页面（继续请求 `/api/*`）。
 - `worker.js`：Worker 入口，路由 `/api/*` 到后端处理器，其他请求回退到静态资源。
-- `functions/api/*.js`：各业务 API（posts/profile/calendar/todos/photos/books）。
+- `functions/api/*.js`：API 处理逻辑（posts/profile/calendar/todos/photos/books）。
 - `functions/_lib/store.js`：KV 读写和响应工具。
-- `wrangler.toml`：Workers 配置。
+- `wrangler.toml`：Wrangler 配置（本地开发/手动部署用）。
 
 ## 一次性准备
 
-1. 安装依赖
-
 ```bash
 npm install
-```
-
-2. 登录 Cloudflare
-
-```bash
 npx wrangler login
-```
-
-3. 创建 KV 命名空间
-
-```bash
 npx wrangler kv namespace create BLOG_DATA
 npx wrangler kv namespace create BLOG_DATA --preview
 ```
 
-4. 将 `id` / `preview_id` 填入 `wrangler.toml`。
+然后把 KV 的 `id` / `preview_id` 填入 `wrangler.toml`。
+
+## 关键：Cloudflare Pages 构建设置（修复 build 报错）
+
+如果你在 Pages 上看到：
+`Failed: error occurred while running deploy command`
+
+请这样配置：
+
+- **Build command**: `npm run build`
+- **Build output directory**: `/`（根目录）
+- **Deploy command**: **留空（不要填）**
+
+> 原因：Pages Git 集成本身会负责部署，不应在构建阶段再次执行 `npm run deploy`（那是 wrangler 手动发布命令，会在 CI 中失败）。
 
 ## 本地开发
 
@@ -41,14 +42,28 @@ npx wrangler kv namespace create BLOG_DATA --preview
 npm run dev
 ```
 
-## 部署到 workers.dev
+## 手动部署（可选）
+
+部署到 workers.dev：
 
 ```bash
-npm run deploy
+npm run deploy:worker
+```
+
+部署到 Pages（CLI）：
+
+```bash
+npm run deploy:pages
+```
+
+## 测试
+
+```bash
+npm run test
 ```
 
 ## 快速排查“无法保存”
 
-- 打开浏览器 DevTools，检查 `/api/posts`、`/api/photos` 请求是否返回 200。
-- 如果返回 500，通常是 `wrangler.toml` 里的 KV namespace ID 没填或填错。
-- 如果返回 404，确认当前部署使用的是本仓库的 `worker.js` 和最新代码。
+- 看 DevTools 的 `/api/posts`、`/api/photos` 请求是否 200。
+- 500：通常是 KV 命名空间 ID 未正确配置。
+- 404：通常是部署配置不对，没把 API 路由接入。
