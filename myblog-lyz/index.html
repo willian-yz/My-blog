@@ -136,13 +136,13 @@
       background: var(--paper); z-index: 100;
     }
     .header-inner {
-      max-width: 860px; margin: 0 auto; padding: 0 2rem;
+      max-width: 1320px; margin: 0 auto; padding: 0 2rem;
       display: flex; align-items: baseline; justify-content: space-between;
     }
     .site-title {
       font-family: 'Noto Serif SC', serif;
       font-size: 1.8rem; font-weight: 700; letter-spacing: -0.5px;
-      transform: translateX(-8px);
+      transform: translateX(-220px);
     }
     .site-title span { color: var(--accent); }
 
@@ -786,12 +786,12 @@
 
     /* ─── Homepage Two-Column Layout ─── */
     .home-layout { display: flex; gap: 2.5rem; }
-    .photo-wall-sidebar { width: 300px; flex-shrink: 0; }
+    .photo-wall-sidebar { width: 420px; flex-shrink: 0; margin-left: 8px; }
     .home-main-content { flex: 1; min-width: 0; display: flex; flex-direction: column; }
     #list-view { max-width: 1320px; }
     @media (max-width: 960px) {
       .home-layout { flex-direction: column; }
-      .photo-wall-sidebar { width: 100%; }
+      .photo-wall-sidebar { width: 100%; margin-left: 0; }
       .home-top-grid { grid-template-columns: 1fr; }
       .home-posts-block { margin-top: 0; max-width: 100%; }
       .home-planner-section { transform: none; margin-left: 0; }
@@ -889,7 +889,7 @@
     .pw-container {
       display: flex; flex-wrap: wrap; gap: 6px;
       justify-content: center; padding: 10px;
-      min-height: 200px; position: relative;
+      min-height: 560px; position: relative;
     }
     .polaroid {
       background: #fff; padding: 8px 8px 32px 8px;
@@ -1264,7 +1264,7 @@
 
 <header>
   <div class="header-inner">
-    <div class="site-title">创造时间的<span>琥珀</span></div>
+    <div class="site-title">创造时间的<span>琥珀</span><span>琥珀</span></div>
     <nav>
       <button class="active" onclick="showView('list', this)">全部文章</button>
       <button onclick="showView('write', this)">写新文章</button>
