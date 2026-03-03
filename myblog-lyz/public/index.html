@@ -1987,7 +1987,7 @@
         apiFetch('/api/books'),
         apiFetch('/api/trash')
       ]);
-      posts = results[0] || [];
+      posts = ensurePostsArray(results[0]);
       profile = results[1] || profile;
       calendarData = results[2] || {};
       todosData = results[3] || {};
@@ -2023,8 +2023,32 @@
     initAudioPlayer();
   }
 
+  function normalizePost(raw) {
+    var post = raw && typeof raw === 'object' ? Object.assign({}, raw) : {};
+    var now = new Date();
+    if (!post.id) post.id = Date.now() + Math.floor(Math.random() * 1000);
+    post.type = post.type === 'blog' ? 'blog' : 'diary';
+    post.date = post.date || formatDateGMT8(now);
+    post.time = post.time || '';
+    post.title = (post.title || '未命名文章').toString();
+    post.body = (typeof post.body === 'string' && post.body) ? post.body : (typeof post.content === 'string' ? post.content : '<p></p>');
+    if (!post.excerpt) {
+      var tmp = document.createElement('div');
+      tmp.innerHTML = post.body;
+      var text = (tmp.textContent || tmp.innerText || '').trim();
+      post.excerpt = (text ? text.slice(0, 60) : '无摘要') + '...';
+    }
+    return post;
+  }
+
+  function ensurePostsArray(raw) {
+    if (!Array.isArray(raw)) return [];
+    return raw.map(function(item) { return normalizePost(item); });
+  }
+
   // ─── Render Post List ───
   function renderList() {
+    posts = ensurePostsArray(posts);
     var ul = document.getElementById('post-list');
     var pager = document.getElementById('post-pagination');
     if (posts.length === 0) {
@@ -2042,16 +2066,17 @@
     var pageItems = sorted.slice(startIdx, startIdx + postPageSize);
 
     ul.innerHTML = pageItems.map(function(p) {
-      var timeStr = p.time ? ' ' + p.time : '';
+      var safePost = normalizePost(p);
+      var timeStr = safePost.time ? ' ' + safePost.time : '';
       return '<li class="post-item" onclick="openPost(' + p.id + ')">' +
         '<div class="post-date">' +
-          p.date.replace(/-/g, '/') + timeStr +
+          safePost.date.replace(/-/g, '/') + timeStr +
           '<br>' +
-          '<span class="post-tag tag-' + p.type + '">' + (p.type === 'blog' ? '博客' : '日记') + '</span>' +
+          '<span class="post-tag tag-' + safePost.type + '">' + (safePost.type === 'blog' ? '博客' : '日记') + '</span>' +
         '</div>' +
         '<div>' +
-          '<div class="post-title">' + escapeHtml(p.title) + '</div>' +
-          '<div class="post-excerpt">' + escapeHtml(p.excerpt) + '</div>' +
+          '<div class="post-title">' + escapeHtml(safePost.title) + '</div>' +
+          '<div class="post-excerpt">' + escapeHtml(safePost.excerpt) + '</div>' +
         '</div>' +
       '</li>';
     }).join('');
@@ -2113,7 +2138,7 @@
   async function restorePost(id) {
     var post = deletedPosts.find(function(p){ return p.id === id; });
     if (!post) return;
-    var restoreData = Object.assign({}, post);
+    var restoreData = normalizePost(Object.assign({}, post));
     delete restoreData.deletedAt;
     try {
       await apiFetch('/api/posts', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(restoreData) });
@@ -2161,6 +2186,7 @@
   function openPost(id) {
     var post = posts.find(function(p) { return p.id === id; });
     if (!post) return;
+    post = normalizePost(post);
     currentPostId = id;
     var timeStr = post.time ? ' ' + post.time : '';
     document.getElementById('detail-meta').textContent =
@@ -3143,7 +3169,7 @@
   }
 
   function getDayPostsHtml(dateStr) {
-    var datePosts = posts.filter(function(p) { return p.date === dateStr; });
+    var datePosts = ensurePostsArray(posts).filter(function(p) { return p.date === dateStr; });
     if (datePosts.length === 0) {
       return '<div class="planner-diary-empty">这一天还没有发表文章。</div>';
     }
