@@ -2028,8 +2028,11 @@
     var now = new Date();
     if (!post.id) post.id = Date.now() + Math.floor(Math.random() * 1000);
     post.type = post.type === 'blog' ? 'blog' : 'diary';
-    post.date = post.date || formatDateGMT8(now);
-    post.time = post.time || '';
+    if (typeof post.date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(post.date)) {
+      var parsedDate = post.date ? new Date(post.date) : now;
+      post.date = isNaN(parsedDate.getTime()) ? formatDateGMT8(now) : formatDateGMT8(parsedDate);
+    }
+    post.time = typeof post.time === 'string' ? post.time : '';
     post.title = (post.title || '未命名文章').toString();
     post.body = (typeof post.body === 'string' && post.body) ? post.body : (typeof post.content === 'string' ? post.content : '<p></p>');
     if (!post.excerpt) {
@@ -2037,6 +2040,8 @@
       tmp.innerHTML = post.body;
       var text = (tmp.textContent || tmp.innerText || '').trim();
       post.excerpt = (text ? text.slice(0, 60) : '无摘要') + '...';
+    } else {
+      post.excerpt = post.excerpt.toString();
     }
     return post;
   }
@@ -2068,7 +2073,7 @@
     ul.innerHTML = pageItems.map(function(p) {
       var safePost = normalizePost(p);
       var timeStr = safePost.time ? ' ' + safePost.time : '';
-      return '<li class="post-item" onclick="openPost(' + p.id + ')">' +
+      return '<li class="post-item" onclick="openPost(' + safePost.id + ')">' +
         '<div class="post-date">' +
           safePost.date.replace(/-/g, '/') + timeStr +
           '<br>' +
