@@ -2330,10 +2330,14 @@
 
   // ─── Switch View ───
   function showView(name, btn) {
+    var targetView = document.getElementById(name + '-view');
+    if (!targetView) return;
     document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
-    document.getElementById(name + '-view').classList.add('active');
+    targetView.classList.add('active');
     document.querySelectorAll('nav button').forEach(function(b) { b.classList.remove('active'); });
     if (btn) btn.classList.add('active');
+    var panel = document.getElementById('trash-panel');
+    if (panel) panel.classList.remove('show');
     currentView = name;
     if (name === 'list') { renderList(); renderPhotoWall(); renderPlannerCalendar(); renderPlannerDetail(); renderCalendar(); renderWritingHistory(); }
     if (name === 'about') { renderProfile(); }
@@ -3178,10 +3182,11 @@
       html += '<ul class="todo-list-items">';
       for (var i = 0; i < todos.length; i++) {
         var todo = todos[i];
+        var todoKey = typeof todo.id === 'undefined' ? i : todo.id;
         html += '<li class="todo-item">' +
-          '<div class="todo-checkbox ' + (todo.done ? 'checked' : '') + '" onclick="toggleTodo(' + i + ')"></div>' +
+          '<div class="todo-checkbox ' + (todo.done ? 'checked' : '') + '" onclick="toggleTodo(' + todoKey + ')"></div>' +
           '<div class="todo-text ' + (todo.done ? 'done' : '') + '">' + escapeHtml(todo.text) + '</div>' +
-          '<button class="todo-delete" onclick="deleteTodo(' + i + ')">&#10005;</button>' +
+          '<button class="todo-delete" onclick="deleteTodo(' + todoKey + ')">&#10005;</button>' +
           '</li>';
       }
       html += '</ul>';
@@ -3229,7 +3234,9 @@
     var dayData = todosData[plannerSelectedDate];
     if (!dayData) return;
 
-    var todo = dayData.todos.find(function(t) { return t.id === todoId; });
+    var todo = dayData.todos.find(function(t, index) {
+      return t.id === todoId || (typeof t.id === 'undefined' && index === todoId);
+    });
     if (!todo) return;
     todo.done = !todo.done;
 
@@ -3250,7 +3257,9 @@
     var dayData = todosData[plannerSelectedDate];
     if (!dayData) return;
 
-    dayData.todos = dayData.todos.filter(function(t) { return t.id !== todoId; });
+    dayData.todos = dayData.todos.filter(function(t, index) {
+      return !(t.id === todoId || (typeof t.id === 'undefined' && index === todoId));
+    });
 
     try {
       await apiFetch('/api/todos', {
