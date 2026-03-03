@@ -142,6 +142,7 @@
     .site-title {
       font-family: 'Noto Serif SC', serif;
       font-size: 1.8rem; font-weight: 700; letter-spacing: -0.5px;
+      transform: translateX(-8px);
     }
     .site-title span { color: var(--accent); }
 
@@ -780,7 +781,45 @@
     @media (max-width: 960px) {
       .home-layout { flex-direction: column; }
       .photo-wall-sidebar { width: 100%; }
+      nav { gap: 1rem; flex-wrap: wrap; justify-content: flex-end; }
+      .backup-grid { grid-template-columns: 1fr; }
+      .site-title { transform: translateX(-4px); }
     }
+    @media (max-width: 640px) {
+      .header-inner { flex-direction: column; align-items: flex-start; gap: 0.6rem; }
+      nav { justify-content: flex-start; }
+      main { padding: 2rem 1rem; }
+      .home-planner-section { padding: 0.8rem; }
+    }
+
+
+    .home-planner-section {
+      margin-top: 2rem;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 1.2rem;
+    }
+    .home-planner-section .planner-container { max-width: 100%; }
+
+    .backup-wrap { max-width: 980px; }
+    .backup-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+      margin-top: 1rem;
+    }
+    .backup-card {
+      background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 1rem;
+    }
+    .backup-card h3 { font-family: 'Noto Serif SC', serif; margin-bottom: 0.6rem; }
+    .backup-post-list { max-height: 340px; overflow: auto; border: 1px solid var(--line); border-radius: 6px; padding: 0.5rem; }
+    .backup-post-item { display: flex; gap: 0.6rem; align-items: flex-start; padding: 0.45rem; border-bottom: 1px dashed var(--line); }
+    .backup-post-item:last-child { border-bottom: none; }
+    .backup-actions { margin-top: 0.7rem; display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .backup-btn { border: 1px solid var(--line); background: #fff; padding: 0.45rem 0.9rem; border-radius: 4px; cursor: pointer; }
+    .backup-btn.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+    .backup-note { color: var(--muted); font-size: 0.82rem; line-height: 1.6; margin-top: 0.5rem; }
 
     /* ─── Photo Wall ─── */
     .pw-header {
@@ -1178,8 +1217,7 @@
     <nav>
       <button class="active" onclick="showView('list', this)">全部文章</button>
       <button onclick="showView('write', this)">写新文章</button>
-      <button onclick="backupDiaryAsWord()">备份日记</button>
-      <button onclick="showView('planner', this)">日历记事</button>
+      <button onclick="showView('backup', this)">备份日记</button>
       <button onclick="showView('reader', this)">阅读</button>
       <button onclick="showView('about', this)">关于我</button>
     </nav>
@@ -1238,6 +1276,28 @@
         <div id="trash-bin" style="margin-top:1rem;border-top:1px dashed #ddd;padding-top:0.8rem;">
           <p class="section-label" style="margin:0 0 0.5rem 0;">回收站（7天后自动清理）</p>
           <div id="trash-list" style="font-size:0.85rem;color:var(--muted);">暂无已删除文章</div>
+        </div>
+
+        <div class="home-planner-section">
+          <div class="planner-container">
+            <div class="planner-header">
+              <div class="planner-month-nav">
+                <button class="planner-nav-btn" onclick="plannerPrevMonth()">&#8249;</button>
+                <div class="planner-month-title" id="planner-month-title"></div>
+                <button class="planner-nav-btn" onclick="plannerNextMonth()">&#8250;</button>
+              </div>
+              <button class="planner-today-btn" onclick="plannerGoToday()">今天</button>
+            </div>
+            <div class="planner-cal-grid" id="planner-cal-grid"></div>
+            <div class="planner-detail" id="planner-detail">
+              <div class="planner-detail-header">
+                <div class="planner-detail-date" id="planner-detail-date">选择一个日期</div>
+              </div>
+              <div id="planner-detail-content">
+                <p style="color: var(--muted); font-size: 0.9rem;">点击日历上的日期查看或添加待办事项</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1329,24 +1389,29 @@
     </div>
   </div>
 
-  <!-- 日历记事 -->
-  <div id="planner-view" class="view">
-    <div class="planner-container">
-      <div class="planner-header">
-        <div class="planner-month-nav">
-          <button class="planner-nav-btn" onclick="plannerPrevMonth()">&#8249;</button>
-          <div class="planner-month-title" id="planner-month-title"></div>
-          <button class="planner-nav-btn" onclick="plannerNextMonth()">&#8250;</button>
+
+  <!-- 备份日记 -->
+  <div id="backup-view" class="view">
+    <div class="backup-wrap">
+      <p class="section-label">备份与上传</p>
+      <div class="backup-grid">
+        <div class="backup-card">
+          <h3>备份日记</h3>
+          <div class="backup-post-list" id="backup-post-list"></div>
+          <div class="backup-actions">
+            <button class="backup-btn" onclick="toggleAllBackupPosts(true)">全选</button>
+            <button class="backup-btn" onclick="toggleAllBackupPosts(false)">清空</button>
+            <button class="backup-btn primary" onclick="backupDiaryAsWord(true)">下载已选 Word</button>
+          </div>
+          <div class="backup-note">可勾选现有文章后导出为 .doc 备份文件。</div>
         </div>
-        <button class="planner-today-btn" onclick="plannerGoToday()">今天</button>
-      </div>
-      <div class="planner-cal-grid" id="planner-cal-grid"></div>
-      <div class="planner-detail" id="planner-detail">
-        <div class="planner-detail-header">
-          <div class="planner-detail-date" id="planner-detail-date">选择一个日期</div>
-        </div>
-        <div id="planner-detail-content">
-          <p style="color: var(--muted); font-size: 0.9rem;">点击日历上的日期查看或添加待办事项</p>
+        <div class="backup-card">
+          <h3>上传日记</h3>
+          <p class="backup-note">上传通过本系统导出的备份文件（.doc/.html），会自动恢复为文章。</p>
+          <div class="backup-actions">
+            <button class="backup-btn primary" onclick="document.getElementById('backup-import-input').click()">选择备份文件并上传</button>
+          </div>
+          <div class="backup-note" id="backup-import-status">尚未上传文件。</div>
         </div>
       </div>
     </div>
@@ -1533,6 +1598,7 @@
 <input type="file" id="avatar-input" accept="image/*" style="display:none;">
 <input type="file" id="photo-input" accept="image/*" style="display:none;">
 <input type="file" id="epub-input" accept=".epub" style="display:none;">
+<input type="file" id="backup-import-input" accept=".doc,.html,.htm,.txt" style="display:none;">
 
 <!-- Calendar Tooltip -->
 <div class="calendar-tooltip" id="calendar-tooltip"></div>
@@ -1802,6 +1868,11 @@
       renderProfile();
       updateStats();
       renderPhotoWall();
+      renderPlannerCalendar();
+      renderPlannerDetail();
+      renderCalendar();
+      renderWritingHistory();
+      renderBackupPostList();
     } catch (e) {
       console.error('Failed to load data:', e);
       renderList();
@@ -1809,6 +1880,11 @@
       renderProfile();
       updateStats();
       renderPhotoWall();
+      renderPlannerCalendar();
+      renderPlannerDetail();
+      renderCalendar();
+      renderWritingHistory();
+      renderBackupPostList();
     }
     dataReady = true;
     checkReady();
@@ -2074,9 +2150,9 @@
     document.querySelectorAll('nav button').forEach(function(b) { b.classList.remove('active'); });
     if (btn) btn.classList.add('active');
     currentView = name;
-    if (name === 'list') { renderList(); renderPhotoWall(); }
-    if (name === 'about') { renderProfile(); renderCalendar(); renderWritingHistory(); }
-    if (name === 'planner') { renderPlannerCalendar(); renderPlannerDetail(); }
+    if (name === 'list') { renderList(); renderPhotoWall(); renderPlannerCalendar(); renderPlannerDetail(); renderCalendar(); renderWritingHistory(); }
+    if (name === 'about') { renderProfile(); }
+    if (name === 'backup') { renderBackupPostList(); }
     if (name === 'reader') { renderBookshelf(); }
     if (name === 'write' && !editingPostId) {
       document.getElementById('write-label').textContent = '写一篇新文章';
@@ -2411,6 +2487,8 @@
     return 'https://player.bilibili.com/player.html?bvid=' + m[1] + '&page=1&high_quality=1&autoplay=1&loop=1';
   }
 
+  var externalVolume = 0.7;
+
   function normalizeExternalMediaUrl(url) {
     var bilibili = parseBilibiliEmbedUrl(url);
     if (bilibili) return bilibili;
@@ -2427,7 +2505,7 @@
           vid = u.searchParams.get('v') || '';
         }
         if (vid) {
-          return 'https://www.youtube.com/embed/' + vid + '?autoplay=1&loop=1&playlist=' + vid;
+          return 'https://www.youtube.com/embed/' + vid + '?autoplay=1&loop=1&playlist=' + vid + '&enablejsapi=1';
         }
       }
 
@@ -2478,6 +2556,7 @@
       audio.style.display = 'none';
       externalWrap.style.display = document.getElementById('audio-player-bar').classList.contains('hidden') ? 'none' : 'block';
       externalFrame.src = embed;
+      setTimeout(function(){ applyExternalVolume(externalVolume, true); }, 500);
       showAudioPlayer();
       document.getElementById('audio-track-name').textContent = '外部音频源已加载';
       document.getElementById('audio-time').textContent = '外部链接模式';
@@ -2540,8 +2619,38 @@
     audio.currentTime = pct * audio.duration;
   }
 
+  function applyExternalVolume(vol, forceReload) {
+    var frame = document.getElementById('audio-external-frame');
+    if (!frame || !frame.src) return;
+
+    try {
+      var u = new URL(frame.src);
+      var host = u.hostname.replace(/^www\./, '');
+
+      if (host.indexOf('youtube.com') !== -1 || host.indexOf('youtu.be') !== -1) {
+        frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'setVolume', args: [Math.round(vol * 100)] }), '*');
+      }
+
+      frame.contentWindow.postMessage({ type: 'setVolume', value: vol }, '*');
+      frame.contentWindow.postMessage({ cmd: 'setVolume', value: Math.round(vol * 100) }, '*');
+
+      if (forceReload && host.indexOf('bilibili.com') !== -1) {
+        u.searchParams.set('volume', String(Math.round(vol * 100)));
+        frame.src = u.toString();
+      }
+    } catch (e) {}
+  }
+
   function setAudioVolume(val) {
-    document.getElementById('audio-element').volume = parseFloat(val);
+    var volume = parseFloat(val);
+    externalVolume = volume;
+    document.getElementById('audio-element').volume = volume;
+
+    var cfg = null;
+    try { cfg = JSON.parse(localStorage.getItem('audioPlayerConfig') || 'null'); } catch(e) {}
+    if (cfg && cfg.mode === 'external') {
+      applyExternalVolume(volume, true);
+    }
   }
 
   function toggleAudioUrlPanel() {
@@ -2587,16 +2696,59 @@
     document.body.classList.add('has-audio-player');
   }
 
-  function backupDiaryAsWord() {
+  var backupSelection = {};
+
+  function renderBackupPostList() {
+    var el = document.getElementById('backup-post-list');
+    if (!el) return;
+    if (!posts || posts.length === 0) {
+      el.innerHTML = '<div class="backup-note">暂无文章可备份。</div>';
+      return;
+    }
+
+    var sorted = posts.slice().sort(function(a, b) {
+      return ((b.date || '') + (b.time || '')).localeCompare((a.date || '') + (a.time || ''));
+    });
+
+    el.innerHTML = sorted.map(function(post) {
+      var checked = backupSelection[post.id] ? 'checked' : '';
+      return '<label class="backup-post-item">' +
+        '<input type="checkbox" ' + checked + ' onchange="toggleBackupPost(' + post.id + ', this.checked)">' +
+        '<div><div style="font-weight:600;">' + escapeHtml(post.title || '无标题') + '</div>' +
+        '<div style="font-size:0.78rem;color:var(--muted);">' + (post.date || '') + ' ' + (post.time || '') + '</div></div>' +
+      '</label>';
+    }).join('');
+  }
+
+  function toggleBackupPost(id, checked) {
+    backupSelection[id] = !!checked;
+  }
+
+  function toggleAllBackupPosts(checked) {
+    posts.forEach(function(p) { backupSelection[p.id] = checked; });
+    renderBackupPostList();
+  }
+
+  function backupDiaryAsWord(onlySelected) {
     if (!posts || posts.length === 0) {
       alert('当前没有可备份的日记内容。');
       return;
     }
 
-    var sortedPosts = posts.slice().sort(function(a, b) {
+    var selected = onlySelected ? posts.filter(function(p){ return !!backupSelection[p.id]; }) : posts.slice();
+    if (selected.length === 0) {
+      alert('请先勾选要备份的文章。');
+      return;
+    }
+
+    var sortedPosts = selected.slice().sort(function(a, b) {
       var ad = (a.date || '') + ' ' + (a.time || '00:00');
       var bd = (b.date || '') + ' ' + (b.time || '00:00');
       return ad.localeCompare(bd);
+    });
+
+    var payload = sortedPosts.map(function(post) {
+      return { title: post.title || '', type: post.type || 'diary', date: post.date || '', time: post.time || '', body: post.body || '', excerpt: post.excerpt || '' };
     });
 
     var html = '<html><head><meta charset="utf-8"><title>日记备份</title>' +
@@ -2612,6 +2764,8 @@
       html += '<hr/>';
     });
 
+    var safeJson = JSON.stringify(payload).replace(/<\//g, '<\\/');
+    html += '<script id="diary-backup-json" type="application/json">' + safeJson + '<\/script>'; 
     html += '</body></html>';
 
     var blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
@@ -2624,6 +2778,56 @@
       URL.revokeObjectURL(a.href);
       a.remove();
     }, 0);
+  }
+
+  async function importDiaryBackupFile(file) {
+    var statusEl = document.getElementById('backup-import-status');
+    if (!file) return;
+    statusEl.textContent = '正在读取文件：' + file.name;
+
+    var text = await file.text();
+    var m = text.match(/<script id="diary-backup-json" type="application\/json">([\s\S]*?)<\/script>/i);
+    if (!m) {
+      statusEl.textContent = '上传失败：不是受支持的备份文件。';
+      alert('未找到备份数据，请上传通过“备份日记”导出的文件。');
+      return;
+    }
+
+    var items = [];
+    try { items = JSON.parse(m[1] || '[]'); } catch (e) {}
+    if (!Array.isArray(items) || items.length === 0) {
+      statusEl.textContent = '上传失败：备份文件中没有可恢复内容。';
+      return;
+    }
+
+    var imported = 0;
+    for (var i = 0; i < items.length; i++) {
+      var it = items[i] || {};
+      var post = {
+        id: Date.now() + i,
+        title: it.title || ('导入日记 ' + (i + 1)),
+        type: it.type === 'blog' ? 'blog' : 'diary',
+        date: it.date || formatDateGMT8(),
+        time: it.time || formatTimeGMT8(),
+        excerpt: it.excerpt || (function(){ var d=document.createElement('div'); d.innerHTML = it.body || ''; var t=d.textContent || ''; return t.slice(0,60) + '...'; })(),
+        body: it.body || '<p></p>'
+      };
+      try {
+        await apiFetch('/api/posts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(post)
+        });
+        posts.push(post);
+        imported++;
+      } catch (e) {}
+    }
+
+    renderList();
+    renderBackupPostList();
+    updateStats();
+    statusEl.textContent = '上传完成，成功恢复 ' + imported + ' 篇文章。';
+    alert('上传完成，成功恢复 ' + imported + ' 篇文章。');
   }
 
   // ─── Planner / Calendar Module ───
@@ -2911,6 +3115,11 @@
       };
       photosData.push(photo);
       renderPhotoWall();
+      renderPlannerCalendar();
+      renderPlannerDetail();
+      renderCalendar();
+      renderWritingHistory();
+      renderBackupPostList();
       savePhotos();
       // Open edit modal for the new photo
       openPhotoEdit(photo.id);
@@ -3897,6 +4106,20 @@
   }
 
   // ─── Initialize ───
+  var backupInputEl = document.getElementById('backup-import-input');
+  if (backupInputEl) {
+    backupInputEl.addEventListener('change', function(e) {
+      var file = e.target.files && e.target.files[0];
+      importDiaryBackupFile(file).catch(function(err){
+        console.error('Import backup failed:', err);
+        var statusEl = document.getElementById('backup-import-status');
+        if (statusEl) statusEl.textContent = '上传失败：' + (err && err.message ? err.message : '未知错误');
+        alert('上传失败，请检查文件格式。');
+      });
+      e.target.value = '';
+    });
+  }
+
   loadAllData();
 
   // Init photo wall background settings on page load
