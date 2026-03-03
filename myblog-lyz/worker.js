@@ -4,6 +4,7 @@ import { onRequest as profileHandler } from "./functions/api/profile.js";
 import { onRequest as calendarHandler } from "./functions/api/calendar.js";
 import { onRequest as todosHandler } from "./functions/api/todos.js";
 import { onRequest as photosHandler } from "./functions/api/photos.js";
+import { onRequest as doodlesHandler } from "./functions/api/doodles.js";
 import { onRequest as booksHandler } from "./functions/api/books.js";
 import { onRequest as trashHandler } from "./functions/api/trash.js";
 
@@ -15,6 +16,7 @@ const routes = {
   "/api/calendar": calendarHandler,
   "/api/todos": todosHandler,
   "/api/photos": photosHandler,
+  "/api/doodles": doodlesHandler,
   "/api/books": booksHandler,
   "/api/trash": trashHandler,
   "/api/version": async () => json({ version: BUILD_VERSION }),

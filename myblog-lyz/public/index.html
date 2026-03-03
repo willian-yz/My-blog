@@ -1015,6 +1015,19 @@
     .photo-modal-actions .pm-save {
       background: var(--ink); color: var(--paper); border-color: var(--ink);
     }
+
+    .doodle-wrap { max-width: 1100px; margin: 0 auto; }
+    .doodle-toolbar { display:flex; flex-wrap:wrap; gap:0.7rem; align-items:center; margin-bottom: 1rem; }
+    .doodle-toolbar label { font-size: 0.82rem; color: var(--muted); display:flex; align-items:center; gap:0.4rem; }
+    .doodle-toolbar input[type="range"] { width: 140px; accent-color: var(--accent); }
+    .doodle-toolbar button { border:1px solid var(--line); background:#fff; border-radius: 6px; padding: 0.45rem 0.75rem; cursor:pointer; }
+    .doodle-toolbar button:hover { border-color: var(--ink); }
+    .doodle-board-wrap { border:1px solid var(--line); border-radius: 8px; overflow:auto; background:#fff; padding:0.6rem; }
+    #doodle-canvas { background:#fff; display:block; margin:0 auto; cursor:crosshair; max-width:100%; touch-action: none; }
+    .doodle-gallery { margin-top: 1rem; display:grid; grid-template-columns: repeat(auto-fill,minmax(170px,1fr)); gap: 0.8rem; }
+    .doodle-card { border:1px solid var(--line); border-radius: 8px; padding:0.5rem; background:#fff; }
+    .doodle-card img { width:100%; height:120px; object-fit:cover; border-radius:6px; display:block; }
+    .doodle-card-title { font-size:0.75rem; color:var(--muted); margin-top:0.4rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .crop-overlay {
       position: absolute; border: 2px dashed var(--accent);
       background: rgba(192,57,43,0.1); pointer-events: none; display: none;
@@ -1305,6 +1318,7 @@
       <button class="active" data-view="list" onclick="showView('list', this)">全部文章</button>
       <button data-view="write" onclick="showView('write', this)">写新文章</button>
       <button data-view="backup" onclick="showView('backup', this)">备份日记</button>
+      <button data-view="doodle" onclick="showView('doodle', this)">涂鸦板</button>
       <button data-view="reader" onclick="showView('reader', this)">阅读</button>
       <button data-view="about" onclick="showView('about', this)">关于我</button>
     </nav>
@@ -1504,6 +1518,26 @@
           <div class="backup-note" id="backup-import-status">尚未上传文件。</div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- 涂鸦板 -->
+  <div id="doodle-view" class="view">
+    <div class="doodle-wrap">
+      <p class="section-label">涂鸦板</p>
+      <div class="doodle-toolbar">
+        <label>画笔颜色 <input type="color" id="doodle-color" value="#c0392b" onchange="setDoodleColor(this.value)"></label>
+        <label>画笔粗细 <input type="range" id="doodle-size" min="1" max="40" value="6" oninput="setDoodleSize(this.value)"><span id="doodle-size-label">6px</span></label>
+        <button onclick="toggleDoodleEraser()" id="doodle-eraser-btn">橡皮擦</button>
+        <button onclick="clearDoodleCanvas()">清空画布</button>
+        <button onclick="document.getElementById('doodle-upload-input').click()">上传图片底图</button>
+        <button onclick="saveDoodleImage()">保存涂鸦</button>
+      </div>
+      <div class="doodle-board-wrap">
+        <canvas id="doodle-canvas" width="980" height="580"></canvas>
+      </div>
+      <input type="file" id="doodle-upload-input" accept="image/*" style="display:none;">
+      <div class="doodle-gallery" id="doodle-gallery"></div>
     </div>
   </div>
 
@@ -1780,6 +1814,7 @@
   var calendarData = {};
   var todosData = {};
   var photosData = [];
+  var doodlesData = [];
   var booksData = [];
   var postPage = 1;
   var postPageSize = 5;
@@ -1809,6 +1844,15 @@
   var cropMode = false;
   var cropStart = null;
   var cropRect = null;
+
+  // Doodle state
+  var doodleCtx = null;
+  var doodleDrawing = false;
+  var doodleBrushColor = '#c0392b';
+  var doodleBrushSize = 6;
+  var doodleEraser = false;
+  var doodleLastX = 0;
+  var doodleLastY = 0;
 
   // E-book state
   var currentBook = null;
@@ -1984,6 +2028,7 @@
         apiFetch('/api/calendar'),
         apiFetch('/api/todos'),
         apiFetch('/api/photos'),
+        apiFetch('/api/doodles'),
         apiFetch('/api/books'),
         apiFetch('/api/trash')
       ]);
@@ -1992,8 +2037,9 @@
       calendarData = results[2] || {};
       todosData = results[3] || {};
       photosData = results[4] || [];
-      booksData = results[5] || [];
-      deletedPosts = results[6] || [];
+      doodlesData = results[5] || [];
+      booksData = results[6] || [];
+      deletedPosts = results[7] || [];
       purgeExpiredTrash();
       renderList();
       renderTrashBin();
@@ -2005,6 +2051,7 @@
       renderCalendar();
       renderWritingHistory();
       renderBackupPostList();
+      renderDoodleGallery();
     } catch (e) {
       console.error('Failed to load data:', e);
       renderList();
@@ -2017,6 +2064,7 @@
       renderCalendar();
       renderWritingHistory();
       renderBackupPostList();
+      renderDoodleGallery();
     }
     dataReady = true;
     checkReady();
@@ -2373,6 +2421,7 @@
     if (name === 'list') { renderList(); renderPhotoWall(); renderPlannerCalendar(); renderPlannerDetail(); renderCalendar(); renderWritingHistory(); }
     if (name === 'about') { renderProfile(); }
     if (name === 'backup') { renderBackupPostList(); }
+    if (name === 'doodle') { initDoodleBoard(); renderDoodleGallery(); }
     if (name === 'reader') { renderBookshelf(); }
     if (name === 'write' && !editingPostId) {
       document.getElementById('write-label').textContent = '写一篇新文章';
@@ -4367,6 +4416,155 @@
     el.addEventListener('pointerdown', onPointerDown);
   }
 
+  function initDoodleBoard() {
+    var canvas = document.getElementById('doodle-canvas');
+    if (!canvas || canvas.__doodleInited) return;
+    doodleCtx = canvas.getContext('2d');
+    doodleCtx.lineCap = 'round';
+    doodleCtx.lineJoin = 'round';
+    doodleCtx.fillStyle = '#ffffff';
+    doodleCtx.fillRect(0, 0, canvas.width, canvas.height);
+    canvas.__doodleInited = true;
+
+    function getPoint(e) {
+      var rect = canvas.getBoundingClientRect();
+      var clientX = e.clientX;
+      var clientY = e.clientY;
+      if (e.touches && e.touches[0]) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      }
+      return {
+        x: (clientX - rect.left) * (canvas.width / rect.width),
+        y: (clientY - rect.top) * (canvas.height / rect.height)
+      };
+    }
+
+    function startDraw(e) {
+      e.preventDefault();
+      var p = getPoint(e);
+      doodleDrawing = true;
+      doodleLastX = p.x;
+      doodleLastY = p.y;
+    }
+
+    function moveDraw(e) {
+      if (!doodleDrawing || !doodleCtx) return;
+      e.preventDefault();
+      var p = getPoint(e);
+      doodleCtx.globalCompositeOperation = doodleEraser ? 'destination-out' : 'source-over';
+      doodleCtx.strokeStyle = doodleBrushColor;
+      doodleCtx.lineWidth = doodleBrushSize;
+      doodleCtx.beginPath();
+      doodleCtx.moveTo(doodleLastX, doodleLastY);
+      doodleCtx.lineTo(p.x, p.y);
+      doodleCtx.stroke();
+      doodleLastX = p.x;
+      doodleLastY = p.y;
+    }
+
+    function stopDraw() {
+      doodleDrawing = false;
+    }
+
+    canvas.addEventListener('pointerdown', startDraw);
+    canvas.addEventListener('pointermove', moveDraw);
+    canvas.addEventListener('pointerup', stopDraw);
+    canvas.addEventListener('pointerleave', stopDraw);
+  }
+
+  function setDoodleColor(color) {
+    doodleBrushColor = color || '#c0392b';
+    doodleEraser = false;
+    var eraserBtn = document.getElementById('doodle-eraser-btn');
+    if (eraserBtn) eraserBtn.textContent = '橡皮擦';
+  }
+
+  function setDoodleSize(size) {
+    doodleBrushSize = Math.max(1, parseInt(size, 10) || 6);
+    var label = document.getElementById('doodle-size-label');
+    if (label) label.textContent = doodleBrushSize + 'px';
+  }
+
+  function toggleDoodleEraser() {
+    doodleEraser = !doodleEraser;
+    var eraserBtn = document.getElementById('doodle-eraser-btn');
+    if (eraserBtn) eraserBtn.textContent = doodleEraser ? '画笔模式' : '橡皮擦';
+  }
+
+  function clearDoodleCanvas() {
+    var canvas = document.getElementById('doodle-canvas');
+    if (!canvas || !doodleCtx) return;
+    doodleCtx.globalCompositeOperation = 'source-over';
+    doodleCtx.fillStyle = '#ffffff';
+    doodleCtx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+  function renderDoodleGallery() {
+    var el = document.getElementById('doodle-gallery');
+    if (!el) return;
+    if (!Array.isArray(doodlesData) || doodlesData.length === 0) {
+      el.innerHTML = '<div class="empty-state">🎨<p>还没有保存的涂鸦作品，开始创作吧！</p></div>';
+      return;
+    }
+    var sorted = doodlesData.slice().sort(function(a, b){ return (b.id || 0) - (a.id || 0); });
+    el.innerHTML = sorted.map(function(item){
+      var title = item.title || ('涂鸦 ' + (item.id || ''));
+      return '<div class="doodle-card">' +
+        '<img src="' + item.dataUrl + '" alt="doodle">' +
+        '<div class="doodle-card-title">' + escapeHtml(title) + '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  async function saveDoodleImage() {
+    var canvas = document.getElementById('doodle-canvas');
+    if (!canvas) return;
+    var dataUrl = canvas.toDataURL('image/png');
+    var item = {
+      id: Date.now(),
+      title: '涂鸦作品 ' + formatDateGMT8() + ' ' + formatTimeGMT8(),
+      dataUrl: dataUrl,
+      createdAt: Date.now()
+    };
+    doodlesData.push(item);
+    renderDoodleGallery();
+    try {
+      await apiFetch('/api/doodles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(item)
+      });
+      alert('涂鸦已保存！');
+    } catch (e) {
+      alert('保存失败，请稍后再试。');
+    }
+  }
+
+  function loadDoodleBaseImage(file) {
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      var img = new Image();
+      img.onload = function() {
+        var canvas = document.getElementById('doodle-canvas');
+        if (!canvas) return;
+        initDoodleBoard();
+        var scale = Math.min(canvas.width / img.width, canvas.height / img.height);
+        var w = Math.round(img.width * scale);
+        var h = Math.round(img.height * scale);
+        var x = Math.round((canvas.width - w) / 2);
+        var y = Math.round((canvas.height - h) / 2);
+        doodleCtx.globalCompositeOperation = 'source-over';
+        doodleCtx.fillStyle = '#ffffff';
+        doodleCtx.fillRect(0, 0, canvas.width, canvas.height);
+        doodleCtx.drawImage(img, x, y, w, h);
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
   // ─── Initialize ───
   var backupInputEl = document.getElementById('backup-import-input');
   if (backupInputEl) {
@@ -4378,6 +4576,15 @@
         if (statusEl) statusEl.textContent = '上传失败：' + (err && err.message ? err.message : '未知错误');
         alert('上传失败，请检查文件格式。');
       });
+      e.target.value = '';
+    });
+  }
+
+  var doodleUploadEl = document.getElementById('doodle-upload-input');
+  if (doodleUploadEl) {
+    doodleUploadEl.addEventListener('change', function(e) {
+      var file = e.target.files && e.target.files[0];
+      loadDoodleBaseImage(file);
       e.target.value = '';
     });
   }
@@ -4394,6 +4601,7 @@
   initTopNavFallback();
 
   loadAllData();
+  initDoodleBoard();
 
   // Init photo wall background settings on page load
   setTimeout(function() {

@@ -121,6 +121,20 @@ test("photos API can save and read photos", async () => {
   assert.equal(getRes.body[0].id, 7);
 });
 
+test("doodles API can save and read doodles", async () => {
+  const env = makeEnv();
+  const doodle = { id: 77, title: "涂鸦测试", dataUrl: "data:image/png;base64,abc" };
+
+  const createRes = await call(env, "/api/doodles", "POST", doodle);
+  assert.equal(createRes.status, 200);
+  assert.equal(createRes.body.ok, true);
+
+  const getRes = await call(env, "/api/doodles");
+  assert.equal(getRes.status, 200);
+  assert.equal(getRes.body.length, 1);
+  assert.equal(getRes.body[0].id, 77);
+});
+
 test("D1 binding persists diary data and can be read after reload", async () => {
   const db = new MockD1();
   const env = makeEnv({ BLOG_DB: db, BLOG_DATA: undefined });
