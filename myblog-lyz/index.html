@@ -787,12 +787,13 @@
     /* ─── Homepage Two-Column Layout ─── */
     .home-layout { display: flex; gap: 2.5rem; }
     .photo-wall-sidebar { width: 300px; flex-shrink: 0; }
-    .home-main-content { flex: 1; min-width: 0; }
-    #list-view { max-width: 1200px; }
+    .home-main-content { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    #list-view { max-width: 1320px; }
     @media (max-width: 960px) {
       .home-layout { flex-direction: column; }
       .photo-wall-sidebar { width: 100%; }
       .home-top-grid { grid-template-columns: 1fr; }
+      .home-posts-block { margin-top: 0; }
       nav { gap: 1rem; flex-wrap: wrap; justify-content: flex-end; }
       .backup-grid { grid-template-columns: 1fr; }
       .site-title { transform: translateX(-4px); }
@@ -801,7 +802,7 @@
       .header-inner { flex-direction: column; align-items: flex-start; gap: 0.6rem; }
       nav { justify-content: flex-start; }
       main { padding: 2rem 1rem; }
-      .home-planner-section { padding: 0.8rem; }
+      .home-planner-section { padding: 0.8rem; transform: none; }
     }
 
 
@@ -810,18 +811,22 @@
     .home-top-grid {
       display: grid;
       grid-template-columns: minmax(260px, 1fr) minmax(360px, 440px);
-      gap: 1rem;
+      gap: 1.2rem;
       align-items: start;
-      margin-bottom: 1.2rem;
+      margin-bottom: 0.2rem;
     }
     .home-planner-section {
       margin-top: 0;
       margin-left: auto;
+      transform: translateX(24px);
       background: #fff;
       border: 2px solid #e9d7c2;
       border-radius: 10px;
       padding: 1rem;
       box-shadow: 0 8px 22px rgba(0,0,0,0.05);
+    }
+    .home-posts-block {
+      margin-top: -48px;
     }
     .post-pagination {
       display: flex;
@@ -1336,6 +1341,7 @@
           </div>
         </div>
 
+        <div class="home-posts-block">
         <p class="section-label">最新文章</p>
         <ul class="post-list" id="post-list">
           <div class="loading-msg">加载中...</div>
@@ -1344,6 +1350,7 @@
         <div id="trash-bin" style="margin-top:1rem;border-top:1px dashed #ddd;padding-top:0.8rem;">
           <p class="section-label" style="margin:0 0 0.5rem 0;">回收站（7天后自动清理）</p>
           <div id="trash-list" style="font-size:0.85rem;color:var(--muted);">暂无已删除文章</div>
+        </div>
         </div>
       </div>
     </div>
