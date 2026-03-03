@@ -204,6 +204,40 @@ test("health endpoint reports active storage binding", async () => {
   assert.equal(bodyD1.bindings.BLOG_DB, true);
 });
 
+test("book-search endpoint maps public epub search results", async () => {
+  const env = makeEnv();
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () =>
+    new Response(
+      JSON.stringify({
+        results: [
+          {
+            title: "Pride and Prejudice",
+            authors: [{ name: "Jane Austen" }],
+            formats: {
+              "application/epub+zip": "https://example.com/pride.epub",
+              "image/jpeg": "https://example.com/cover.jpg",
+            },
+          },
+        ],
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+
+  try {
+    const request = new Request("https://example.com/api/book-search?q=pride");
+    const res = await worker.fetch(request, env, {});
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.equal(Array.isArray(body.items), true);
+    assert.equal(body.items.length, 1);
+    assert.equal(body.items[0].source, "gutendex");
+    assert.equal(body.items[0].epubUrl.includes(".epub"), true);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("index response has anti-cache header", async () => {
   const env = makeEnv();
   const request = new Request("https://example.com/");
