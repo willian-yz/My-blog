@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>我的个人博客</title>
+  <title>崭新的日记本</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -136,12 +136,13 @@
       background: var(--paper); z-index: 100;
     }
     .header-inner {
-      max-width: 860px; margin: 0 auto; padding: 0 2rem;
+      max-width: 1320px; margin: 0 auto; padding: 0 2rem;
       display: flex; align-items: baseline; justify-content: space-between;
     }
     .site-title {
       font-family: 'Noto Serif SC', serif;
       font-size: 1.8rem; font-weight: 700; letter-spacing: -0.5px;
+      transform: translateX(-220px);
     }
     .site-title span { color: var(--accent); }
 
@@ -166,8 +167,8 @@
 
     /* ─── Hero Section ─── */
     .hero-section {
-      text-align: center; padding: 3rem 0 3.5rem;
-      border-bottom: 1px solid var(--line); margin-bottom: 2.5rem;
+      text-align: center; padding: 1.6rem 0 2rem;
+      border-bottom: 1px solid var(--line); margin-bottom: 1.2rem;
     }
     .hero-icon {
       font-size: 2.5rem; margin-bottom: 1.2rem;
@@ -180,7 +181,7 @@
     .hero-quote-en {
       font-family: Georgia, 'Noto Serif SC', serif;
       font-size: 1rem; color: var(--muted);
-      font-style: italic; margin-bottom: 1.5rem; letter-spacing: 0.02em;
+      font-style: italic; margin: -0.4rem 0 1rem; letter-spacing: 0.02em;
     }
     .hero-divider { width: 40px; height: 2px; background: var(--accent); margin: 0 auto 1.5rem; }
     .hero-desc {
@@ -564,216 +565,25 @@
     }
     #audio-external-frame { width: 100%; height: 148px; border: 0; }
 
-    .polar-bear-widget {
+    .bear-image-widget {
       position: fixed;
       right: 8px;
-      bottom: 18px;
+      top: 50%;
+      transform: translateY(-50%);
       width: 230px;
-      height: 280px;
       z-index: 3200;
-      pointer-events: none;
-      filter: drop-shadow(0 18px 24px rgba(0,0,0,0.22));
+      pointer-events: auto;
       user-select: none;
+      cursor: grab;
+      touch-action: none;
     }
-    .bear-plush {
-      position: absolute;
-      inset: 0;
-      border-radius: 26px;
-      background: radial-gradient(circle at 50% 14%, rgba(255,255,255,0.86), rgba(242,246,241,0.65) 40%, rgba(232,239,230,0.25));
-    }
-    .bear-head {
-      position: absolute;
-      width: 172px;
-      height: 145px;
-      left: 29px;
-      top: 12px;
-      border-radius: 50%;
-      background:
-        repeating-linear-gradient(100deg, rgba(255,255,255,0.11), rgba(255,255,255,0.11) 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px),
-        linear-gradient(170deg, #d8f5bf 0%, #c3eba6 100%);
-      border: 2px solid #a6d089;
-      box-shadow: inset 0 -10px 18px rgba(124,176,97,0.22);
-    }
-    .bear-ear {
-      position: absolute;
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      top: 4px;
-      background: linear-gradient(#d6f2be, #bde39f);
-      border: 2px solid #9fca85;
-      box-shadow: inset 0 -6px 10px rgba(118,165,96,0.24);
-    }
-    .bear-ear.left { left: 18px; }
-    .bear-ear.right { right: 18px; }
-    .bear-ear:after {
-      content: '';
-      position: absolute;
-      inset: 12px;
-      border-radius: 50%;
-      background: linear-gradient(#64b955, #4a9c44);
-      opacity: .75;
-    }
-    .bear-face {
-      position: absolute;
-      width: 136px;
-      height: 94px;
-      left: 47px;
-      top: 54px;
-      border-radius: 48px;
-      background: linear-gradient(#85dc7e, #6bca63);
-      border: 2px solid #63b65a;
-      box-shadow: inset 0 -8px 12px rgba(54,132,53,0.2);
-    }
-    .bear-eye {
-      position: absolute;
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 32% 30%, #fff 0 18%, rgba(255,255,255,0.25) 20%, #111 55% 100%);
-      top: 78px;
-      box-shadow: 0 2px 0 rgba(0,0,0,0.2);
-    }
-    .bear-eye.left { left: 58px; }
-    .bear-eye.right { right: 58px; }
-    .bear-brow {
-      position: absolute;
-      width: 30px;
-      height: 12px;
-      border-top: 8px solid #2d342c;
-      border-radius: 50%;
-      top: 62px;
-    }
-    .bear-brow.left { left: 56px; transform: rotate(-12deg); }
-    .bear-brow.right { right: 56px; transform: rotate(12deg); }
-    .bear-nose {
-      position: absolute;
-      width: 32px;
-      height: 20px;
-      left: 99px;
-      top: 108px;
-      border-radius: 50% 50% 55% 55%;
-      background: radial-gradient(circle at 34% 25%, rgba(255,255,255,0.8), rgba(255,255,255,0.1) 30%, #1f2321 68%);
-    }
-    .bear-mouth {
-      position: absolute;
-      left: 82px;
-      top: 121px;
-      width: 66px;
-      height: 38px;
-      border-radius: 0 0 30px 30px;
-      background: #1b1f1b;
-      overflow: hidden;
-    }
-    .bear-mouth:before {
-      content: '';
-      position: absolute;
-      left: 14px;
-      right: 14px;
-      bottom: 4px;
-      height: 16px;
-      border-radius: 14px;
-      background: linear-gradient(#ff8cab, #ff6f94);
-    }
-    .bear-mouth:after {
-      content: '';
-      position: absolute;
-      right: 14px;
-      top: 2px;
-      width: 9px;
-      height: 9px;
-      border-radius: 0 0 8px 8px;
-      background: #fff;
-      transform: rotate(15deg);
-    }
-    .bear-cheek {
-      position: absolute;
-      width: 24px;
-      height: 15px;
-      border-radius: 50%;
-      background: rgba(255, 124, 124, 0.42);
-      top: 112px;
-      filter: blur(.2px);
-    }
-    .bear-cheek.left { left: 42px; }
-    .bear-cheek.right { right: 42px; }
-    .bear-body {
-      position: absolute;
-      width: 138px;
-      height: 116px;
-      left: 46px;
-      top: 146px;
-      border-radius: 58% 58% 54% 54%;
-      background:
-        repeating-linear-gradient(98deg, rgba(255,255,255,0.09), rgba(255,255,255,0.09) 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px),
-        linear-gradient(170deg, #d5f4bc 0%, #bde9a0 100%);
-      border: 2px solid #9ecb82;
-      box-shadow: inset 0 -8px 12px rgba(95,152,73,0.2);
-    }
-    .bear-arm {
-      position: absolute;
-      width: 52px;
-      height: 76px;
-      border-radius: 36px;
-      top: 170px;
-      background: linear-gradient(#d6f2bc, #b9e79a);
-      border: 2px solid #98c87c;
-    }
-    .bear-arm.left { left: 24px; transform: rotate(20deg); }
-    .bear-arm.right { right: 24px; transform: rotate(-20deg); }
-    .bear-leg {
-      position: absolute;
-      width: 58px;
-      height: 58px;
-      border-radius: 50%;
-      bottom: 6px;
-      background: linear-gradient(#d7f3be, #bce8a0);
-      border: 2px solid #9ac77e;
-      box-shadow: inset 0 -6px 10px rgba(109,162,88,0.2);
-    }
-    .bear-leg.left { left: 38px; }
-    .bear-leg.right { right: 38px; }
-    .bear-paw {
-      position: absolute;
-      width: 36px;
-      height: 28px;
-      border-radius: 40px;
-      left: 10px;
-      top: 14px;
-      background: rgba(105,196,100,0.42);
-      border: 1px solid rgba(80,155,74,0.35);
-    }
-    .bear-patch {
-      position: absolute;
-      border-radius: 6px;
-      border: 2px solid rgba(89,115,88,0.38);
-      box-shadow: inset 0 -4px 8px rgba(0,0,0,0.15);
-    }
-    .bear-patch.blue { width: 28px; height: 20px; left: 38px; top: 194px; background: #8bc7d4; transform: rotate(-16deg); }
-    .bear-patch.brown { width: 26px; height: 20px; right: 46px; top: 204px; background: #a37843; transform: rotate(14deg); }
-    .bear-stitch {
-      position: absolute;
-      width: 30px;
-      height: 1px;
-      border-top: 2px dashed rgba(67,84,65,0.6);
-    }
-    .bear-stitch.s1 { left: 39px; top: 203px; transform: rotate(-16deg); }
-    .bear-stitch.s2 { right: 44px; top: 213px; transform: rotate(14deg); }
-    .bear-sweat {
-      position: absolute;
-      background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.92), rgba(169,226,255,0.58) 44%, rgba(87,168,255,0.26));
-      border: 1px solid rgba(92,152,224,0.45);
-      border-radius: 46% 46% 56% 56%;
-      animation: bearSweat 1.9s ease-in-out infinite;
-      opacity: 0.95;
-    }
-    .bear-sweat.big { width: 19px; height: 24px; left: 142px; top: 30px; }
-    .bear-sweat.mid { width: 14px; height: 18px; left: 120px; top: 54px; animation-delay: .2s; }
-    .bear-sweat.left { width: 13px; height: 16px; left: 34px; top: 74px; animation-delay: .45s; }
-    .bear-sweat.cheek { width: 12px; height: 15px; left: 150px; top: 95px; animation-delay: .62s; }
-    @keyframes bearSweat {
-      0%, 100% { transform: translateY(0) rotate(14deg); }
-      50% { transform: translateY(6px) rotate(14deg); }
+    .bear-image-widget.dragging { cursor: grabbing; }
+    .bear-image-widget img {
+      width: 100%;
+      height: auto;
+      display: block;
+      filter: drop-shadow(0 18px 24px rgba(0,0,0,0.22));
+      pointer-events: none;
     }
     .app-version-badge {
       position: fixed;
@@ -781,16 +591,52 @@
       bottom: 8px;
       z-index: 4000;
       font-size: 10px;
-      color: #888;
-      background: rgba(255,255,255,0.85);
-      border: 1px solid #ddd;
+      color: rgba(80,80,80,0.45);
+      background: rgba(255,255,255,0.22);
+      border: 1px solid rgba(160,160,160,0.28);
       border-radius: 999px;
       padding: 2px 8px;
       pointer-events: none;
     }
 
+
+    .trash-fab {
+      position: fixed;
+      left: 14px;
+      bottom: 82px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.9);
+      color: var(--muted);
+      cursor: pointer;
+      z-index: 3205;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+    }
+    .trash-fab:hover { color: var(--accent); border-color: #f0b3ad; }
+    .trash-panel {
+      position: fixed;
+      left: 14px;
+      bottom: 128px;
+      width: min(360px, calc(100vw - 28px));
+      max-height: 52vh;
+      overflow: auto;
+      background: rgba(255,255,255,0.96);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0.7rem 0.8rem;
+      z-index: 3204;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.14);
+      display: none;
+    }
+    .trash-panel.show { display: block; }
     /* ─── Planner View ─── */
-    .planner-container { max-width: 700px; }
+    .planner-container { max-width: 700px; width: 100%; }
     .planner-header {
       display: flex; align-items: center; justify-content: space-between;
       margin-bottom: 2rem;
@@ -819,8 +665,8 @@
     .planner-today-btn:hover { border-color: var(--ink); color: var(--ink); }
 
     .planner-cal-grid {
-      display: grid; grid-template-columns: repeat(7, 1fr);
-      gap: 2px; margin-bottom: 2rem;
+      display: grid; grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 2px; margin-bottom: 1rem; width: 100%;
     }
     .planner-day-label {
       text-align: center; font-size: 0.72rem; color: var(--muted);
@@ -832,7 +678,8 @@
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       cursor: pointer; transition: all 0.15s;
-      position: relative; min-height: 48px;
+      position: relative; min-height: 0;
+      padding: 0.35rem 0;
       background: #fff;
     }
     .planner-day:hover { border-color: var(--accent); background: var(--hover-bg); }
@@ -863,6 +710,16 @@
       font-family: 'Noto Serif SC', serif;
       font-size: 1.1rem; font-weight: 600;
     }
+
+    .planner-tabs { display: flex; gap: 0.45rem; margin-bottom: 0.9rem; }
+    .planner-tab-btn {
+      border: 1px solid var(--line); background: #fff; color: var(--muted);
+      border-radius: 4px; padding: 0.3rem 0.7rem; cursor: pointer; font-size: 0.78rem;
+    }
+    .planner-tab-btn.active { border-color: var(--accent); color: var(--accent); background: #fff7f6; }
+    .planner-tab-content { display: none; }
+    .planner-tab-content.active { display: block; }
+
     .planner-add-btn {
       background: var(--ink); color: var(--paper); border: none;
       padding: 0.4rem 1rem; font-family: 'Noto Sans SC', sans-serif;
@@ -965,13 +822,91 @@
 
     /* ─── Homepage Two-Column Layout ─── */
     .home-layout { display: flex; gap: 2.5rem; }
-    .photo-wall-sidebar { width: 300px; flex-shrink: 0; }
-    .home-main-content { flex: 1; min-width: 0; }
-    #list-view { max-width: 1200px; }
+    .photo-wall-sidebar { width: 420px; flex-shrink: 0; margin-left: 8px; }
+    .home-main-content { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    #list-view { max-width: 1320px; }
     @media (max-width: 960px) {
       .home-layout { flex-direction: column; }
-      .photo-wall-sidebar { width: 100%; }
+      .photo-wall-sidebar { width: 100%; margin-left: 0; }
+      .home-top-grid { grid-template-columns: 1fr; }
+      .home-posts-block { margin-top: 0; max-width: 100%; }
+      .home-planner-section { transform: none; margin-left: 0; }
+      nav { gap: 1rem; flex-wrap: wrap; justify-content: flex-end; }
+      .backup-grid { grid-template-columns: 1fr; }
+      .site-title { transform: translateX(-4px); }
     }
+    @media (max-width: 640px) {
+      .header-inner { flex-direction: column; align-items: flex-start; gap: 0.6rem; }
+      nav { justify-content: flex-start; }
+      main { padding: 2rem 1rem; }
+      .home-planner-section { padding: 0.8rem; transform: none; }
+    }
+
+
+    .home-planner-section .planner-container { max-width: 100%; }
+
+    .home-top-grid {
+      display: grid;
+      grid-template-columns: minmax(420px, 1fr) minmax(360px, 430px);
+      gap: 1.2rem;
+      align-items: start;
+      margin-bottom: 0.2rem;
+    }
+    .home-planner-section {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      margin-top: 0;
+      margin-left: auto;
+      transform: translateX(34px);
+      background: #fff;
+      border: 2px solid #e9d7c2;
+      border-radius: 10px;
+      padding: 1rem;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.05);
+    }
+    .home-posts-block {
+      grid-column: 1;
+      grid-row: 2;
+      margin-top: -8px;
+      max-width: 640px;
+    }
+    .post-pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.6rem;
+      margin-top: 1rem;
+    }
+    .post-page-btn {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--muted);
+      border-radius: 4px;
+      padding: 0.25rem 0.7rem;
+      cursor: pointer;
+      font-size: 0.82rem;
+    }
+    .post-page-btn:disabled { opacity: .45; cursor: default; }
+    .post-page-info { font-size: 0.8rem; color: var(--muted); }
+
+    .backup-wrap { max-width: 980px; }
+    .backup-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+      margin-top: 1rem;
+    }
+    .backup-card {
+      background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 1rem;
+    }
+    .backup-card h3 { font-family: 'Noto Serif SC', serif; margin-bottom: 0.6rem; }
+    .backup-post-list { max-height: 340px; overflow: auto; border: 1px solid var(--line); border-radius: 6px; padding: 0.5rem; }
+    .backup-post-item { display: flex; gap: 0.6rem; align-items: flex-start; padding: 0.45rem; border-bottom: 1px dashed var(--line); }
+    .backup-post-item:last-child { border-bottom: none; }
+    .backup-actions { margin-top: 0.7rem; display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .backup-btn { border: 1px solid var(--line); background: #fff; padding: 0.45rem 0.9rem; border-radius: 4px; cursor: pointer; }
+    .backup-btn.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+    .backup-note { color: var(--muted); font-size: 0.82rem; line-height: 1.6; margin-top: 0.5rem; }
 
     /* ─── Photo Wall ─── */
     .pw-header {
@@ -990,7 +925,7 @@
     .pw-container {
       display: flex; flex-wrap: wrap; gap: 6px;
       justify-content: center; padding: 10px;
-      min-height: 200px; position: relative;
+      min-height: 560px; position: relative;
     }
     .polaroid {
       background: #fff; padding: 8px 8px 32px 8px;
@@ -1349,9 +1284,9 @@
         <path class="pen-stroke" d="M48 16 L52 12 L60 12 L52 20 Z" stroke="#1a1008" stroke-width="1.5" fill="none" style="animation-delay: 0.2s;"/>
       </svg>
     </div>
-    <div class="splash-title">我的<span class="accent">·</span>小角落</div>
+    <div class="splash-title">创造时间的<span class="accent">琥珀</span></div>
     <div class="splash-line"></div>
-    <div class="splash-quote">Fill your paper with the breathings of your heart.</div>
+    <div class="splash-quote" id="splash-quote"></div>
     <div class="splash-dots">
       <div class="splash-dot"></div>
       <div class="splash-dot"></div>
@@ -1365,11 +1300,11 @@
 
 <header>
   <div class="header-inner">
-    <div class="site-title">我的<span>·</span>小角落</div>
+    <div class="site-title">创造时间的<span>琥珀</span></div>
     <nav>
       <button class="active" onclick="showView('list', this)">全部文章</button>
       <button onclick="showView('write', this)">写新文章</button>
-      <button onclick="showView('planner', this)">日历记事</button>
+      <button onclick="showView('backup', this)">备份日记</button>
       <button onclick="showView('reader', this)">阅读</button>
       <button onclick="showView('about', this)">关于我</button>
     </nav>
@@ -1412,22 +1347,47 @@
         </div>
       </div>
       <div class="home-main-content">
-        <div class="hero-section">
-          <div class="hero-icon">&#9998;</div>
-          <div class="hero-quote-en">"Fill your paper with the breathings of your heart."</div>
-          <div class="hero-divider"></div>
-          <div class="hero-desc">
-            用文字记录生活的呼吸，用心感受每一个平凡的瞬间。<br>
-            欢迎来到我的小角落，这里收藏着关于生活、思考与梦想的文字。
+        <div class="home-top-grid">
+          <div class="hero-section">
+            <div class="hero-icon">&#9998;</div>
+            <div class="hero-quote-en" id="hero-quote-en"></div>
+            <div class="hero-divider"></div>
+            <div class="hero-desc">
+              用文字记录生活的呼吸，用心感受每一个平凡的瞬间。<br>
+              欢迎来到我的小角落，这里收藏着关于生活、思考与梦想的文字。
+            </div>
           </div>
-        </div>
+
+          <div class="home-planner-section">
+            <div class="planner-container">
+              <div class="planner-header">
+                <div class="planner-month-nav">
+                  <button class="planner-nav-btn" onclick="plannerPrevMonth()">&#8249;</button>
+                  <div class="planner-month-title" id="planner-month-title"></div>
+                  <button class="planner-nav-btn" onclick="plannerNextMonth()">&#8250;</button>
+                </div>
+                <button class="planner-today-btn" onclick="plannerGoToday()">今天</button>
+              </div>
+              <div class="planner-cal-grid" id="planner-cal-grid"></div>
+              <div class="planner-detail" id="planner-detail">
+                <div class="planner-detail-header">
+                  <div class="planner-detail-date" id="planner-detail-date">选择一个日期</div>
+                </div>
+                <div class="planner-tabs">
+                  <button class="planner-tab-btn active" id="planner-tab-daily" onclick="switchPlannerPage('daily')">日历 / 待办 / 今日记录</button>
+                  <button class="planner-tab-btn" id="planner-tab-posts" onclick="switchPlannerPage('posts')">当日发表文章</button>
+                </div>
+                <div id="planner-detail-content"></div>
+              </div>
+            </div>
+          </div>
+
+        <div class="home-posts-block">
         <p class="section-label">最新文章</p>
         <ul class="post-list" id="post-list">
           <div class="loading-msg">加载中...</div>
         </ul>
-        <div id="trash-bin" style="margin-top:1rem;border-top:1px dashed #ddd;padding-top:0.8rem;">
-          <p class="section-label" style="margin:0 0 0.5rem 0;">回收站（7天后自动清理）</p>
-          <div id="trash-list" style="font-size:0.85rem;color:var(--muted);">暂无已删除文章</div>
+        <div class="post-pagination" id="post-pagination"></div>
         </div>
       </div>
     </div>
@@ -1519,24 +1479,29 @@
     </div>
   </div>
 
-  <!-- 日历记事 -->
-  <div id="planner-view" class="view">
-    <div class="planner-container">
-      <div class="planner-header">
-        <div class="planner-month-nav">
-          <button class="planner-nav-btn" onclick="plannerPrevMonth()">&#8249;</button>
-          <div class="planner-month-title" id="planner-month-title"></div>
-          <button class="planner-nav-btn" onclick="plannerNextMonth()">&#8250;</button>
+
+  <!-- 备份日记 -->
+  <div id="backup-view" class="view">
+    <div class="backup-wrap">
+      <p class="section-label">备份与上传</p>
+      <div class="backup-grid">
+        <div class="backup-card">
+          <h3>备份日记</h3>
+          <div class="backup-post-list" id="backup-post-list"></div>
+          <div class="backup-actions">
+            <button class="backup-btn" onclick="toggleAllBackupPosts(true)">全选</button>
+            <button class="backup-btn" onclick="toggleAllBackupPosts(false)">清空</button>
+            <button class="backup-btn primary" onclick="backupDiaryAsWord(true)">下载已选 Word</button>
+          </div>
+          <div class="backup-note">可勾选现有文章后导出为 .doc 备份文件。</div>
         </div>
-        <button class="planner-today-btn" onclick="plannerGoToday()">今天</button>
-      </div>
-      <div class="planner-cal-grid" id="planner-cal-grid"></div>
-      <div class="planner-detail" id="planner-detail">
-        <div class="planner-detail-header">
-          <div class="planner-detail-date" id="planner-detail-date">选择一个日期</div>
-        </div>
-        <div id="planner-detail-content">
-          <p style="color: var(--muted); font-size: 0.9rem;">点击日历上的日期查看或添加待办事项</p>
+        <div class="backup-card">
+          <h3>上传日记</h3>
+          <p class="backup-note">上传通过本系统导出的备份文件（.doc/.html），会自动恢复为文章。</p>
+          <div class="backup-actions">
+            <button class="backup-btn primary" onclick="document.getElementById('backup-import-input').click()">选择备份文件并上传</button>
+          </div>
+          <div class="backup-note" id="backup-import-status">尚未上传文件。</div>
         </div>
       </div>
     </div>
@@ -1723,6 +1688,7 @@
 <input type="file" id="avatar-input" accept="image/*" style="display:none;">
 <input type="file" id="photo-input" accept="image/*" style="display:none;">
 <input type="file" id="epub-input" accept=".epub" style="display:none;">
+<input type="file" id="backup-import-input" accept=".doc,.html,.htm,.txt" style="display:none;">
 
 <!-- Calendar Tooltip -->
 <div class="calendar-tooltip" id="calendar-tooltip"></div>
@@ -1790,35 +1756,17 @@
 </div>
 
 
-<div class="polar-bear-widget" aria-hidden="true">
-  <div class="bear-plush"></div>
-  <div class="bear-ear left"></div>
-  <div class="bear-ear right"></div>
-  <div class="bear-head"></div>
-  <div class="bear-face"></div>
-  <div class="bear-face-tint"></div>
-  <div class="bear-brow left"></div>
-  <div class="bear-brow right"></div>
-  <div class="bear-eye left"></div>
-  <div class="bear-eye right"></div>
-  <div class="bear-nose"></div>
-  <div class="bear-mouth"></div>
-  <div class="bear-cheek left"></div>
-  <div class="bear-cheek right"></div>
-  <div class="bear-body"></div>
-  <div class="bear-arm left"></div>
-  <div class="bear-arm right"></div>
-  <div class="bear-leg left"><div class="bear-paw"></div></div>
-  <div class="bear-leg right"><div class="bear-paw"></div></div>
-  <div class="bear-patch blue"></div>
-  <div class="bear-patch brown"></div>
-  <div class="bear-stitch s1"></div>
-  <div class="bear-stitch s2"></div>
-  <div class="bear-sweat big"></div>
-  <div class="bear-sweat mid"></div>
-  <div class="bear-sweat left"></div>
-  <div class="bear-sweat cheek"></div>
+<div class="bear-image-widget" aria-hidden="true">
+  <img src="green_plush_bear_cutout.svg" alt="">
 </div>
+
+
+<button class="trash-fab" id="trash-fab" onclick="toggleTrashPanel()" title="回收站">&#128465;</button>
+<div class="trash-panel" id="trash-panel">
+  <p class="section-label" style="margin:0 0 0.5rem 0;">回收站（7天后自动清理）</p>
+  <div id="trash-list" style="font-size:0.85rem;color:var(--muted);">暂无已删除文章</div>
+</div>
+
 <div class="app-version-badge" id="app-version-badge">build local</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -1833,11 +1781,25 @@
   var todosData = {};
   var photosData = [];
   var booksData = [];
+  var postPage = 1;
+  var postPageSize = 5;
+  var quotePool = [
+    "I write to discover what I think.",
+    "Fill your paper with the breathings of your heart.",
+    "Journal writing is a voyage to the interior.",
+    "Write what disturbs you, what you fear, what you have not been willing to speak about.",
+    "The life of every man is a diary in which he means to write one story, and writes another.",
+    "Keep a diary, and someday it'll keep you.",
+    "Write as if no one is reading.",
+    "The discipline of writing something down is the first step toward making it happen."
+  ];
   var editingPostId = null;
   var currentPostId = null;
   var currentView = 'list';
   var dataReady = false;
   var splashReady = false;
+  var plannerPage = "daily";
+  var writeStartedAt = 0;
 
   // Photo edit state
   var editingPhotoId = null;
@@ -1874,13 +1836,110 @@
   };
 
   // Planner state
-  var plannerYear = new Date().getFullYear();
-  var plannerMonth = new Date().getMonth();
-  var plannerSelectedDate = new Date().toISOString().slice(0, 10);
+  var plannerYear = getGMT8NowParts().year;
+  var plannerMonth = getGMT8NowParts().month;
+  var plannerSelectedDate = formatDateGMT8();
+
+  function pad2(num) { return String(num).padStart(2, '0'); }
+
+  function getGMT8DateObj(input) {
+    var base = input ? new Date(input) : new Date();
+    var offsetMs = (8 * 60 + base.getTimezoneOffset()) * 60000;
+    return new Date(base.getTime() + offsetMs);
+  }
+
+  function formatDateGMT8(input) {
+    var d = getGMT8DateObj(input);
+    return d.getUTCFullYear() + '-' + pad2(d.getUTCMonth() + 1) + '-' + pad2(d.getUTCDate());
+  }
+
+  function formatTimeGMT8(input) {
+    var d = getGMT8DateObj(input);
+    return pad2(d.getUTCHours()) + ':' + pad2(d.getUTCMinutes());
+  }
+
+  function getGMT8NowParts() {
+    var d = getGMT8DateObj();
+    return {
+      year: d.getUTCFullYear(),
+      month: d.getUTCMonth(),
+      day: d.getUTCDate()
+    };
+  }
 
   (function showBuildVersion(){
     var el = document.getElementById('app-version-badge');
     if (el) el.textContent = "build " + APP_BUILD;
+  })();
+  function applyRandomQuote() {
+    var idx = Math.floor(Math.random() * quotePool.length);
+    var q = quotePool[idx] || quotePool[0];
+    var splash = document.getElementById('splash-quote');
+    var hero = document.getElementById('hero-quote-en');
+    if (splash) splash.textContent = q;
+    if (hero) hero.textContent = '"' + q + '"';
+  }
+
+
+  (function initBearDrag() {
+    var bear = document.querySelector('.bear-image-widget');
+    if (!bear) return;
+
+    var drag = {
+      active: false,
+      pointerId: null,
+      startX: 0,
+      startY: 0,
+      startLeft: 0,
+      startTop: 0
+    };
+
+    bear.addEventListener('pointerdown', function (e) {
+      drag.active = true;
+      drag.pointerId = e.pointerId;
+      drag.startX = e.clientX;
+      drag.startY = e.clientY;
+
+      var rect = bear.getBoundingClientRect();
+      bear.style.left = rect.left + 'px';
+      bear.style.top = rect.top + 'px';
+      bear.style.right = 'auto';
+      bear.style.transform = 'none';
+      drag.startLeft = rect.left;
+      drag.startTop = rect.top;
+
+      bear.classList.add('dragging');
+      bear.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    });
+
+    bear.addEventListener('pointermove', function (e) {
+      if (!drag.active || e.pointerId !== drag.pointerId) return;
+
+      var deltaX = e.clientX - drag.startX;
+      var deltaY = e.clientY - drag.startY;
+      var nextLeft = drag.startLeft + deltaX;
+      var nextTop = drag.startTop + deltaY;
+      var maxLeft = window.innerWidth - bear.offsetWidth;
+      var maxTop = window.innerHeight - bear.offsetHeight;
+      if (nextLeft < 0) nextLeft = 0;
+      if (nextTop < 0) nextTop = 0;
+      if (nextLeft > maxLeft) nextLeft = maxLeft;
+      if (nextTop > maxTop) nextTop = maxTop;
+
+      bear.style.left = nextLeft + 'px';
+      bear.style.top = nextTop + 'px';
+    });
+
+    function stopDrag(e) {
+      if (!drag.active || e.pointerId !== drag.pointerId) return;
+      drag.active = false;
+      bear.classList.remove('dragging');
+      bear.releasePointerCapture(e.pointerId);
+    }
+
+    bear.addEventListener('pointerup', stopDrag);
+    bear.addEventListener('pointercancel', stopDrag);
   })();
 
   // ─── Splash Screen Logic ───
@@ -1941,6 +2000,11 @@
       renderProfile();
       updateStats();
       renderPhotoWall();
+      renderPlannerCalendar();
+      renderPlannerDetail();
+      renderCalendar();
+      renderWritingHistory();
+      renderBackupPostList();
     } catch (e) {
       console.error('Failed to load data:', e);
       renderList();
@@ -1948,6 +2012,11 @@
       renderProfile();
       updateStats();
       renderPhotoWall();
+      renderPlannerCalendar();
+      renderPlannerDetail();
+      renderCalendar();
+      renderWritingHistory();
+      renderBackupPostList();
     }
     dataReady = true;
     checkReady();
@@ -1957,11 +2026,22 @@
   // ─── Render Post List ───
   function renderList() {
     var ul = document.getElementById('post-list');
+    var pager = document.getElementById('post-pagination');
     if (posts.length === 0) {
       ul.innerHTML = '<div class="empty-state">&#10022;<p>还没有文章，去写第一篇吧！</p></div>';
+      if (pager) pager.innerHTML = '';
       return;
     }
-    ul.innerHTML = posts.slice().reverse().map(function(p) {
+
+    var sorted = posts.slice().reverse();
+    var totalPages = Math.max(1, Math.ceil(sorted.length / postPageSize));
+    if (postPage > totalPages) postPage = totalPages;
+    if (postPage < 1) postPage = 1;
+
+    var startIdx = (postPage - 1) * postPageSize;
+    var pageItems = sorted.slice(startIdx, startIdx + postPageSize);
+
+    ul.innerHTML = pageItems.map(function(p) {
       var timeStr = p.time ? ' ' + p.time : '';
       return '<li class="post-item" onclick="openPost(' + p.id + ')">' +
         '<div class="post-date">' +
@@ -1975,7 +2055,20 @@
         '</div>' +
       '</li>';
     }).join('');
+
+    if (pager) {
+      pager.innerHTML =
+        '<button class="post-page-btn" ' + (postPage <= 1 ? 'disabled' : '') + ' onclick="changePostPage(-1)">上一页</button>' +
+        '<span class="post-page-info">第 ' + postPage + ' / ' + totalPages + ' 页</span>' +
+        '<button class="post-page-btn" ' + (postPage >= totalPages ? 'disabled' : '') + ' onclick="changePostPage(1)">下一页</button>';
+    }
+
     updateStats();
+  }
+
+  function changePostPage(delta) {
+    postPage += delta;
+    renderList();
   }
 
   function escapeHtml(text) {
@@ -1983,6 +2076,19 @@
     div.appendChild(document.createTextNode(text));
     return div.innerHTML;
   }
+
+  function toggleTrashPanel() {
+    var panel = document.getElementById('trash-panel');
+    if (!panel) return;
+    panel.classList.toggle('show');
+  }
+
+  document.addEventListener('click', function(e) {
+    var panel = document.getElementById('trash-panel');
+    var fab = document.getElementById('trash-fab');
+    if (!panel || !fab) return;
+    if (!panel.contains(e.target) && !fab.contains(e.target)) panel.classList.remove('show');
+  });
 
   function renderTrashBin() {
     var el = document.getElementById('trash-list');
@@ -2081,6 +2187,7 @@
     document.getElementById('cancel-edit-btn').style.display = 'inline-block';
 
     showView('write', document.querySelectorAll('nav button')[1]);
+    resetWriteTimer();
   }
 
   // ─── Cancel Edit ───
@@ -2093,6 +2200,7 @@
     document.getElementById('cancel-edit-btn').style.display = 'none';
 
     showView('list', document.querySelectorAll('nav button')[0]);
+    resetWriteTimer();
   }
 
   // ─── Delete Current Post ───
@@ -2126,6 +2234,19 @@
   }
 
   // ─── Publish / Update Post ───
+  function startWriteTimerIfNeeded() {
+    if (!writeStartedAt) writeStartedAt = Date.now();
+  }
+
+  function resetWriteTimer() {
+    writeStartedAt = 0;
+  }
+
+  function getCurrentWriteSeconds() {
+    if (!writeStartedAt) return 0;
+    return Math.max(1, Math.round((Date.now() - writeStartedAt) / 1000));
+  }
+
   async function publishPost() {
     var title = document.getElementById('input-title').value.trim();
     var type  = document.getElementById('input-type').value;
@@ -2143,8 +2264,8 @@
     var excerpt = plainText.slice(0, 60) + '...';
 
     var now = new Date();
-    var dateStr = now.toISOString().slice(0, 10);
-    var timeStr = now.toTimeString().slice(0, 5);
+    var dateStr = formatDateGMT8(now);
+    var timeStr = formatTimeGMT8(now);
 
     if (editingPostId) {
       var post = posts.find(function(p) { return p.id === editingPostId; });
@@ -2188,7 +2309,7 @@
           body: JSON.stringify(newPost)
         });
         posts.push(newPost);
-        await recordWritingSession(dateStr);
+        await recordWritingSession(dateStr, getCurrentWriteSeconds());
         alert('文章发布成功！');
       } catch (e) {
         alert('发布失败，请稍后再试。');
@@ -2198,6 +2319,7 @@
 
     document.getElementById('input-title').value = '';
     editor.innerHTML = '';
+    resetWriteTimer();
     showView('list', document.querySelectorAll('nav button')[0]);
   }
 
@@ -2208,19 +2330,24 @@
 
   // ─── Switch View ───
   function showView(name, btn) {
+    var targetView = document.getElementById(name + '-view');
+    if (!targetView) return;
     document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
-    document.getElementById(name + '-view').classList.add('active');
+    targetView.classList.add('active');
     document.querySelectorAll('nav button').forEach(function(b) { b.classList.remove('active'); });
     if (btn) btn.classList.add('active');
+    var panel = document.getElementById('trash-panel');
+    if (panel) panel.classList.remove('show');
     currentView = name;
-    if (name === 'list') { renderList(); renderPhotoWall(); }
-    if (name === 'about') { renderProfile(); renderCalendar(); renderWritingHistory(); }
-    if (name === 'planner') { renderPlannerCalendar(); renderPlannerDetail(); }
+    if (name === 'list') { renderList(); renderPhotoWall(); renderPlannerCalendar(); renderPlannerDetail(); renderCalendar(); renderWritingHistory(); }
+    if (name === 'about') { renderProfile(); }
+    if (name === 'backup') { renderBackupPostList(); }
     if (name === 'reader') { renderBookshelf(); }
     if (name === 'write' && !editingPostId) {
       document.getElementById('write-label').textContent = '写一篇新文章';
       document.getElementById('submit-btn').innerHTML = '发布文章 &#8594;';
       document.getElementById('cancel-edit-btn').style.display = 'none';
+      resetWriteTimer();
     }
   }
 
@@ -2363,11 +2490,26 @@
   }
 
   // ─── Writing Calendar (Last 3 Months) ───
-  async function recordWritingSession(dateStr) {
-    if (!calendarData[dateStr]) {
-      calendarData[dateStr] = 0;
+  function getDayWritingSeconds(dateStr) {
+    var entry = calendarData[dateStr];
+    if (entry == null) return 0;
+    if (typeof entry === 'number') {
+      return entry > 1000 ? Math.round(entry) : Math.round(entry * 60);
     }
-    calendarData[dateStr] += 30;
+    if (typeof entry === 'object') {
+      return Math.round(entry.seconds || 0);
+    }
+    return 0;
+  }
+
+  function setDayWritingSeconds(dateStr, seconds) {
+    calendarData[dateStr] = { seconds: Math.max(0, Math.round(seconds || 0)) };
+  }
+
+  async function recordWritingSession(dateStr, secondsSpent) {
+    var deltaSeconds = Math.max(1, Math.round(secondsSpent || 0));
+    var daySeconds = getDayWritingSeconds(dateStr);
+    setDayWritingSeconds(dateStr, daySeconds + deltaSeconds);
 
     try {
       await apiFetch('/api/calendar', {
@@ -2394,17 +2536,19 @@
     }
   }
 
-  function getColorLevel(minutes) {
-    if (!minutes || minutes === 0) return '#ebedf0';
-    if (minutes < 30) return '#fde8e6';
-    if (minutes < 60) return '#f5a9a1';
-    if (minutes < 90) return '#e05a4b';
-    return '#a02a1e';
+  function getColorLevel(totalSeconds) {
+    var minutes = (totalSeconds || 0) / 60;
+    if (!minutes || minutes === 0) return "#ebedf0";
+    if (minutes < 10) return "#fde8e6";
+    if (minutes < 25) return "#f5a9a1";
+    if (minutes < 45) return "#e05a4b";
+    return "#a02a1e";
   }
 
   function renderCalendar() {
     var container = document.getElementById('calendar-grid');
     var today = new Date();
+    var todayStr = formatDateGMT8(today);
     var cellSize = 13;
     var cellGap = 3;
     var totalSize = cellSize + cellGap;
@@ -2438,7 +2582,8 @@
       for (var day = 0; day < 7; day++) {
         var cellDate = new Date(startDate);
         cellDate.setDate(cellDate.getDate() + w * 7 + day);
-        if (cellDate > today) continue;
+        var cellDateStr = formatDateGMT8(cellDate);
+        if (cellDateStr > todayStr) continue;
 
         var threeMonthsAgo = new Date(today);
         threeMonthsAgo.setDate(threeMonthsAgo.getDate() - (daysToShow - 1));
@@ -2450,9 +2595,9 @@
           continue;
         }
 
-        var dateStr = cellDate.toISOString().slice(0, 10);
-        var minutes = calendarData[dateStr] || 0;
-        var color = getColorLevel(minutes);
+        var dateStr = cellDateStr;
+        var seconds = getDayWritingSeconds(dateStr);
+        var color = getColorLevel(seconds);
 
         var x = 30 + w * totalSize;
         var y = 25 + day * totalSize;
@@ -2463,7 +2608,7 @@
           lastMonth = month;
         }
 
-        svg += '<rect class="calendar-cell" data-date="' + dateStr + '" data-minutes="' + minutes + '" x="' + x + '" y="' + y + '" width="' + cellSize + '" height="' + cellSize + '" fill="' + color + '" rx="2" ry="2" onmouseenter="showCalTooltip(event)" onmouseleave="hideCalTooltip()"/>';
+        svg += '<rect class="calendar-cell" data-date="' + dateStr + '" data-seconds="' + seconds + '" x="' + x + '" y="' + y + '" width="' + cellSize + '" height="' + cellSize + '" fill="' + color + '" rx="2" ry="2" onmouseenter="showCalTooltip(event)" onmouseleave="hideCalTooltip()"/>';
       }
     }
 
@@ -2474,63 +2619,53 @@
   // ─── Writing History (All Time) ───
   function renderWritingHistory() {
     var statsEl = document.getElementById('history-stats');
-    var totalMinutes = 0;
+    var totalSeconds = 0;
     var totalDays = 0;
-    var maxMinutes = 0;
 
     for (var dateStr in calendarData) {
-      if (calendarData.hasOwnProperty(dateStr) && calendarData[dateStr] > 0) {
-        totalMinutes += calendarData[dateStr];
-        totalDays++;
-        if (calendarData[dateStr] > maxMinutes) {
-          maxMinutes = calendarData[dateStr];
+      if (calendarData.hasOwnProperty(dateStr)) {
+        var daySeconds = getDayWritingSeconds(dateStr);
+        if (daySeconds > 0) {
+          totalSeconds += daySeconds;
+          totalDays++;
         }
       }
     }
 
-    var totalHours = Math.floor(totalMinutes / 60);
-    var remainMins = totalMinutes % 60;
-    var avgMinutes = totalDays > 0 ? Math.round(totalMinutes / totalDays) : 0;
+    var avgSeconds = totalDays > 0 ? Math.round(totalSeconds / totalDays) : 0;
 
-    var timeStr = '';
-    if (totalHours > 0) {
-      timeStr = totalHours + ' 小时 ' + remainMins + ' 分钟';
-    } else {
-      timeStr = totalMinutes + ' 分钟';
+    function formatMinSec(sec) {
+      var min = Math.floor(sec / 60);
+      var remain = sec % 60;
+      return min + ' 分钟 ' + remain + ' 秒';
     }
 
     statsEl.innerHTML =
-      '<div class="history-stat"><div class="history-stat-num">' + timeStr + '</div><div class="history-stat-label">总写作时间</div></div>' +
+      '<div class="history-stat"><div class="history-stat-num">' + formatMinSec(totalSeconds) + '</div><div class="history-stat-label">总写作时间</div></div>' +
       '<div class="history-stat"><div class="history-stat-num">' + totalDays + ' 天</div><div class="history-stat-label">写作天数</div></div>' +
-      '<div class="history-stat"><div class="history-stat-num">' + avgMinutes + ' 分钟</div><div class="history-stat-label">平均每次</div></div>' +
+      '<div class="history-stat"><div class="history-stat-num">' + formatMinSec(avgSeconds) + '</div><div class="history-stat-label">平均每次</div></div>' +
       '<div class="history-stat"><div class="history-stat-num">' + posts.length + ' 篇</div><div class="history-stat-label">累计文章</div></div>';
   }
 
   function showCalTooltip(e) {
     var rect = e.target;
     var date = rect.getAttribute('data-date');
-    var minutes = parseInt(rect.getAttribute('data-minutes'));
+    var seconds = parseInt(rect.getAttribute('data-seconds')) || 0;
     var tooltip = document.getElementById('calendar-tooltip');
 
     var text;
-    if (minutes > 0) {
-      var hours = Math.floor(minutes / 60);
-      var mins = minutes % 60;
-      if (hours > 0) {
-        text = date + ': 写作 ' + hours + '小时' + (mins > 0 ? mins + '分钟' : '');
-      } else {
-        text = date + ': 写作 ' + mins + '分钟';
-      }
+    if (seconds > 0) {
+      var min = Math.floor(seconds / 60);
+      var sec = seconds % 60;
+      text = date + '：写作 ' + min + ' 分 ' + sec + ' 秒';
     } else {
       text = date + ': 无写作记录';
     }
 
     tooltip.textContent = text;
     tooltip.classList.add('visible');
-
-    var rectBounds = rect.getBoundingClientRect();
-    tooltip.style.left = (rectBounds.left + rectBounds.width / 2 - tooltip.offsetWidth / 2) + 'px';
-    tooltip.style.top = (rectBounds.top - 36) + 'px';
+    tooltip.style.left = (e.clientX + 12) + 'px';
+    tooltip.style.top = (e.clientY - 32) + 'px';
   }
 
   function hideCalTooltip() {
@@ -2546,6 +2681,37 @@
     var m = url.match(/\/video\/(BV[0-9A-Za-z]+)/i) || url.match(/[?&]bvid=(BV[0-9A-Za-z]+)/i);
     if (!m) return null;
     return 'https://player.bilibili.com/player.html?bvid=' + m[1] + '&page=1&high_quality=1&autoplay=1&loop=1';
+  }
+
+  var externalVolume = 0.7;
+
+  function normalizeExternalMediaUrl(url) {
+    var bilibili = parseBilibiliEmbedUrl(url);
+    if (bilibili) return bilibili;
+
+    try {
+      var u = new URL(url);
+      var host = u.hostname.replace(/^www\./, '');
+
+      if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'youtu.be') {
+        var vid = '';
+        if (host === 'youtu.be') {
+          vid = u.pathname.replace(/^\//, '');
+        } else {
+          vid = u.searchParams.get('v') || '';
+        }
+        if (vid) {
+          return 'https://www.youtube.com/embed/' + vid + '?autoplay=1&loop=1&playlist=' + vid + '&enablejsapi=1';
+        }
+      }
+
+      u.searchParams.set('autoplay', '1');
+      u.searchParams.set('loop', '1');
+      return u.toString();
+    } catch (e) {
+      var sep = url.indexOf('?') === -1 ? '?' : '&';
+      return url + sep + 'autoplay=1&loop=1';
+    }
   }
 
   function initAudioPlayer() {
@@ -2580,12 +2746,13 @@
       externalFrame.src = '';
       document.getElementById('audio-track-name').textContent = '&#9835; ' + (url.split('/').pop() || '音频');
     } else {
-      var embed = parseBilibiliEmbedUrl(url) || url;
+      var embed = normalizeExternalMediaUrl(url);
       audio.pause();
       audio.src = '';
       audio.style.display = 'none';
       externalWrap.style.display = document.getElementById('audio-player-bar').classList.contains('hidden') ? 'none' : 'block';
       externalFrame.src = embed;
+      setTimeout(function(){ applyExternalVolume(externalVolume, true); }, 500);
       showAudioPlayer();
       document.getElementById('audio-track-name').textContent = '外部音频源已加载';
       document.getElementById('audio-time').textContent = '外部链接模式';
@@ -2648,8 +2815,38 @@
     audio.currentTime = pct * audio.duration;
   }
 
+  function applyExternalVolume(vol, forceReload) {
+    var frame = document.getElementById('audio-external-frame');
+    if (!frame || !frame.src) return;
+
+    try {
+      var u = new URL(frame.src);
+      var host = u.hostname.replace(/^www\./, '');
+
+      if (host.indexOf('youtube.com') !== -1 || host.indexOf('youtu.be') !== -1) {
+        frame.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'setVolume', args: [Math.round(vol * 100)] }), '*');
+      }
+
+      frame.contentWindow.postMessage({ type: 'setVolume', value: vol }, '*');
+      frame.contentWindow.postMessage({ cmd: 'setVolume', value: Math.round(vol * 100) }, '*');
+
+      if (forceReload && host.indexOf('bilibili.com') !== -1) {
+        u.searchParams.set('volume', String(Math.round(vol * 100)));
+        frame.src = u.toString();
+      }
+    } catch (e) {}
+  }
+
   function setAudioVolume(val) {
-    document.getElementById('audio-element').volume = parseFloat(val);
+    var volume = parseFloat(val);
+    externalVolume = volume;
+    document.getElementById('audio-element').volume = volume;
+
+    var cfg = null;
+    try { cfg = JSON.parse(localStorage.getItem('audioPlayerConfig') || 'null'); } catch(e) {}
+    if (cfg && cfg.mode === 'external') {
+      applyExternalVolume(volume, true);
+    }
   }
 
   function toggleAudioUrlPanel() {
@@ -2695,6 +2892,140 @@
     document.body.classList.add('has-audio-player');
   }
 
+  var backupSelection = {};
+
+  function renderBackupPostList() {
+    var el = document.getElementById('backup-post-list');
+    if (!el) return;
+    if (!posts || posts.length === 0) {
+      el.innerHTML = '<div class="backup-note">暂无文章可备份。</div>';
+      return;
+    }
+
+    var sorted = posts.slice().sort(function(a, b) {
+      return ((b.date || '') + (b.time || '')).localeCompare((a.date || '') + (a.time || ''));
+    });
+
+    el.innerHTML = sorted.map(function(post) {
+      var checked = backupSelection[post.id] ? 'checked' : '';
+      return '<label class="backup-post-item">' +
+        '<input type="checkbox" ' + checked + ' onchange="toggleBackupPost(' + post.id + ', this.checked)">' +
+        '<div><div style="font-weight:600;">' + escapeHtml(post.title || '无标题') + '</div>' +
+        '<div style="font-size:0.78rem;color:var(--muted);">' + (post.date || '') + ' ' + (post.time || '') + '</div></div>' +
+      '</label>';
+    }).join('');
+  }
+
+  function toggleBackupPost(id, checked) {
+    backupSelection[id] = !!checked;
+  }
+
+  function toggleAllBackupPosts(checked) {
+    posts.forEach(function(p) { backupSelection[p.id] = checked; });
+    renderBackupPostList();
+  }
+
+  function backupDiaryAsWord(onlySelected) {
+    if (!posts || posts.length === 0) {
+      alert('当前没有可备份的日记内容。');
+      return;
+    }
+
+    var selected = onlySelected ? posts.filter(function(p){ return !!backupSelection[p.id]; }) : posts.slice();
+    if (selected.length === 0) {
+      alert('请先勾选要备份的文章。');
+      return;
+    }
+
+    var sortedPosts = selected.slice().sort(function(a, b) {
+      var ad = (a.date || '') + ' ' + (a.time || '00:00');
+      var bd = (b.date || '') + ' ' + (b.time || '00:00');
+      return ad.localeCompare(bd);
+    });
+
+    var payload = sortedPosts.map(function(post) {
+      return { title: post.title || '', type: post.type || 'diary', date: post.date || '', time: post.time || '', body: post.body || '', excerpt: post.excerpt || '' };
+    });
+
+    var html = '<html><head><meta charset="utf-8"><title>日记备份</title>' +
+      '<style>body{font-family:"Noto Serif SC","Microsoft YaHei",serif;line-height:1.8;padding:28px;color:#222;}h1{font-size:28px;}h2{font-size:20px;margin:24px 0 8px;}hr{border:none;border-top:1px solid #ddd;margin:22px 0;} .meta{color:#666;font-size:13px;margin-bottom:8px;}</style>' +
+      '</head><body>';
+    html += '<h1>崭新的日记本 · 备份</h1>';
+    html += '<p>导出时间（GMT+8）：' + formatDateGMT8() + ' ' + formatTimeGMT8() + '</p><hr/>';
+
+    sortedPosts.forEach(function(post, idx) {
+      html += '<h2>' + (idx + 1) + '. ' + (post.title || '无标题') + '</h2>';
+      html += '<div class="meta">日期：' + (post.date || '') + ' ' + (post.time || '') + ' ｜ 类型：' + (post.type || '') + '</div>';
+      html += '<div>' + (post.body || '') + '</div>';
+      html += '<hr/>';
+    });
+
+    var safeJson = JSON.stringify(payload).replace(/<\//g, '<\\/');
+    html += '<script id="diary-backup-json" type="application/json">' + safeJson + '<\/script>'; 
+    html += '</body></html>';
+
+    var blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'diary-backup-' + formatDateGMT8() + '.doc';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function() {
+      URL.revokeObjectURL(a.href);
+      a.remove();
+    }, 0);
+  }
+
+  async function importDiaryBackupFile(file) {
+    var statusEl = document.getElementById('backup-import-status');
+    if (!file) return;
+    statusEl.textContent = '正在读取文件：' + file.name;
+
+    var text = await file.text();
+    var m = text.match(/<script id="diary-backup-json" type="application\/json">([\s\S]*?)<\/script>/i);
+    if (!m) {
+      statusEl.textContent = '上传失败：不是受支持的备份文件。';
+      alert('未找到备份数据，请上传通过“备份日记”导出的文件。');
+      return;
+    }
+
+    var items = [];
+    try { items = JSON.parse(m[1] || '[]'); } catch (e) {}
+    if (!Array.isArray(items) || items.length === 0) {
+      statusEl.textContent = '上传失败：备份文件中没有可恢复内容。';
+      return;
+    }
+
+    var imported = 0;
+    for (var i = 0; i < items.length; i++) {
+      var it = items[i] || {};
+      var post = {
+        id: Date.now() + i,
+        title: it.title || ('导入日记 ' + (i + 1)),
+        type: it.type === 'blog' ? 'blog' : 'diary',
+        date: it.date || formatDateGMT8(),
+        time: it.time || formatTimeGMT8(),
+        excerpt: it.excerpt || (function(){ var d=document.createElement('div'); d.innerHTML = it.body || ''; var t=d.textContent || ''; return t.slice(0,60) + '...'; })(),
+        body: it.body || '<p></p>'
+      };
+      try {
+        await apiFetch('/api/posts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(post)
+        });
+        posts.push(post);
+        imported++;
+      } catch (e) {}
+    }
+
+    renderList();
+    renderBackupPostList();
+    updateStats();
+    statusEl.textContent = '上传完成，成功恢复 ' + imported + ' 篇文章。';
+    alert('上传完成，成功恢复 ' + imported + ' 篇文章。');
+  }
+
   // ─── Planner / Calendar Module ───
   function plannerPrevMonth() {
     plannerMonth--;
@@ -2710,9 +3041,10 @@
 
   function plannerGoToday() {
     var now = new Date();
-    plannerYear = now.getFullYear();
-    plannerMonth = now.getMonth();
-    plannerSelectedDate = now.toISOString().slice(0, 10);
+    var nowParts = getGMT8NowParts();
+    plannerYear = nowParts.year;
+    plannerMonth = nowParts.month;
+    plannerSelectedDate = formatDateGMT8(now);
     renderPlannerCalendar();
     renderPlannerDetail();
   }
@@ -2734,7 +3066,7 @@
     var daysInMonth = new Date(plannerYear, plannerMonth + 1, 0).getDate();
     var prevMonthDays = new Date(plannerYear, plannerMonth, 0).getDate();
 
-    var todayStr = new Date().toISOString().slice(0, 10);
+    var todayStr = formatDateGMT8();
 
     // Previous month fill
     for (var d = firstDay - 1; d >= 0; d--) {
@@ -2790,6 +3122,32 @@
     renderPlannerDetail();
   }
 
+  function switchPlannerPage(page) {
+    plannerPage = page === 'posts' ? 'posts' : 'daily';
+    var btnDaily = document.getElementById('planner-tab-daily');
+    var btnPosts = document.getElementById('planner-tab-posts');
+    if (btnDaily) btnDaily.classList.toggle('active', plannerPage === 'daily');
+    if (btnPosts) btnPosts.classList.toggle('active', plannerPage === 'posts');
+    renderPlannerDetail();
+  }
+
+  function getDayPostsHtml(dateStr) {
+    var datePosts = posts.filter(function(p) { return p.date === dateStr; });
+    if (datePosts.length === 0) {
+      return '<div class="planner-diary-empty">这一天还没有发表文章。</div>';
+    }
+    var html = '<div class="planner-diary-section" style="margin-top:0;padding-top:0;border-top:none;">';
+    for (var i = 0; i < datePosts.length; i++) {
+      var p = datePosts[i];
+      html += '<div class="planner-diary-item" style="cursor:pointer;" onclick="openPost(' + p.id + ')">' +
+        '<div class="planner-diary-item-title">' + escapeHtml(p.title) + '</div>' +
+        '<div class="planner-diary-item-excerpt">' + escapeHtml(p.excerpt) + '</div>' +
+        '</div>';
+    }
+    html += '</div>';
+    return html;
+  }
+
   function renderPlannerDetail() {
     var dateEl = document.getElementById('planner-detail-date');
     var contentEl = document.getElementById('planner-detail-content');
@@ -2801,54 +3159,44 @@
     }
 
     dateEl.textContent = plannerSelectedDate;
-
     var dayData = todosData[plannerSelectedDate] || { todos: [], note: '' };
     var todos = dayData.todos || [];
     var note = dayData.note || '';
 
     var html = '';
 
-    // Todo input
+    if (plannerPage === 'posts') {
+      html = getDayPostsHtml(plannerSelectedDate);
+      contentEl.innerHTML = html;
+      return;
+    }
+
     html += '<div class="todo-input-row">' +
-      '<input type="text" id="new-todo-input" placeholder="添加新的待办事项..." onkeydown="if(event.key===\'Enter\')addTodo()">' +
+      '<input type="text" id="new-todo-input" placeholder="添加新的待办事项..." onkeypress="if(event.key===\'Enter\') addTodo()">' +
       '<button onclick="addTodo()">添加</button>' +
       '</div>';
 
-    // Todo list
-    if (todos.length > 0) {
+    if (todos.length === 0) {
+      html += '<div class="planner-diary-empty">今日暂无待办事项</div>';
+    } else {
       html += '<ul class="todo-list-items">';
       for (var i = 0; i < todos.length; i++) {
-        var t = todos[i];
+        var todo = todos[i];
+        var todoKey = typeof todo.id === 'undefined' ? i : todo.id;
         html += '<li class="todo-item">' +
-          '<div class="todo-checkbox' + (t.done ? ' checked' : '') + '" onclick="toggleTodo(' + t.id + ')"></div>' +
-          '<span class="todo-text' + (t.done ? ' done' : '') + '">' + escapeHtml(t.text) + '</span>' +
-          '<button class="todo-delete" onclick="deleteTodo(' + t.id + ')">&#10005;</button>' +
+          '<div class="todo-checkbox ' + (todo.done ? 'checked' : '') + '" onclick="toggleTodo(' + todoKey + ')"></div>' +
+          '<div class="todo-text ' + (todo.done ? 'done' : '') + '">' + escapeHtml(todo.text) + '</div>' +
+          '<button class="todo-delete" onclick="deleteTodo(' + todoKey + ')">&#10005;</button>' +
           '</li>';
       }
       html += '</ul>';
     }
 
-    // Note / diary
     html += '<div class="planner-note-section">' +
       '<div class="planner-note-label">今日记录 / 日记</div>' +
       '<textarea class="planner-note-area" id="planner-note" placeholder="写下今天的想法或记录...">' + escapeHtml(note) + '</textarea>' +
       '<button class="planner-note-save" onclick="savePlannerNote()">保存记录</button>' +
       '</div>';
-
-    // Show diary entries for this date
-    var datePosts = posts.filter(function(p) { return p.date === plannerSelectedDate; });
-    if (datePosts.length > 0) {
-      html += '<div class="planner-diary-section">' +
-        '<div class="planner-diary-title">当日发表的文章</div>';
-      for (var i = 0; i < datePosts.length; i++) {
-        var p = datePosts[i];
-        html += '<div class="planner-diary-item" style="cursor:pointer;" onclick="openPost(' + p.id + ')">' +
-          '<div class="planner-diary-item-title">' + escapeHtml(p.title) + '</div>' +
-          '<div class="planner-diary-item-excerpt">' + escapeHtml(p.excerpt) + '</div>' +
-          '</div>';
-      }
-      html += '</div>';
-    }
 
     contentEl.innerHTML = html;
   }
@@ -2886,7 +3234,9 @@
     var dayData = todosData[plannerSelectedDate];
     if (!dayData) return;
 
-    var todo = dayData.todos.find(function(t) { return t.id === todoId; });
+    var todo = dayData.todos.find(function(t, index) {
+      return t.id === todoId || (typeof t.id === 'undefined' && index === todoId);
+    });
     if (!todo) return;
     todo.done = !todo.done;
 
@@ -2907,7 +3257,9 @@
     var dayData = todosData[plannerSelectedDate];
     if (!dayData) return;
 
-    dayData.todos = dayData.todos.filter(function(t) { return t.id !== todoId; });
+    dayData.todos = dayData.todos.filter(function(t, index) {
+      return !(t.id === todoId || (typeof t.id === 'undefined' && index === todoId));
+    });
 
     try {
       await apiFetch('/api/todos', {
@@ -2979,6 +3331,11 @@
       };
       photosData.push(photo);
       renderPhotoWall();
+      renderPlannerCalendar();
+      renderPlannerDetail();
+      renderCalendar();
+      renderWritingHistory();
+      renderBackupPostList();
       savePhotos();
       // Open edit modal for the new photo
       openPhotoEdit(photo.id);
@@ -3385,7 +3742,7 @@
           cover: coverData,
           progress: 0,
           currentCfi: '',
-          lastRead: new Date().toISOString().slice(0, 10)
+          lastRead: formatDateGMT8()
         };
 
         // Save file to IndexedDB
@@ -3965,6 +4322,28 @@
   }
 
   // ─── Initialize ───
+  var backupInputEl = document.getElementById('backup-import-input');
+  if (backupInputEl) {
+    backupInputEl.addEventListener('change', function(e) {
+      var file = e.target.files && e.target.files[0];
+      importDiaryBackupFile(file).catch(function(err){
+        console.error('Import backup failed:', err);
+        var statusEl = document.getElementById('backup-import-status');
+        if (statusEl) statusEl.textContent = '上传失败：' + (err && err.message ? err.message : '未知错误');
+        alert('上传失败，请检查文件格式。');
+      });
+      e.target.value = '';
+    });
+  }
+
+  applyRandomQuote();
+  var editorEl = document.getElementById('editor-area');
+  if (editorEl) {
+    editorEl.addEventListener('input', startWriteTimerIfNeeded);
+    editorEl.addEventListener('keydown', startWriteTimerIfNeeded);
+    editorEl.addEventListener('paste', startWriteTimerIfNeeded);
+  }
+
   loadAllData();
 
   // Init photo wall background settings on page load
