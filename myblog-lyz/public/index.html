@@ -4889,11 +4889,11 @@
       src.stop(now + 0.25);
     }
 
-    function burst(cx, cy, count, baseColor) {
+    function burst(cx, cy, count, baseColor, spreadBoost) {
       playBurst();
       for (var i = 0; i < count; i++) {
         var a = (Math.PI * 2 * i) / count + Math.random() * 0.12;
-        var speed = 2.8 + Math.random() * 4.8;
+        var speed = 2.8 + Math.random() * (4.8 + (spreadBoost || 0));
         particles.push({
           x: cx,
           y: cy,
@@ -4907,24 +4907,33 @@
       }
     }
 
-    function launchRocket(startX, delayMs) {
+    function launchRocket(startX, delayMs, wave) {
       setTimeout(function() {
         playWhoosh();
+        var waveFactor = 1 + wave * 0.28;
         rockets.push({
           x: startX,
           y: canvas.height + 10,
-          vx: (Math.random() - 0.5) * 1.2,
-          vy: -(6.8 + Math.random() * 1.4),
-          targetY: canvas.height * (0.2 + Math.random() * 0.22),
+          vx: (Math.random() - 0.5) * (1.2 + wave * 0.2),
+          vy: -(6.8 + Math.random() * 1.4) * waveFactor,
+          targetY: canvas.height * (0.18 + Math.random() * 0.2),
           color: colors[(Math.random() * colors.length) | 0],
-          trail: []
+          trail: [],
+          wave: wave,
         });
       }, delayMs);
     }
 
-    launchRocket(canvas.width * 0.2, 0);
-    launchRocket(canvas.width * 0.5, 180);
-    launchRocket(canvas.width * 0.8, 360);
+    function launchWave(wave, baseDelay) {
+      launchRocket(canvas.width * 0.2, baseDelay + 0, wave);
+      launchRocket(canvas.width * 0.5, baseDelay + 180, wave);
+      launchRocket(canvas.width * 0.8, baseDelay + 360, wave);
+    }
+
+    // 三轮烟花：一轮比一轮更盛大
+    launchWave(0, 0);
+    launchWave(1, 1300);
+    launchWave(2, 2700);
 
     var start = performance.now();
     function tick() {
@@ -4955,7 +4964,16 @@
         ctx.fill();
 
         if (rk.y <= rk.targetY || rk.vy > -0.6) {
-          burst(rk.x, rk.y, 120, rk.color);
+          var count = 120 + rk.wave * 55;
+          var spread = rk.wave * 1.7;
+          burst(rk.x, rk.y, count, rk.color, spread);
+          // 额外副爆：后两轮更盛大
+          if (rk.wave >= 1) {
+            burst(rk.x + (Math.random() - 0.5) * 40, rk.y + (Math.random() - 0.5) * 24, 60 + rk.wave * 25, colors[(Math.random() * colors.length) | 0], 1 + rk.wave);
+          }
+          if (rk.wave >= 2) {
+            burst(rk.x + (Math.random() - 0.5) * 70, rk.y + (Math.random() - 0.5) * 36, 80, colors[(Math.random() * colors.length) | 0], 2.4);
+          }
           rockets.splice(r, 1);
         }
       }
@@ -4980,7 +4998,7 @@
       }
       ctx.globalAlpha = 1;
 
-      if (particles.length > 0 || rockets.length > 0 || performance.now() - start < 2300) {
+      if (particles.length > 0 || rockets.length > 0 || performance.now() - start < 5600) {
         requestAnimationFrame(tick);
       } else {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
