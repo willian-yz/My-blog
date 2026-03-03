@@ -793,7 +793,8 @@
       .home-layout { flex-direction: column; }
       .photo-wall-sidebar { width: 100%; }
       .home-top-grid { grid-template-columns: 1fr; }
-      .home-posts-block { margin-top: 0; }
+      .home-posts-block { margin-top: 0; max-width: 100%; }
+      .home-planner-section { transform: none; margin-left: 0; }
       nav { gap: 1rem; flex-wrap: wrap; justify-content: flex-end; }
       .backup-grid { grid-template-columns: 1fr; }
       .site-title { transform: translateX(-4px); }
@@ -810,15 +811,17 @@
 
     .home-top-grid {
       display: grid;
-      grid-template-columns: minmax(260px, 1fr) minmax(360px, 440px);
+      grid-template-columns: minmax(420px, 1fr) minmax(360px, 430px);
       gap: 1.2rem;
       align-items: start;
       margin-bottom: 0.2rem;
     }
     .home-planner-section {
+      grid-column: 2;
+      grid-row: 1 / span 2;
       margin-top: 0;
       margin-left: auto;
-      transform: translateX(24px);
+      transform: translateX(34px);
       background: #fff;
       border: 2px solid #e9d7c2;
       border-radius: 10px;
@@ -826,7 +829,10 @@
       box-shadow: 0 8px 22px rgba(0,0,0,0.05);
     }
     .home-posts-block {
-      margin-top: -48px;
+      grid-column: 1;
+      grid-row: 2;
+      margin-top: -8px;
+      max-width: 640px;
     }
     .post-pagination {
       display: flex;
@@ -1339,7 +1345,6 @@
               </div>
             </div>
           </div>
-        </div>
 
         <div class="home-posts-block">
         <p class="section-label">最新文章</p>
@@ -1352,6 +1357,7 @@
           <div id="trash-list" style="font-size:0.85rem;color:var(--muted);">暂无已删除文章</div>
         </div>
         </div>
+      </div>
       </div>
     </div>
   </div>
