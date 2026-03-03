@@ -1302,11 +1302,11 @@
   <div class="header-inner">
     <div class="site-title">创造时间的<span>琥珀</span></div>
     <nav>
-      <button class="active" onclick="showView('list', this)">全部文章</button>
-      <button onclick="showView('write', this)">写新文章</button>
-      <button onclick="showView('backup', this)">备份日记</button>
-      <button onclick="showView('reader', this)">阅读</button>
-      <button onclick="showView('about', this)">关于我</button>
+      <button class="active" data-view="list" onclick="showView('list', this)">全部文章</button>
+      <button data-view="write" onclick="showView('write', this)">写新文章</button>
+      <button data-view="backup" onclick="showView('backup', this)">备份日记</button>
+      <button data-view="reader" onclick="showView('reader', this)">阅读</button>
+      <button data-view="about" onclick="showView('about', this)">关于我</button>
     </nav>
   </div>
 </header>
@@ -2349,6 +2349,17 @@
       document.getElementById('cancel-edit-btn').style.display = 'none';
       resetWriteTimer();
     }
+  }
+
+
+  function initTopNavFallback() {
+    document.querySelectorAll('nav button[data-view]').forEach(function(btn) {
+      if (btn.__navBound) return;
+      btn.__navBound = true;
+      btn.addEventListener('click', function() {
+        showView(btn.getAttribute('data-view'), btn);
+      });
+    });
   }
 
   // ─── Rich Text Editor Commands ───
@@ -4347,6 +4358,9 @@
     editorEl.addEventListener('keydown', startWriteTimerIfNeeded);
     editorEl.addEventListener('paste', startWriteTimerIfNeeded);
   }
+
+  window.showView = showView;
+  initTopNavFallback();
 
   loadAllData();
 
