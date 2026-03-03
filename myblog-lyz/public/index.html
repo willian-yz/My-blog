@@ -4836,37 +4836,130 @@
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    var colors = ['#ff4d4f', '#ffd666', '#40a9ff', '#73d13d', '#9254de', '#ff85c0', '#ffa940'];
+    var colors = ['#ff4d4f', '#ffd666', '#40a9ff', '#73d13d', '#9254de', '#ff85c0', '#ffa940', '#36cfc9'];
     var particles = [];
+    var rockets = [];
     var gravity = 0.045;
     var friction = 0.985;
+    var audioCtx = null;
 
-    function burst(cx, cy, count) {
+    function getAudioCtx() {
+      try {
+        if (!audioCtx) {
+          var AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) audioCtx = new AC();
+        }
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+      } catch (e) {}
+      return audioCtx;
+    }
+
+    function playWhoosh() {
+      var ac = getAudioCtx();
+      if (!ac) return;
+      var now = ac.currentTime;
+      var osc = ac.createOscillator();
+      var gain = ac.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(220 + Math.random() * 80, now);
+      osc.frequency.exponentialRampToValueAtTime(60 + Math.random() * 20, now + 0.35);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.07, now + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+      osc.connect(gain).connect(ac.destination);
+      osc.start(now);
+      osc.stop(now + 0.38);
+    }
+
+    function playBurst() {
+      var ac = getAudioCtx();
+      if (!ac) return;
+      var now = ac.currentTime;
+      var noiseBuffer = ac.createBuffer(1, ac.sampleRate * 0.22, ac.sampleRate);
+      var data = noiseBuffer.getChannelData(0);
+      for (var i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
+      var src = ac.createBufferSource();
+      src.buffer = noiseBuffer;
+      var gain = ac.createGain();
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.18, now + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.24);
+      src.connect(gain).connect(ac.destination);
+      src.start(now);
+      src.stop(now + 0.25);
+    }
+
+    function burst(cx, cy, count, baseColor) {
+      playBurst();
       for (var i = 0; i < count; i++) {
-        var a = (Math.PI * 2 * i) / count + Math.random() * 0.08;
-        var speed = 3.2 + Math.random() * 3.8;
+        var a = (Math.PI * 2 * i) / count + Math.random() * 0.12;
+        var speed = 2.8 + Math.random() * 4.8;
         particles.push({
           x: cx,
           y: cy,
           vx: Math.cos(a) * speed,
           vy: Math.sin(a) * speed,
-          life: 74 + Math.random() * 24,
+          life: 70 + Math.random() * 30,
           age: 0,
-          color: colors[(Math.random() * colors.length) | 0],
-          size: 2 + Math.random() * 2.4,
+          color: baseColor || colors[(Math.random() * colors.length) | 0],
+          size: 1.8 + Math.random() * 2.8,
         });
       }
     }
 
-    var y = canvas.height * 0.78;
-    burst(canvas.width * 0.22, y, 100);
-    setTimeout(function() { burst(canvas.width * 0.5, y - 40, 120); }, 180);
-    setTimeout(function() { burst(canvas.width * 0.78, y, 100); }, 360);
+    function launchRocket(startX, delayMs) {
+      setTimeout(function() {
+        playWhoosh();
+        rockets.push({
+          x: startX,
+          y: canvas.height + 10,
+          vx: (Math.random() - 0.5) * 1.2,
+          vy: -(6.8 + Math.random() * 1.4),
+          targetY: canvas.height * (0.2 + Math.random() * 0.22),
+          color: colors[(Math.random() * colors.length) | 0],
+          trail: []
+        });
+      }, delayMs);
+    }
+
+    launchRocket(canvas.width * 0.2, 0);
+    launchRocket(canvas.width * 0.5, 180);
+    launchRocket(canvas.width * 0.8, 360);
 
     var start = performance.now();
     function tick() {
       ctx.fillStyle = 'rgba(3, 8, 20, 0.16)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+      for (var r = rockets.length - 1; r >= 0; r--) {
+        var rk = rockets[r];
+        rk.vy += gravity * 0.08;
+        rk.x += rk.vx;
+        rk.y += rk.vy;
+        rk.trail.push({ x: rk.x, y: rk.y, a: 1 });
+        if (rk.trail.length > 12) rk.trail.shift();
+
+        for (var t = 0; t < rk.trail.length; t++) {
+          var tr = rk.trail[t];
+          var ta = (t + 1) / rk.trail.length;
+          ctx.globalAlpha = 0.14 * ta;
+          ctx.fillStyle = rk.color;
+          ctx.beginPath();
+          ctx.arc(tr.x, tr.y, 1.5 + ta, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(rk.x, rk.y, 2.1, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (rk.y <= rk.targetY || rk.vy > -0.6) {
+          burst(rk.x, rk.y, 120, rk.color);
+          rockets.splice(r, 1);
+        }
+      }
+
       for (var i = particles.length - 1; i >= 0; i--) {
         var p = particles[i];
         p.age += 1;
@@ -4887,7 +4980,7 @@
       }
       ctx.globalAlpha = 1;
 
-      if (particles.length > 0 || performance.now() - start < 1800) {
+      if (particles.length > 0 || rockets.length > 0 || performance.now() - start < 2300) {
         requestAnimationFrame(tick);
       } else {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
