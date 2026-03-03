@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>我的个人博客</title>
+  <title>崭新的日记本</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -1158,7 +1158,7 @@
         <path class="pen-stroke" d="M48 16 L52 12 L60 12 L52 20 Z" stroke="#1a1008" stroke-width="1.5" fill="none" style="animation-delay: 0.2s;"/>
       </svg>
     </div>
-    <div class="splash-title">我的<span class="accent">·</span>小角落</div>
+    <div class="splash-title">创造时间的<span class="accent">琥珀</span></div>
     <div class="splash-line"></div>
     <div class="splash-quote">Fill your paper with the breathings of your heart.</div>
     <div class="splash-dots">
@@ -1174,10 +1174,11 @@
 
 <header>
   <div class="header-inner">
-    <div class="site-title">我的<span>·</span>小角落</div>
+    <div class="site-title">创造时间的<span>琥珀</span></div>
     <nav>
       <button class="active" onclick="showView('list', this)">全部文章</button>
       <button onclick="showView('write', this)">写新文章</button>
+      <button onclick="backupDiaryAsWord()">备份日记</button>
       <button onclick="showView('planner', this)">日历记事</button>
       <button onclick="showView('reader', this)">阅读</button>
       <button onclick="showView('about', this)">关于我</button>
@@ -1658,9 +1659,36 @@
   };
 
   // Planner state
-  var plannerYear = new Date().getFullYear();
-  var plannerMonth = new Date().getMonth();
-  var plannerSelectedDate = new Date().toISOString().slice(0, 10);
+  var plannerYear = getGMT8NowParts().year;
+  var plannerMonth = getGMT8NowParts().month;
+  var plannerSelectedDate = formatDateGMT8();
+
+  function pad2(num) { return String(num).padStart(2, '0'); }
+
+  function getGMT8DateObj(input) {
+    var base = input ? new Date(input) : new Date();
+    var offsetMs = (8 * 60 + base.getTimezoneOffset()) * 60000;
+    return new Date(base.getTime() + offsetMs);
+  }
+
+  function formatDateGMT8(input) {
+    var d = getGMT8DateObj(input);
+    return d.getUTCFullYear() + '-' + pad2(d.getUTCMonth() + 1) + '-' + pad2(d.getUTCDate());
+  }
+
+  function formatTimeGMT8(input) {
+    var d = getGMT8DateObj(input);
+    return pad2(d.getUTCHours()) + ':' + pad2(d.getUTCMinutes());
+  }
+
+  function getGMT8NowParts() {
+    var d = getGMT8DateObj();
+    return {
+      year: d.getUTCFullYear(),
+      month: d.getUTCMonth(),
+      day: d.getUTCDate()
+    };
+  }
 
   (function showBuildVersion(){
     var el = document.getElementById('app-version-badge');
@@ -1976,8 +2004,8 @@
     var excerpt = plainText.slice(0, 60) + '...';
 
     var now = new Date();
-    var dateStr = now.toISOString().slice(0, 10);
-    var timeStr = now.toTimeString().slice(0, 5);
+    var dateStr = formatDateGMT8(now);
+    var timeStr = formatTimeGMT8(now);
 
     if (editingPostId) {
       var post = posts.find(function(p) { return p.id === editingPostId; });
@@ -2238,6 +2266,7 @@
   function renderCalendar() {
     var container = document.getElementById('calendar-grid');
     var today = new Date();
+    var todayStr = formatDateGMT8(today);
     var cellSize = 13;
     var cellGap = 3;
     var totalSize = cellSize + cellGap;
@@ -2271,7 +2300,8 @@
       for (var day = 0; day < 7; day++) {
         var cellDate = new Date(startDate);
         cellDate.setDate(cellDate.getDate() + w * 7 + day);
-        if (cellDate > today) continue;
+        var cellDateStr = formatDateGMT8(cellDate);
+        if (cellDateStr > todayStr) continue;
 
         var threeMonthsAgo = new Date(today);
         threeMonthsAgo.setDate(threeMonthsAgo.getDate() - (daysToShow - 1));
@@ -2283,7 +2313,7 @@
           continue;
         }
 
-        var dateStr = cellDate.toISOString().slice(0, 10);
+        var dateStr = cellDateStr;
         var minutes = calendarData[dateStr] || 0;
         var color = getColorLevel(minutes);
 
@@ -2381,6 +2411,35 @@
     return 'https://player.bilibili.com/player.html?bvid=' + m[1] + '&page=1&high_quality=1&autoplay=1&loop=1';
   }
 
+  function normalizeExternalMediaUrl(url) {
+    var bilibili = parseBilibiliEmbedUrl(url);
+    if (bilibili) return bilibili;
+
+    try {
+      var u = new URL(url);
+      var host = u.hostname.replace(/^www\./, '');
+
+      if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'youtu.be') {
+        var vid = '';
+        if (host === 'youtu.be') {
+          vid = u.pathname.replace(/^\//, '');
+        } else {
+          vid = u.searchParams.get('v') || '';
+        }
+        if (vid) {
+          return 'https://www.youtube.com/embed/' + vid + '?autoplay=1&loop=1&playlist=' + vid;
+        }
+      }
+
+      u.searchParams.set('autoplay', '1');
+      u.searchParams.set('loop', '1');
+      return u.toString();
+    } catch (e) {
+      var sep = url.indexOf('?') === -1 ? '?' : '&';
+      return url + sep + 'autoplay=1&loop=1';
+    }
+  }
+
   function initAudioPlayer() {
     var savedConfig = null;
     try { savedConfig = JSON.parse(localStorage.getItem('audioPlayerConfig') || 'null'); } catch(e) {}
@@ -2413,7 +2472,7 @@
       externalFrame.src = '';
       document.getElementById('audio-track-name').textContent = '&#9835; ' + (url.split('/').pop() || '音频');
     } else {
-      var embed = parseBilibiliEmbedUrl(url) || url;
+      var embed = normalizeExternalMediaUrl(url);
       audio.pause();
       audio.src = '';
       audio.style.display = 'none';
@@ -2528,6 +2587,45 @@
     document.body.classList.add('has-audio-player');
   }
 
+  function backupDiaryAsWord() {
+    if (!posts || posts.length === 0) {
+      alert('当前没有可备份的日记内容。');
+      return;
+    }
+
+    var sortedPosts = posts.slice().sort(function(a, b) {
+      var ad = (a.date || '') + ' ' + (a.time || '00:00');
+      var bd = (b.date || '') + ' ' + (b.time || '00:00');
+      return ad.localeCompare(bd);
+    });
+
+    var html = '<html><head><meta charset="utf-8"><title>日记备份</title>' +
+      '<style>body{font-family:"Noto Serif SC","Microsoft YaHei",serif;line-height:1.8;padding:28px;color:#222;}h1{font-size:28px;}h2{font-size:20px;margin:24px 0 8px;}hr{border:none;border-top:1px solid #ddd;margin:22px 0;} .meta{color:#666;font-size:13px;margin-bottom:8px;}</style>' +
+      '</head><body>';
+    html += '<h1>崭新的日记本 · 备份</h1>';
+    html += '<p>导出时间（GMT+8）：' + formatDateGMT8() + ' ' + formatTimeGMT8() + '</p><hr/>';
+
+    sortedPosts.forEach(function(post, idx) {
+      html += '<h2>' + (idx + 1) + '. ' + (post.title || '无标题') + '</h2>';
+      html += '<div class="meta">日期：' + (post.date || '') + ' ' + (post.time || '') + ' ｜ 类型：' + (post.type || '') + '</div>';
+      html += '<div>' + (post.body || '') + '</div>';
+      html += '<hr/>';
+    });
+
+    html += '</body></html>';
+
+    var blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'diary-backup-' + formatDateGMT8() + '.doc';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function() {
+      URL.revokeObjectURL(a.href);
+      a.remove();
+    }, 0);
+  }
+
   // ─── Planner / Calendar Module ───
   function plannerPrevMonth() {
     plannerMonth--;
@@ -2543,9 +2641,10 @@
 
   function plannerGoToday() {
     var now = new Date();
-    plannerYear = now.getFullYear();
-    plannerMonth = now.getMonth();
-    plannerSelectedDate = now.toISOString().slice(0, 10);
+    var nowParts = getGMT8NowParts();
+    plannerYear = nowParts.year;
+    plannerMonth = nowParts.month;
+    plannerSelectedDate = formatDateGMT8(now);
     renderPlannerCalendar();
     renderPlannerDetail();
   }
@@ -2567,7 +2666,7 @@
     var daysInMonth = new Date(plannerYear, plannerMonth + 1, 0).getDate();
     var prevMonthDays = new Date(plannerYear, plannerMonth, 0).getDate();
 
-    var todayStr = new Date().toISOString().slice(0, 10);
+    var todayStr = formatDateGMT8();
 
     // Previous month fill
     for (var d = firstDay - 1; d >= 0; d--) {
@@ -3218,7 +3317,7 @@
           cover: coverData,
           progress: 0,
           currentCfi: '',
-          lastRead: new Date().toISOString().slice(0, 10)
+          lastRead: formatDateGMT8()
         };
 
         // Save file to IndexedDB
