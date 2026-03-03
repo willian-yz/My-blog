@@ -600,7 +600,7 @@
     }
 
     /* ─── Planner View ─── */
-    .planner-container { max-width: 700px; }
+    .planner-container { max-width: 700px; width: 100%; }
     .planner-header {
       display: flex; align-items: center; justify-content: space-between;
       margin-bottom: 2rem;
@@ -629,8 +629,8 @@
     .planner-today-btn:hover { border-color: var(--ink); color: var(--ink); }
 
     .planner-cal-grid {
-      display: grid; grid-template-columns: repeat(7, 1fr);
-      gap: 2px; margin-bottom: 2rem;
+      display: grid; grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 2px; margin-bottom: 1rem; width: 100%;
     }
     .planner-day-label {
       text-align: center; font-size: 0.72rem; color: var(--muted);
@@ -642,7 +642,8 @@
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       cursor: pointer; transition: all 0.15s;
-      position: relative; min-height: 48px;
+      position: relative; min-height: 0;
+      padding: 0.35rem 0;
       background: #fff;
     }
     .planner-day:hover { border-color: var(--accent); background: var(--hover-bg); }
@@ -673,6 +674,16 @@
       font-family: 'Noto Serif SC', serif;
       font-size: 1.1rem; font-weight: 600;
     }
+
+    .planner-tabs { display: flex; gap: 0.45rem; margin-bottom: 0.9rem; }
+    .planner-tab-btn {
+      border: 1px solid var(--line); background: #fff; color: var(--muted);
+      border-radius: 4px; padding: 0.3rem 0.7rem; cursor: pointer; font-size: 0.78rem;
+    }
+    .planner-tab-btn.active { border-color: var(--accent); color: var(--accent); background: #fff7f6; }
+    .planner-tab-content { display: none; }
+    .planner-tab-content.active { display: block; }
+
     .planner-add-btn {
       background: var(--ink); color: var(--paper); border: none;
       padding: 0.4rem 1rem; font-family: 'Noto Sans SC', sans-serif;
@@ -798,13 +809,14 @@
 
     .home-top-grid {
       display: grid;
-      grid-template-columns: minmax(260px, 1fr) minmax(320px, 1fr);
+      grid-template-columns: minmax(260px, 1fr) minmax(360px, 440px);
       gap: 1rem;
       align-items: start;
       margin-bottom: 1.2rem;
     }
     .home-planner-section {
       margin-top: 0;
+      margin-left: auto;
       background: #fff;
       border: 2px solid #e9d7c2;
       border-radius: 10px;
@@ -1314,9 +1326,11 @@
                 <div class="planner-detail-header">
                   <div class="planner-detail-date" id="planner-detail-date">选择一个日期</div>
                 </div>
-                <div id="planner-detail-content">
-                  <p style="color: var(--muted); font-size: 0.9rem;">点击日历上的日期查看或添加待办事项</p>
+                <div class="planner-tabs">
+                  <button class="planner-tab-btn active" id="planner-tab-daily" onclick="switchPlannerPage('daily')">日历 / 待办 / 今日记录</button>
+                  <button class="planner-tab-btn" id="planner-tab-posts" onclick="switchPlannerPage('posts')">当日发表文章</button>
                 </div>
+                <div id="planner-detail-content"></div>
               </div>
             </div>
           </div>
@@ -1733,6 +1747,8 @@
   var currentView = 'list';
   var dataReady = false;
   var splashReady = false;
+  var plannerPage = "daily";
+  var writeStartedAt = 0;
 
   // Photo edit state
   var editingPhotoId = null;
@@ -2095,6 +2111,7 @@
     document.getElementById('cancel-edit-btn').style.display = 'inline-block';
 
     showView('write', document.querySelectorAll('nav button')[1]);
+    resetWriteTimer();
   }
 
   // ─── Cancel Edit ───
@@ -2107,6 +2124,7 @@
     document.getElementById('cancel-edit-btn').style.display = 'none';
 
     showView('list', document.querySelectorAll('nav button')[0]);
+    resetWriteTimer();
   }
 
   // ─── Delete Current Post ───
@@ -2140,6 +2158,19 @@
   }
 
   // ─── Publish / Update Post ───
+  function startWriteTimerIfNeeded() {
+    if (!writeStartedAt) writeStartedAt = Date.now();
+  }
+
+  function resetWriteTimer() {
+    writeStartedAt = 0;
+  }
+
+  function getCurrentWriteSeconds() {
+    if (!writeStartedAt) return 0;
+    return Math.max(1, Math.round((Date.now() - writeStartedAt) / 1000));
+  }
+
   async function publishPost() {
     var title = document.getElementById('input-title').value.trim();
     var type  = document.getElementById('input-type').value;
@@ -2202,7 +2233,7 @@
           body: JSON.stringify(newPost)
         });
         posts.push(newPost);
-        await recordWritingSession(dateStr);
+        await recordWritingSession(dateStr, getCurrentWriteSeconds());
         alert('文章发布成功！');
       } catch (e) {
         alert('发布失败，请稍后再试。');
@@ -2212,6 +2243,7 @@
 
     document.getElementById('input-title').value = '';
     editor.innerHTML = '';
+    resetWriteTimer();
     showView('list', document.querySelectorAll('nav button')[0]);
   }
 
@@ -2235,6 +2267,7 @@
       document.getElementById('write-label').textContent = '写一篇新文章';
       document.getElementById('submit-btn').innerHTML = '发布文章 &#8594;';
       document.getElementById('cancel-edit-btn').style.display = 'none';
+      resetWriteTimer();
     }
   }
 
@@ -2377,11 +2410,26 @@
   }
 
   // ─── Writing Calendar (Last 3 Months) ───
-  async function recordWritingSession(dateStr) {
-    if (!calendarData[dateStr]) {
-      calendarData[dateStr] = 0;
+  function getDayWritingSeconds(dateStr) {
+    var entry = calendarData[dateStr];
+    if (entry == null) return 0;
+    if (typeof entry === 'number') {
+      return entry > 1000 ? Math.round(entry) : Math.round(entry * 60);
     }
-    calendarData[dateStr] += 30;
+    if (typeof entry === 'object') {
+      return Math.round(entry.seconds || 0);
+    }
+    return 0;
+  }
+
+  function setDayWritingSeconds(dateStr, seconds) {
+    calendarData[dateStr] = { seconds: Math.max(0, Math.round(seconds || 0)) };
+  }
+
+  async function recordWritingSession(dateStr, secondsSpent) {
+    var deltaSeconds = Math.max(1, Math.round(secondsSpent || 0));
+    var daySeconds = getDayWritingSeconds(dateStr);
+    setDayWritingSeconds(dateStr, daySeconds + deltaSeconds);
 
     try {
       await apiFetch('/api/calendar', {
@@ -2408,12 +2456,13 @@
     }
   }
 
-  function getColorLevel(minutes) {
-    if (!minutes || minutes === 0) return '#ebedf0';
-    if (minutes < 30) return '#fde8e6';
-    if (minutes < 60) return '#f5a9a1';
-    if (minutes < 90) return '#e05a4b';
-    return '#a02a1e';
+  function getColorLevel(totalSeconds) {
+    var minutes = (totalSeconds || 0) / 60;
+    if (!minutes || minutes === 0) return "#ebedf0";
+    if (minutes < 10) return "#fde8e6";
+    if (minutes < 25) return "#f5a9a1";
+    if (minutes < 45) return "#e05a4b";
+    return "#a02a1e";
   }
 
   function renderCalendar() {
@@ -2467,8 +2516,8 @@
         }
 
         var dateStr = cellDateStr;
-        var minutes = calendarData[dateStr] || 0;
-        var color = getColorLevel(minutes);
+        var seconds = getDayWritingSeconds(dateStr);
+        var color = getColorLevel(seconds);
 
         var x = 30 + w * totalSize;
         var y = 25 + day * totalSize;
@@ -2479,7 +2528,7 @@
           lastMonth = month;
         }
 
-        svg += '<rect class="calendar-cell" data-date="' + dateStr + '" data-minutes="' + minutes + '" x="' + x + '" y="' + y + '" width="' + cellSize + '" height="' + cellSize + '" fill="' + color + '" rx="2" ry="2" onmouseenter="showCalTooltip(event)" onmouseleave="hideCalTooltip()"/>';
+        svg += '<rect class="calendar-cell" data-date="' + dateStr + '" data-seconds="' + seconds + '" x="' + x + '" y="' + y + '" width="' + cellSize + '" height="' + cellSize + '" fill="' + color + '" rx="2" ry="2" onmouseenter="showCalTooltip(event)" onmouseleave="hideCalTooltip()"/>';
       }
     }
 
@@ -2490,21 +2539,19 @@
   // ─── Writing History (All Time) ───
   function renderWritingHistory() {
     var statsEl = document.getElementById('history-stats');
-    var totalMinutes = 0;
+    var totalSeconds = 0;
     var totalDays = 0;
-    var maxMinutes = 0;
 
     for (var dateStr in calendarData) {
-      if (calendarData.hasOwnProperty(dateStr) && calendarData[dateStr] > 0) {
-        totalMinutes += calendarData[dateStr];
-        totalDays++;
-        if (calendarData[dateStr] > maxMinutes) {
-          maxMinutes = calendarData[dateStr];
+      if (calendarData.hasOwnProperty(dateStr)) {
+        var daySeconds = getDayWritingSeconds(dateStr);
+        if (daySeconds > 0) {
+          totalSeconds += daySeconds;
+          totalDays++;
         }
       }
     }
 
-    var totalSeconds = Math.round(totalMinutes * 60);
     var avgSeconds = totalDays > 0 ? Math.round(totalSeconds / totalDays) : 0;
 
     function formatMinSec(sec) {
@@ -2523,28 +2570,22 @@
   function showCalTooltip(e) {
     var rect = e.target;
     var date = rect.getAttribute('data-date');
-    var minutes = parseInt(rect.getAttribute('data-minutes'));
+    var seconds = parseInt(rect.getAttribute('data-seconds')) || 0;
     var tooltip = document.getElementById('calendar-tooltip');
 
     var text;
-    if (minutes > 0) {
-      var hours = Math.floor(minutes / 60);
-      var mins = minutes % 60;
-      if (hours > 0) {
-        text = date + ': 写作 ' + hours + '小时' + (mins > 0 ? mins + '分钟' : '');
-      } else {
-        text = date + ': 写作 ' + mins + '分钟';
-      }
+    if (seconds > 0) {
+      var min = Math.floor(seconds / 60);
+      var sec = seconds % 60;
+      text = date + '：写作 ' + min + ' 分 ' + sec + ' 秒';
     } else {
       text = date + ': 无写作记录';
     }
 
     tooltip.textContent = text;
     tooltip.classList.add('visible');
-
-    var rectBounds = rect.getBoundingClientRect();
-    tooltip.style.left = (rectBounds.left + rectBounds.width / 2 - tooltip.offsetWidth / 2) + 'px';
-    tooltip.style.top = (rectBounds.top - 36) + 'px';
+    tooltip.style.left = (e.clientX + 12) + 'px';
+    tooltip.style.top = (e.clientY - 32) + 'px';
   }
 
   function hideCalTooltip() {
@@ -3001,6 +3042,32 @@
     renderPlannerDetail();
   }
 
+  function switchPlannerPage(page) {
+    plannerPage = page === 'posts' ? 'posts' : 'daily';
+    var btnDaily = document.getElementById('planner-tab-daily');
+    var btnPosts = document.getElementById('planner-tab-posts');
+    if (btnDaily) btnDaily.classList.toggle('active', plannerPage === 'daily');
+    if (btnPosts) btnPosts.classList.toggle('active', plannerPage === 'posts');
+    renderPlannerDetail();
+  }
+
+  function getDayPostsHtml(dateStr) {
+    var datePosts = posts.filter(function(p) { return p.date === dateStr; });
+    if (datePosts.length === 0) {
+      return '<div class="planner-diary-empty">这一天还没有发表文章。</div>';
+    }
+    var html = '<div class="planner-diary-section" style="margin-top:0;padding-top:0;border-top:none;">';
+    for (var i = 0; i < datePosts.length; i++) {
+      var p = datePosts[i];
+      html += '<div class="planner-diary-item" style="cursor:pointer;" onclick="openPost(' + p.id + ')">' +
+        '<div class="planner-diary-item-title">' + escapeHtml(p.title) + '</div>' +
+        '<div class="planner-diary-item-excerpt">' + escapeHtml(p.excerpt) + '</div>' +
+        '</div>';
+    }
+    html += '</div>';
+    return html;
+  }
+
   function renderPlannerDetail() {
     var dateEl = document.getElementById('planner-detail-date');
     var contentEl = document.getElementById('planner-detail-content');
@@ -3012,54 +3079,43 @@
     }
 
     dateEl.textContent = plannerSelectedDate;
-
     var dayData = todosData[plannerSelectedDate] || { todos: [], note: '' };
     var todos = dayData.todos || [];
     var note = dayData.note || '';
 
     var html = '';
 
-    // Todo input
+    if (plannerPage === 'posts') {
+      html = getDayPostsHtml(plannerSelectedDate);
+      contentEl.innerHTML = html;
+      return;
+    }
+
     html += '<div class="todo-input-row">' +
-      '<input type="text" id="new-todo-input" placeholder="添加新的待办事项..." onkeydown="if(event.key===\'Enter\')addTodo()">' +
+      '<input type="text" id="new-todo-input" placeholder="添加新的待办事项..." onkeypress="if(event.key===\'Enter\') addTodo()">' +
       '<button onclick="addTodo()">添加</button>' +
       '</div>';
 
-    // Todo list
-    if (todos.length > 0) {
+    if (todos.length === 0) {
+      html += '<div class="planner-diary-empty">今日暂无待办事项</div>';
+    } else {
       html += '<ul class="todo-list-items">';
       for (var i = 0; i < todos.length; i++) {
-        var t = todos[i];
+        var todo = todos[i];
         html += '<li class="todo-item">' +
-          '<div class="todo-checkbox' + (t.done ? ' checked' : '') + '" onclick="toggleTodo(' + t.id + ')"></div>' +
-          '<span class="todo-text' + (t.done ? ' done' : '') + '">' + escapeHtml(t.text) + '</span>' +
-          '<button class="todo-delete" onclick="deleteTodo(' + t.id + ')">&#10005;</button>' +
+          '<div class="todo-checkbox ' + (todo.done ? 'checked' : '') + '" onclick="toggleTodo(' + i + ')"></div>' +
+          '<div class="todo-text ' + (todo.done ? 'done' : '') + '">' + escapeHtml(todo.text) + '</div>' +
+          '<button class="todo-delete" onclick="deleteTodo(' + i + ')">&#10005;</button>' +
           '</li>';
       }
       html += '</ul>';
     }
 
-    // Note / diary
     html += '<div class="planner-note-section">' +
       '<div class="planner-note-label">今日记录 / 日记</div>' +
       '<textarea class="planner-note-area" id="planner-note" placeholder="写下今天的想法或记录...">' + escapeHtml(note) + '</textarea>' +
       '<button class="planner-note-save" onclick="savePlannerNote()">保存记录</button>' +
       '</div>';
-
-    // Show diary entries for this date
-    var datePosts = posts.filter(function(p) { return p.date === plannerSelectedDate; });
-    if (datePosts.length > 0) {
-      html += '<div class="planner-diary-section">' +
-        '<div class="planner-diary-title">当日发表的文章</div>';
-      for (var i = 0; i < datePosts.length; i++) {
-        var p = datePosts[i];
-        html += '<div class="planner-diary-item" style="cursor:pointer;" onclick="openPost(' + p.id + ')">' +
-          '<div class="planner-diary-item-title">' + escapeHtml(p.title) + '</div>' +
-          '<div class="planner-diary-item-excerpt">' + escapeHtml(p.excerpt) + '</div>' +
-          '</div>';
-      }
-      html += '</div>';
-    }
 
     contentEl.innerHTML = html;
   }
@@ -4196,6 +4252,13 @@
   }
 
   applyRandomQuote();
+  var editorEl = document.getElementById('editor-area');
+  if (editorEl) {
+    editorEl.addEventListener('input', startWriteTimerIfNeeded);
+    editorEl.addEventListener('keydown', startWriteTimerIfNeeded);
+    editorEl.addEventListener('paste', startWriteTimerIfNeeded);
+  }
+
   loadAllData();
 
   // Init photo wall background settings on page load
