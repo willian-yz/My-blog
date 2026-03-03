@@ -591,14 +591,50 @@
       bottom: 8px;
       z-index: 4000;
       font-size: 10px;
-      color: #888;
-      background: rgba(255,255,255,0.85);
-      border: 1px solid #ddd;
+      color: rgba(80,80,80,0.45);
+      background: rgba(255,255,255,0.22);
+      border: 1px solid rgba(160,160,160,0.28);
       border-radius: 999px;
       padding: 2px 8px;
       pointer-events: none;
     }
 
+
+    .trash-fab {
+      position: fixed;
+      left: 14px;
+      bottom: 82px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.9);
+      color: var(--muted);
+      cursor: pointer;
+      z-index: 3205;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+    }
+    .trash-fab:hover { color: var(--accent); border-color: #f0b3ad; }
+    .trash-panel {
+      position: fixed;
+      left: 14px;
+      bottom: 128px;
+      width: min(360px, calc(100vw - 28px));
+      max-height: 52vh;
+      overflow: auto;
+      background: rgba(255,255,255,0.96);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0.7rem 0.8rem;
+      z-index: 3204;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.14);
+      display: none;
+    }
+    .trash-panel.show { display: block; }
     /* ─── Planner View ─── */
     .planner-container { max-width: 700px; width: 100%; }
     .planner-header {
@@ -1264,7 +1300,7 @@
 
 <header>
   <div class="header-inner">
-    <div class="site-title">创造时间的<span>琥珀</span><span>琥珀</span></div>
+    <div class="site-title">创造时间的<span>琥珀</span></div>
     <nav>
       <button class="active" onclick="showView('list', this)">全部文章</button>
       <button onclick="showView('write', this)">写新文章</button>
@@ -1352,12 +1388,7 @@
           <div class="loading-msg">加载中...</div>
         </ul>
         <div class="post-pagination" id="post-pagination"></div>
-        <div id="trash-bin" style="margin-top:1rem;border-top:1px dashed #ddd;padding-top:0.8rem;">
-          <p class="section-label" style="margin:0 0 0.5rem 0;">回收站（7天后自动清理）</p>
-          <div id="trash-list" style="font-size:0.85rem;color:var(--muted);">暂无已删除文章</div>
         </div>
-        </div>
-      </div>
       </div>
     </div>
   </div>
@@ -1729,6 +1760,13 @@
   <img src="green_plush_bear_cutout.svg" alt="">
 </div>
 
+
+<button class="trash-fab" id="trash-fab" onclick="toggleTrashPanel()" title="回收站">&#128465;</button>
+<div class="trash-panel" id="trash-panel">
+  <p class="section-label" style="margin:0 0 0.5rem 0;">回收站（7天后自动清理）</p>
+  <div id="trash-list" style="font-size:0.85rem;color:var(--muted);">暂无已删除文章</div>
+</div>
+
 <div class="app-version-badge" id="app-version-badge">build local</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -1850,18 +1888,24 @@
     var drag = {
       active: false,
       pointerId: null,
+      startX: 0,
       startY: 0,
+      startLeft: 0,
       startTop: 0
     };
 
     bear.addEventListener('pointerdown', function (e) {
       drag.active = true;
       drag.pointerId = e.pointerId;
+      drag.startX = e.clientX;
       drag.startY = e.clientY;
 
       var rect = bear.getBoundingClientRect();
+      bear.style.left = rect.left + 'px';
       bear.style.top = rect.top + 'px';
+      bear.style.right = 'auto';
       bear.style.transform = 'none';
+      drag.startLeft = rect.left;
       drag.startTop = rect.top;
 
       bear.classList.add('dragging');
@@ -1872,12 +1916,18 @@
     bear.addEventListener('pointermove', function (e) {
       if (!drag.active || e.pointerId !== drag.pointerId) return;
 
+      var deltaX = e.clientX - drag.startX;
       var deltaY = e.clientY - drag.startY;
+      var nextLeft = drag.startLeft + deltaX;
       var nextTop = drag.startTop + deltaY;
+      var maxLeft = window.innerWidth - bear.offsetWidth;
       var maxTop = window.innerHeight - bear.offsetHeight;
+      if (nextLeft < 0) nextLeft = 0;
       if (nextTop < 0) nextTop = 0;
+      if (nextLeft > maxLeft) nextLeft = maxLeft;
       if (nextTop > maxTop) nextTop = maxTop;
 
+      bear.style.left = nextLeft + 'px';
       bear.style.top = nextTop + 'px';
     });
 
@@ -2026,6 +2076,19 @@
     div.appendChild(document.createTextNode(text));
     return div.innerHTML;
   }
+
+  function toggleTrashPanel() {
+    var panel = document.getElementById('trash-panel');
+    if (!panel) return;
+    panel.classList.toggle('show');
+  }
+
+  document.addEventListener('click', function(e) {
+    var panel = document.getElementById('trash-panel');
+    var fab = document.getElementById('trash-fab');
+    if (!panel || !fab) return;
+    if (!panel.contains(e.target) && !fab.contains(e.target)) panel.classList.remove('show');
+  });
 
   function renderTrashBin() {
     var el = document.getElementById('trash-list');
