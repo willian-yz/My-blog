@@ -599,6 +599,29 @@
       pointer-events: none;
     }
 
+    .fireworks-btn {
+      position: fixed;
+      right: 14px;
+      bottom: 128px;
+      z-index: 3600;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 0.45rem 0.75rem;
+      font-size: 0.82rem;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    }
+    .fireworks-btn:hover { border-color: var(--accent); color: var(--accent); }
+    #fireworks-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 3500;
+      pointer-events: none;
+      display: none;
+    }
+
 
     .trash-fab {
       position: fixed;
@@ -1810,6 +1833,8 @@
   <iframe id="audio-external-frame" title="external-audio" allow="autoplay; fullscreen" referrerpolicy="no-referrer-when-downgrade"></iframe>
 </div>
 <button class="player-sidebar-toggle" id="player-sidebar-toggle" onclick="showAudioPlayer()">&#9835;</button>
+<button class="fireworks-btn" id="fireworks-btn" onclick="launchTripleFireworks()">🎆 放烟花</button>
+<canvas id="fireworks-canvas"></canvas>
 
 <!-- Audio URL Panel -->
 <div class="audio-url-panel" id="audio-url-panel">
@@ -1885,6 +1910,7 @@
   var doodleLastY = 0;
   var doodleLastTime = 0;
   var doodlePaletteColors = ['#1a1008','#c0392b','#2563eb','#16a34a','#f59e0b','#7c3aed','#ec4899','#ffffff'];
+  var fireworksRunning = false;
 
   // E-book state
   var currentBook = null;
@@ -4796,6 +4822,81 @@
       img.src = ev.target.result;
     };
     reader.readAsDataURL(file);
+  }
+
+  function launchTripleFireworks() {
+    if (fireworksRunning) return;
+    var canvas = document.getElementById('fireworks-canvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    fireworksRunning = true;
+    canvas.style.display = 'block';
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    var colors = ['#ff4d4f', '#ffd666', '#40a9ff', '#73d13d', '#9254de', '#ff85c0', '#ffa940'];
+    var particles = [];
+    var gravity = 0.045;
+    var friction = 0.985;
+
+    function burst(cx, cy, count) {
+      for (var i = 0; i < count; i++) {
+        var a = (Math.PI * 2 * i) / count + Math.random() * 0.08;
+        var speed = 3.2 + Math.random() * 3.8;
+        particles.push({
+          x: cx,
+          y: cy,
+          vx: Math.cos(a) * speed,
+          vy: Math.sin(a) * speed,
+          life: 74 + Math.random() * 24,
+          age: 0,
+          color: colors[(Math.random() * colors.length) | 0],
+          size: 2 + Math.random() * 2.4,
+        });
+      }
+    }
+
+    var y = canvas.height * 0.78;
+    burst(canvas.width * 0.22, y, 100);
+    setTimeout(function() { burst(canvas.width * 0.5, y - 40, 120); }, 180);
+    setTimeout(function() { burst(canvas.width * 0.78, y, 100); }, 360);
+
+    var start = performance.now();
+    function tick() {
+      ctx.fillStyle = 'rgba(3, 8, 20, 0.16)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      for (var i = particles.length - 1; i >= 0; i--) {
+        var p = particles[i];
+        p.age += 1;
+        if (p.age >= p.life) {
+          particles.splice(i, 1);
+          continue;
+        }
+        p.vx *= friction;
+        p.vy = p.vy * friction + gravity;
+        p.x += p.vx;
+        p.y += p.vy;
+        var alpha = 1 - p.age / p.life;
+        ctx.globalAlpha = Math.max(0, alpha);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+
+      if (particles.length > 0 || performance.now() - start < 1800) {
+        requestAnimationFrame(tick);
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        canvas.style.display = 'none';
+        fireworksRunning = false;
+      }
+    }
+
+    requestAnimationFrame(tick);
   }
 
   // ─── Initialize ───
