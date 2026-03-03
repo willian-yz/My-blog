@@ -1,4 +1,4 @@
-import { json } from "./functions/_lib/store.js";
+import { detectStoreMode, json } from "./functions/_lib/store.js";
 import { onRequest as postsHandler } from "./functions/api/posts.js";
 import { onRequest as profileHandler } from "./functions/api/profile.js";
 import { onRequest as calendarHandler } from "./functions/api/calendar.js";
@@ -18,6 +18,20 @@ const routes = {
   "/api/books": booksHandler,
   "/api/trash": trashHandler,
   "/api/version": async () => json({ version: BUILD_VERSION }),
+  "/api/health": async ({ env }) => {
+    const storeMode = detectStoreMode(env);
+    const hasD1Binding = storeMode === "d1";
+    const hasKvBinding = storeMode === "kv";
+    return json({
+      ok: true,
+      version: BUILD_VERSION,
+      storeMode,
+      bindings: {
+        BLOG_DB: hasD1Binding,
+        BLOG_DATA: hasKvBinding,
+      },
+    });
+  },
 };
 
 export default {

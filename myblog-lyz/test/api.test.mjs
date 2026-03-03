@@ -168,6 +168,28 @@ test("version endpoint exposes build version", async () => {
   assert.equal(body.version.includes("hotfix"), true);
 });
 
+test("health endpoint reports active storage binding", async () => {
+  const envMemory = makeEnv({ BLOG_DATA: undefined });
+  const resMemory = await worker.fetch(new Request("https://example.com/api/health"), envMemory, {});
+  assert.equal(resMemory.status, 200);
+  const bodyMemory = await resMemory.json();
+  assert.equal(bodyMemory.storeMode, "memory");
+  assert.equal(bodyMemory.bindings.BLOG_DB, false);
+  assert.equal(bodyMemory.bindings.BLOG_DATA, false);
+
+  const envKv = makeEnv();
+  const resKv = await worker.fetch(new Request("https://example.com/api/health"), envKv, {});
+  const bodyKv = await resKv.json();
+  assert.equal(bodyKv.storeMode, "kv");
+  assert.equal(bodyKv.bindings.BLOG_DATA, true);
+
+  const envD1 = makeEnv({ BLOG_DB: new MockD1(), BLOG_DATA: undefined });
+  const resD1 = await worker.fetch(new Request("https://example.com/api/health"), envD1, {});
+  const bodyD1 = await resD1.json();
+  assert.equal(bodyD1.storeMode, "d1");
+  assert.equal(bodyD1.bindings.BLOG_DB, true);
+});
+
 test("index response has anti-cache header", async () => {
   const env = makeEnv();
   const request = new Request("https://example.com/");
