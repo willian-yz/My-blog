@@ -1769,8 +1769,8 @@
 
 <div class="app-version-badge" id="app-version-badge">build local</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/epubjs@0.3.93/dist/epub.min.js"></script>
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script async src="https://cdn.jsdelivr.net/npm/epubjs@0.3.93/dist/epub.min.js"></script>
 <script>
   // ─── State ───
   var APP_BUILD = "2026-03-02-b386d2a-hotfix";
@@ -3770,6 +3770,10 @@
   async function openBook(id) {
     var bookMeta = booksData.find(function(b) { return b.id === id; });
     if (!bookMeta) return;
+    if (typeof ePub !== 'function') {
+      alert('阅读器依赖加载失败，请检查网络后刷新页面重试。');
+      return;
+    }
 
     var arrayBuffer = await getBookFile(id);
     if (!arrayBuffer) {
