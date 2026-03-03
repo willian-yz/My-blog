@@ -167,8 +167,8 @@
 
     /* ─── Hero Section ─── */
     .hero-section {
-      text-align: center; padding: 3rem 0 3.5rem;
-      border-bottom: 1px solid var(--line); margin-bottom: 2.5rem;
+      text-align: center; padding: 1.6rem 0 2rem;
+      border-bottom: 1px solid var(--line); margin-bottom: 1.2rem;
     }
     .hero-icon {
       font-size: 2.5rem; margin-bottom: 1.2rem;
@@ -181,7 +181,7 @@
     .hero-quote-en {
       font-family: Georgia, 'Noto Serif SC', serif;
       font-size: 1rem; color: var(--muted);
-      font-style: italic; margin-bottom: 1.5rem; letter-spacing: 0.02em;
+      font-style: italic; margin: -0.4rem 0 1rem; letter-spacing: 0.02em;
     }
     .hero-divider { width: 40px; height: 2px; background: var(--accent); margin: 0 auto 1.5rem; }
     .hero-desc {
@@ -781,6 +781,7 @@
     @media (max-width: 960px) {
       .home-layout { flex-direction: column; }
       .photo-wall-sidebar { width: 100%; }
+      .home-top-grid { grid-template-columns: 1fr; }
       nav { gap: 1rem; flex-wrap: wrap; justify-content: flex-end; }
       .backup-grid { grid-template-columns: 1fr; }
       .site-title { transform: translateX(-4px); }
@@ -793,14 +794,41 @@
     }
 
 
-    .home-planner-section {
-      margin-top: 2rem;
-      background: #fff;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 1.2rem;
-    }
     .home-planner-section .planner-container { max-width: 100%; }
+
+    .home-top-grid {
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) minmax(320px, 1fr);
+      gap: 1rem;
+      align-items: start;
+      margin-bottom: 1.2rem;
+    }
+    .home-planner-section {
+      margin-top: 0;
+      background: #fff;
+      border: 2px solid #e9d7c2;
+      border-radius: 10px;
+      padding: 1rem;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.05);
+    }
+    .post-pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.6rem;
+      margin-top: 1rem;
+    }
+    .post-page-btn {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--muted);
+      border-radius: 4px;
+      padding: 0.25rem 0.7rem;
+      cursor: pointer;
+      font-size: 0.82rem;
+    }
+    .post-page-btn:disabled { opacity: .45; cursor: default; }
+    .post-page-info { font-size: 0.8rem; color: var(--muted); }
 
     .backup-wrap { max-width: 980px; }
     .backup-grid {
@@ -1199,7 +1227,7 @@
     </div>
     <div class="splash-title">创造时间的<span class="accent">琥珀</span></div>
     <div class="splash-line"></div>
-    <div class="splash-quote">Fill your paper with the breathings of your heart.</div>
+    <div class="splash-quote" id="splash-quote"></div>
     <div class="splash-dots">
       <div class="splash-dot"></div>
       <div class="splash-dot"></div>
@@ -1260,44 +1288,48 @@
         </div>
       </div>
       <div class="home-main-content">
-        <div class="hero-section">
-          <div class="hero-icon">&#9998;</div>
-          <div class="hero-quote-en">"Fill your paper with the breathings of your heart."</div>
-          <div class="hero-divider"></div>
-          <div class="hero-desc">
-            用文字记录生活的呼吸，用心感受每一个平凡的瞬间。<br>
-            欢迎来到我的小角落，这里收藏着关于生活、思考与梦想的文字。
+        <div class="home-top-grid">
+          <div class="hero-section">
+            <div class="hero-icon">&#9998;</div>
+            <div class="hero-quote-en" id="hero-quote-en"></div>
+            <div class="hero-divider"></div>
+            <div class="hero-desc">
+              用文字记录生活的呼吸，用心感受每一个平凡的瞬间。<br>
+              欢迎来到我的小角落，这里收藏着关于生活、思考与梦想的文字。
+            </div>
+          </div>
+
+          <div class="home-planner-section">
+            <div class="planner-container">
+              <div class="planner-header">
+                <div class="planner-month-nav">
+                  <button class="planner-nav-btn" onclick="plannerPrevMonth()">&#8249;</button>
+                  <div class="planner-month-title" id="planner-month-title"></div>
+                  <button class="planner-nav-btn" onclick="plannerNextMonth()">&#8250;</button>
+                </div>
+                <button class="planner-today-btn" onclick="plannerGoToday()">今天</button>
+              </div>
+              <div class="planner-cal-grid" id="planner-cal-grid"></div>
+              <div class="planner-detail" id="planner-detail">
+                <div class="planner-detail-header">
+                  <div class="planner-detail-date" id="planner-detail-date">选择一个日期</div>
+                </div>
+                <div id="planner-detail-content">
+                  <p style="color: var(--muted); font-size: 0.9rem;">点击日历上的日期查看或添加待办事项</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+
         <p class="section-label">最新文章</p>
         <ul class="post-list" id="post-list">
           <div class="loading-msg">加载中...</div>
         </ul>
+        <div class="post-pagination" id="post-pagination"></div>
         <div id="trash-bin" style="margin-top:1rem;border-top:1px dashed #ddd;padding-top:0.8rem;">
           <p class="section-label" style="margin:0 0 0.5rem 0;">回收站（7天后自动清理）</p>
           <div id="trash-list" style="font-size:0.85rem;color:var(--muted);">暂无已删除文章</div>
-        </div>
-
-        <div class="home-planner-section">
-          <div class="planner-container">
-            <div class="planner-header">
-              <div class="planner-month-nav">
-                <button class="planner-nav-btn" onclick="plannerPrevMonth()">&#8249;</button>
-                <div class="planner-month-title" id="planner-month-title"></div>
-                <button class="planner-nav-btn" onclick="plannerNextMonth()">&#8250;</button>
-              </div>
-              <button class="planner-today-btn" onclick="plannerGoToday()">今天</button>
-            </div>
-            <div class="planner-cal-grid" id="planner-cal-grid"></div>
-            <div class="planner-detail" id="planner-detail">
-              <div class="planner-detail-header">
-                <div class="planner-detail-date" id="planner-detail-date">选择一个日期</div>
-              </div>
-              <div id="planner-detail-content">
-                <p style="color: var(--muted); font-size: 0.9rem;">点击日历上的日期查看或添加待办事项</p>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -1684,6 +1716,18 @@
   var todosData = {};
   var photosData = [];
   var booksData = [];
+  var postPage = 1;
+  var postPageSize = 5;
+  var quotePool = [
+    "I write to discover what I think.",
+    "Fill your paper with the breathings of your heart.",
+    "Journal writing is a voyage to the interior.",
+    "Write what disturbs you, what you fear, what you have not been willing to speak about.",
+    "The life of every man is a diary in which he means to write one story, and writes another.",
+    "Keep a diary, and someday it'll keep you.",
+    "Write as if no one is reading.",
+    "The discipline of writing something down is the first step toward making it happen."
+  ];
   var editingPostId = null;
   var currentPostId = null;
   var currentView = 'list';
@@ -1760,6 +1804,15 @@
     var el = document.getElementById('app-version-badge');
     if (el) el.textContent = "build " + APP_BUILD;
   })();
+  function applyRandomQuote() {
+    var idx = Math.floor(Math.random() * quotePool.length);
+    var q = quotePool[idx] || quotePool[0];
+    var splash = document.getElementById('splash-quote');
+    var hero = document.getElementById('hero-quote-en');
+    if (splash) splash.textContent = q;
+    if (hero) hero.textContent = '"' + q + '"';
+  }
+
 
   (function initBearDrag() {
     var bear = document.querySelector('.bear-image-widget');
@@ -1894,11 +1947,22 @@
   // ─── Render Post List ───
   function renderList() {
     var ul = document.getElementById('post-list');
+    var pager = document.getElementById('post-pagination');
     if (posts.length === 0) {
       ul.innerHTML = '<div class="empty-state">&#10022;<p>还没有文章，去写第一篇吧！</p></div>';
+      if (pager) pager.innerHTML = '';
       return;
     }
-    ul.innerHTML = posts.slice().reverse().map(function(p) {
+
+    var sorted = posts.slice().reverse();
+    var totalPages = Math.max(1, Math.ceil(sorted.length / postPageSize));
+    if (postPage > totalPages) postPage = totalPages;
+    if (postPage < 1) postPage = 1;
+
+    var startIdx = (postPage - 1) * postPageSize;
+    var pageItems = sorted.slice(startIdx, startIdx + postPageSize);
+
+    ul.innerHTML = pageItems.map(function(p) {
       var timeStr = p.time ? ' ' + p.time : '';
       return '<li class="post-item" onclick="openPost(' + p.id + ')">' +
         '<div class="post-date">' +
@@ -1912,7 +1976,20 @@
         '</div>' +
       '</li>';
     }).join('');
+
+    if (pager) {
+      pager.innerHTML =
+        '<button class="post-page-btn" ' + (postPage <= 1 ? 'disabled' : '') + ' onclick="changePostPage(-1)">上一页</button>' +
+        '<span class="post-page-info">第 ' + postPage + ' / ' + totalPages + ' 页</span>' +
+        '<button class="post-page-btn" ' + (postPage >= totalPages ? 'disabled' : '') + ' onclick="changePostPage(1)">下一页</button>';
+    }
+
     updateStats();
+  }
+
+  function changePostPage(delta) {
+    postPage += delta;
+    renderList();
   }
 
   function escapeHtml(text) {
@@ -2427,21 +2504,19 @@
       }
     }
 
-    var totalHours = Math.floor(totalMinutes / 60);
-    var remainMins = totalMinutes % 60;
-    var avgMinutes = totalDays > 0 ? Math.round(totalMinutes / totalDays) : 0;
+    var totalSeconds = Math.round(totalMinutes * 60);
+    var avgSeconds = totalDays > 0 ? Math.round(totalSeconds / totalDays) : 0;
 
-    var timeStr = '';
-    if (totalHours > 0) {
-      timeStr = totalHours + ' 小时 ' + remainMins + ' 分钟';
-    } else {
-      timeStr = totalMinutes + ' 分钟';
+    function formatMinSec(sec) {
+      var min = Math.floor(sec / 60);
+      var remain = sec % 60;
+      return min + ' 分钟 ' + remain + ' 秒';
     }
 
     statsEl.innerHTML =
-      '<div class="history-stat"><div class="history-stat-num">' + timeStr + '</div><div class="history-stat-label">总写作时间</div></div>' +
+      '<div class="history-stat"><div class="history-stat-num">' + formatMinSec(totalSeconds) + '</div><div class="history-stat-label">总写作时间</div></div>' +
       '<div class="history-stat"><div class="history-stat-num">' + totalDays + ' 天</div><div class="history-stat-label">写作天数</div></div>' +
-      '<div class="history-stat"><div class="history-stat-num">' + avgMinutes + ' 分钟</div><div class="history-stat-label">平均每次</div></div>' +
+      '<div class="history-stat"><div class="history-stat-num">' + formatMinSec(avgSeconds) + '</div><div class="history-stat-label">平均每次</div></div>' +
       '<div class="history-stat"><div class="history-stat-num">' + posts.length + ' 篇</div><div class="history-stat-label">累计文章</div></div>';
   }
 
@@ -4120,6 +4195,7 @@
     });
   }
 
+  applyRandomQuote();
   loadAllData();
 
   // Init photo wall background settings on page load
