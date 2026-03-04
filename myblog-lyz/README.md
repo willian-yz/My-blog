@@ -43,6 +43,25 @@ npx wrangler login
 - **Build output directory**: `/`（根目录）
 - **Deploy command**: `npx wrangler versions upload`
 
+
+## Cloudflare Workers 资源大小限制（Godot wasm）
+
+Cloudflare Workers 静态资源单文件上限是 **25 MiB**，而 `public/godot/slingshot/slingshot.wasm` 约 35.9 MiB，
+直接放在 `public/` 会导致 `Asset too large` 构建失败。
+
+已做的兼容改造：
+
+- Worker 会拦截 `/godot/slingshot/slingshot.wasm` 请求。
+- 改为从环境变量 `SLINGSHOT_WASM_URL` 指向的外部存储拉取 wasm（例如 R2 公共 URL、Cloudflare Images/R2 自定义域名、其他对象存储 CDN）。
+- 页面侧路径不变，仍然请求 `/godot/slingshot/slingshot.wasm`。
+
+你需要在 Cloudflare 中配置变量：
+
+- 变量名：`SLINGSHOT_WASM_URL`
+- 示例值：`https://<your-public-bucket-domain>/godot/slingshot/slingshot.wasm`
+
+> 建议把 wasm 放到 R2 + 公共域名，再把该 URL 配到 Worker 变量中。
+
 ## 本地开发
 
 ```bash
