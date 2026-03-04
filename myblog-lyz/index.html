@@ -1844,8 +1844,7 @@
 
   function getGMT8DateObj(input) {
     var base = input ? new Date(input) : new Date();
-    var offsetMs = (8 * 60 + base.getTimezoneOffset()) * 60000;
-    return new Date(base.getTime() + offsetMs);
+    return new Date(base.getTime() + 8 * 60 * 60 * 1000);
   }
 
   function formatDateGMT8(input) {
@@ -1865,6 +1864,22 @@
       month: d.getUTCMonth(),
       day: d.getUTCDate()
     };
+  }
+
+  function normalizeLegacyPostTime(post) {
+    if (!post || typeof post !== 'object') return post;
+    var idNum = Number(post.id);
+    if (!Number.isFinite(idNum) || idNum < 946684800000) return post;
+
+    var created = new Date(idNum);
+    var legacyDate = created.getUTCFullYear() + '-' + pad2(created.getUTCMonth() + 1) + '-' + pad2(created.getUTCDate());
+    var legacyTime = pad2(created.getUTCHours()) + ':' + pad2(created.getUTCMinutes());
+    var fixedDate = formatDateGMT8(created);
+    var fixedTime = formatTimeGMT8(created);
+
+    if (post.date === legacyDate) post.date = fixedDate;
+    if (post.time === legacyTime) post.time = fixedTime;
+    return post;
   }
 
   (function showBuildVersion(){
@@ -1987,13 +2002,13 @@
         apiFetch('/api/books'),
         apiFetch('/api/trash')
       ]);
-      posts = results[0] || [];
+      posts = (results[0] || []).map(function(post) { return normalizeLegacyPostTime(post); });
       profile = results[1] || profile;
       calendarData = results[2] || {};
       todosData = results[3] || {};
       photosData = results[4] || [];
       booksData = results[5] || [];
-      deletedPosts = results[6] || [];
+      deletedPosts = (results[6] || []).map(function(post) { return normalizeLegacyPostTime(post); });
       purgeExpiredTrash();
       renderList();
       renderTrashBin();
