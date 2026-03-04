@@ -11,6 +11,41 @@ import { onRequest as trashHandler } from "./functions/api/trash.js";
 
 const BUILD_VERSION = "2026-03-02-b386d2a-hotfix";
 
+const SLINGSHOT_WASM_PATH = "/godot/slingshot/slingshot.wasm";
+
+async function serveSlingshotWasm(env) {
+  const wasmUrl = env.SLINGSHOT_WASM_URL;
+  if (!wasmUrl) {
+    return new Response(
+      "Missing SLINGSHOT_WASM_URL binding. Upload slingshot.wasm to external storage and point this env var to it.",
+      { status: 503, headers: { "Content-Type": "text/plain; charset=utf-8" } },
+    );
+  }
+
+  const upstream = await fetch(wasmUrl, {
+    cf: {
+      cacheEverything: true,
+      cacheTtl: 86400,
+    },
+  });
+
+  if (!upstream.ok) {
+    return new Response("Failed to load slingshot.wasm from upstream storage", {
+      status: 502,
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+    });
+  }
+
+  const headers = new Headers(upstream.headers);
+  headers.set("Content-Type", "application/wasm");
+  headers.set("Cache-Control", "public, max-age=86400");
+  return new Response(upstream.body, {
+    status: upstream.status,
+    statusText: upstream.statusText,
+    headers,
+  });
+}
+
 const routes = {
   "/api/posts": postsHandler,
   "/api/profile": profileHandler,
@@ -45,6 +80,10 @@ export default {
 
     if (handler) {
       return handler({ request, env, ctx });
+    }
+
+    if (url.pathname === SLINGSHOT_WASM_PATH) {
+      return serveSlingshotWasm(env);
     }
 
     if (url.pathname.startsWith("/api/")) {
