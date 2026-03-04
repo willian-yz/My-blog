@@ -10,6 +10,8 @@ const RELEASING := 2
 @export var impulse_scale: float = 8.0
 @export var max_impulse: float = 1000.0
 @export var pickup_radius: float = 34.0
+@export var auto_reset_delay: float = 1.6
+@export var reset_bounds: Rect2 = Rect2(Vector2(-520, -320), Vector2(1040, 760))
 
 @onready var anchor_left: Node2D = $AnchorLeft
 @onready var anchor_right: Node2D = $AnchorRight
@@ -21,6 +23,7 @@ const RELEASING := 2
 var state: int = IDLE
 var rest_mid: Vector2
 var projectile_start_global: Vector2
+var reset_timer: float = 0.0
 
 func _ready() -> void:
 	rest_mid = band_mid.global_position
@@ -28,6 +31,17 @@ func _ready() -> void:
 	projectile.freeze = true
 	_reset_projectile()
 	_update_band_visual()
+	set_process(true)
+
+func _process(delta: float) -> void:
+	if state == DRAGGING:
+		return
+
+	if not projectile.freeze:
+		reset_timer -= delta
+		if reset_timer <= 0.0 or not reset_bounds.has_point(projectile.global_position):
+			_reset_projectile()
+			state = IDLE
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
@@ -63,6 +77,7 @@ func _release_slingshot() -> void:
 		projectile.freeze = false
 		var impulse := offset.normalized() * impulse_strength
 		projectile.apply_impulse(impulse)
+		reset_timer = auto_reset_delay
 
 	# 立刻回到初始状态
 	band_mid.global_position = rest_mid
@@ -86,3 +101,4 @@ func _reset_projectile() -> void:
 	projectile.global_position = projectile_start_global
 	projectile.linear_velocity = Vector2.ZERO
 	projectile.angular_velocity = 0.0
+	reset_timer = 0.0
