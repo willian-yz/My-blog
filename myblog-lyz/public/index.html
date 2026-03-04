@@ -1049,18 +1049,6 @@
     #doodle-canvas { background:#fff; display:block; margin:0 auto; cursor:crosshair; max-width:100%; touch-action: none; }
 
     /* ─── Godot Slingshot Input Boundary ─── */
-    #slingshot-container,
-    #godot-container,
-    [data-godot-sling] {
-      position: relative;
-      pointer-events: none;
-    }
-    #slingshot-container canvas,
-    #godot-container canvas,
-    [data-godot-sling] canvas {
-      pointer-events: auto;
-      touch-action: none;
-    }
     .doodle-gallery { margin-top: 1rem; display:grid; grid-template-columns: repeat(auto-fill,minmax(170px,1fr)); gap: 0.8rem; }
     .doodle-card { border:1px solid var(--line); border-radius: 8px; padding:0.5rem; background:#fff; }
     .doodle-card img { width:100%; height:120px; object-fit:cover; border-radius:6px; display:block; }
@@ -1413,7 +1401,8 @@
       padding-top: 0.35rem;
     }
     .site-title {
-      padding: 0.9rem 0 1.05rem 1.4rem;
+      transform: translateX(0);
+      padding: 0.9rem 0 1.05rem 1.9rem;
       text-shadow: 0 1px 0 rgba(255,255,255,0.8);
     }
     nav button {
@@ -1436,6 +1425,9 @@
     .photo-wall-sidebar,
     .backup-card,
     .profile-edit-form,
+    .doodle-board-wrap,
+    .doodle-card,
+    .doodle-toolbar,
     .writing-history,
     .planner-detail,
     .audio-url-panel,
@@ -1443,8 +1435,7 @@
     .photo-modal,
     .ebook-settings-panel,
     .bookshelf,
-    #epub-viewer,
-    #slingshot-godot-host {
+    #epub-viewer {
       background: linear-gradient(180deg, rgba(255,255,255,0.74), rgba(255,248,242,0.9));
       border: 1px solid rgba(255,255,255,0.58);
       box-shadow: var(--shadow-soft);
@@ -1476,15 +1467,29 @@
       align-items: flex-start;
       gap: 2rem;
     }
+    .home-main-content {
+      gap: 1.15rem;
+    }
     .photo-wall-sidebar {
       padding: 1.2rem;
       margin-left: 0;
       border-radius: 28px;
     }
+    .home-top-grid {
+      grid-template-columns: minmax(420px, 1.1fr) minmax(360px, 0.9fr);
+      gap: 1.4rem;
+      margin-bottom: 0;
+    }
     .home-planner-section {
       border-radius: 26px;
       border-width: 1px;
       transform: translateX(18px);
+    }
+    .home-posts-block {
+      grid-column: 1 / span 2;
+      grid-row: 2;
+      max-width: none;
+      margin-top: 0;
     }
     .pw-container {
       border-radius: 22px;
@@ -1501,6 +1506,8 @@
     .editor-toolbar,
     .editor-area,
     .profile-edit-form,
+    .doodle-board-wrap,
+    .doodle-card,
     .post-item,
     .book-cover,
     .ebook-toc-panel {
@@ -1664,6 +1671,26 @@
     .polaroid {
       border-radius: 14px;
     }
+    .doodle-toolbar {
+      padding: 0.9rem 1rem;
+      border-radius: 18px;
+    }
+    .doodle-toolbar button,
+    .doodle-card-actions button {
+      border-radius: 999px;
+      background: rgba(255,255,255,0.82);
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+    .doodle-toolbar button:hover,
+    .doodle-card-actions button:hover {
+      transform: translateY(-1px);
+      border-color: var(--accent);
+      background: rgba(255,255,255,0.96);
+    }
+    .doodle-board-wrap,
+    .doodle-card {
+      border-radius: 22px;
+    }
     .polaroid {
       box-shadow: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
     }
@@ -1690,8 +1717,15 @@
       .photo-wall-sidebar {
         width: 100%;
       }
+      .home-top-grid {
+        grid-template-columns: 1fr;
+      }
       .home-planner-section {
         transform: none;
+      }
+      .home-posts-block {
+        grid-column: 1;
+        grid-row: auto;
       }
       .header-inner {
         border-radius: 28px;
@@ -2263,7 +2297,6 @@
 
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/epubjs@0.3.93/dist/epub.min.js"></script>
-<script src="/godot/slingshot/bootstrap.js"></script>
 <script>
   // ─── State ───
   var APP_BUILD = "2026-03-02-b386d2a-hotfix";
@@ -2939,7 +2972,6 @@
     var panel = document.getElementById('trash-panel');
     if (panel) panel.classList.remove('show');
     currentView = name;
-    setGodotVisibilityState(name === 'list');
     if (name === 'list') { renderList(); renderPhotoWall(); renderPlannerCalendar(); renderPlannerDetail(); renderCalendar(); renderWritingHistory(); }
     if (name === 'about') { renderProfile(); }
     if (name === 'backup') { renderBackupPostList(); }
@@ -2953,89 +2985,15 @@
     }
   }
 
-  function resolveSlingshotContainer() {
-    return document.getElementById('slingshot-container') ||
-      document.getElementById('godot-container') ||
-      document.querySelector('[data-godot-sling]');
-  }
-
-  function resolveSlingshotCanvas() {
-    var container = resolveSlingshotContainer();
-    return container ? container.querySelector('canvas') : null;
-  }
-
-  function markSlingshotDragging(flag) {
-    window.__slingshotDragging = !!flag;
-  }
-
-  function bindSlingshotTouchPolicy() {
-    var container = resolveSlingshotContainer();
-    var canvas = resolveSlingshotCanvas();
-    if (!container || !canvas || container.__slingshotTouchBound) return;
-    container.__slingshotTouchBound = true;
-
-    function stopDrag() {
-      markSlingshotDragging(false);
-    }
-
-    canvas.addEventListener('pointerdown', function() {
-      markSlingshotDragging(true);
-    });
-    canvas.addEventListener('pointerup', stopDrag);
-    canvas.addEventListener('pointercancel', stopDrag);
-    canvas.addEventListener('lostpointercapture', stopDrag);
-
-    container.addEventListener('touchmove', function(e) {
-      if (!window.__slingshotDragging) return;
-      e.preventDefault();
-    }, { passive: false });
-  }
-
-  function setGodotVisibilityState(visible) {
-    var container = resolveSlingshotContainer();
-    if (!container) return;
-
-    container.style.visibility = visible ? 'visible' : 'hidden';
-    container.style.pointerEvents = 'none';
-
-    var instance = window.__slingshotGodotInstance;
-    if (!instance) return;
-
-    if (visible) {
-      if (typeof instance.resume === 'function') instance.resume();
-      else if (typeof instance.setPaused === 'function') instance.setPaused(false);
-      else if (typeof instance.setLowProcessorUsageMode === 'function') instance.setLowProcessorUsageMode(false);
-    } else {
-      if (typeof instance.pause === 'function') instance.pause();
-      else if (typeof instance.setPaused === 'function') instance.setPaused(true);
-      else if (typeof instance.setLowProcessorUsageMode === 'function') instance.setLowProcessorUsageMode(true);
-    }
-  }
-
-  function destroySlingshotGodot() {
-    var instance = window.__slingshotGodotInstance;
-    if (!instance) {
-      window.__slingshotBooted = false;
-      return;
-    }
-
-    if (typeof instance.destroy === 'function') instance.destroy();
-    else if (typeof instance.quit === 'function') instance.quit();
-
-    window.__slingshotGodotInstance = null;
-    window.__slingshotBooted = false;
-  }
-
   function showSlingshotFallback(message) {
+    return;
     var container = resolveSlingshotContainer();
     if (!container) return;
     container.innerHTML = '<div class="godot-fallback-msg">' + escapeHtml(message || '弹弓加载失败，请刷新') + '</div>';
   }
 
   function initSlingshotGodot() {
-    var container = resolveSlingshotContainer();
-    if (!container) return;
-    if (window.__slingshotBooted) return;
+    return;
 
     window.__slingshotBooted = true;
     container.dataset.godotBooted = '1';
@@ -5623,8 +5581,6 @@
 
   loadAllData();
   initDoodleBoard();
-  initSlingshotGodot();
-  window.addEventListener('beforeunload', destroySlingshotGodot);
 
   // Init photo wall background settings on page load
   setTimeout(function() {
