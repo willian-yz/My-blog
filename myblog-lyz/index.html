@@ -1307,6 +1307,396 @@
     main { max-width: 1200px; }
     .view:not(#list-view) { max-width: 860px; margin: 0 auto; }
     body.has-audio-player main { padding-bottom: 80px; }
+
+    /* Warm visual refresh */
+    :root {
+      --ink: #34261c;
+      --paper: #fffaf4;
+      --paper-deep: #f6ede2;
+      --surface: rgba(255, 252, 247, 0.78);
+      --surface-strong: rgba(255, 251, 245, 0.92);
+      --accent: #cc7a5b;
+      --accent-strong: #ab5d42;
+      --accent-soft: #f2c9b7;
+      --muted: #7c6a5e;
+      --line: rgba(137, 108, 87, 0.18);
+      --hover-bg: rgba(255, 244, 235, 0.9);
+      --shadow-soft: 0 18px 45px rgba(110, 84, 67, 0.10);
+      --shadow-card: 0 14px 30px rgba(87, 61, 45, 0.08);
+      --mx: 50%;
+      --my: 18%;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background:
+        radial-gradient(circle at 12% 18%, rgba(255, 216, 192, 0.82), transparent 24%),
+        radial-gradient(circle at 84% 12%, rgba(255, 230, 204, 0.72), transparent 26%),
+        radial-gradient(circle at 50% 100%, rgba(243, 209, 193, 0.58), transparent 30%),
+        linear-gradient(180deg, #fffdf9 0%, #fff7ee 42%, #fbf1e7 100%);
+      position: relative;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+    body::before,
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+    }
+    body::before {
+      opacity: 0.55;
+      background:
+        linear-gradient(rgba(255,255,255,0.14) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.14) 1px, transparent 1px);
+      background-size: 28px 28px;
+      mask-image: radial-gradient(circle at center, black 38%, transparent 100%);
+    }
+    body::after {
+      opacity: 0.78;
+      background:
+        radial-gradient(260px circle at var(--mx) var(--my), rgba(255, 255, 255, 0.72), transparent 60%),
+        radial-gradient(520px circle at var(--mx) var(--my), rgba(255, 217, 197, 0.22), transparent 62%);
+      transition: opacity 0.25s ease-out;
+    }
+    body[data-pointer='idle']::after { opacity: 0.44; }
+    button, [role="button"] { cursor: pointer; }
+    ::selection {
+      background: rgba(204, 122, 91, 0.18);
+      color: var(--ink);
+    }
+    #splash {
+      background:
+        radial-gradient(circle at top, rgba(255, 227, 210, 0.88), transparent 34%),
+        linear-gradient(180deg, #fffaf5 0%, #f9efe5 100%);
+    }
+    #app {
+      position: relative;
+      isolation: isolate;
+    }
+    header {
+      padding-top: 1rem;
+      border-bottom: 1px solid rgba(137, 108, 87, 0.14);
+      background: rgba(255, 250, 244, 0.72);
+      backdrop-filter: blur(18px);
+    }
+    .header-inner {
+      max-width: 1360px;
+      border: 1px solid rgba(255,255,255,0.58);
+      border-radius: 999px;
+      background: rgba(255, 252, 247, 0.72);
+      box-shadow: 0 12px 30px rgba(122, 96, 78, 0.08);
+      padding-top: 0.35rem;
+    }
+    .site-title {
+      padding: 0.9rem 0 1.05rem 1.4rem;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+    }
+    nav button {
+      padding: 0.95rem 0 1.25rem;
+      transition: color 0.24s ease, border-color 0.24s ease, transform 0.24s ease;
+    }
+    nav button:hover,
+    nav button.active {
+      transform: translateY(-1px);
+    }
+    main {
+      max-width: 1400px;
+      padding: 3rem 2rem 6rem;
+    }
+    .view:not(#list-view) {
+      max-width: 920px;
+    }
+    .hero-section,
+    .home-planner-section,
+    .photo-wall-sidebar,
+    .backup-card,
+    .profile-edit-form,
+    .writing-history,
+    .planner-detail,
+    .audio-url-panel,
+    .trash-panel,
+    .photo-modal,
+    .ebook-settings-panel,
+    .bookshelf,
+    #epub-viewer,
+    #slingshot-godot-host {
+      background: linear-gradient(180deg, rgba(255,255,255,0.74), rgba(255,248,242,0.9));
+      border: 1px solid rgba(255,255,255,0.58);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(14px);
+    }
+    .hero-section {
+      position: relative;
+      overflow: hidden;
+      padding: 2.2rem 2rem 2.4rem;
+      border-radius: 28px;
+      border-bottom: 1px solid rgba(255,255,255,0.58);
+    }
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 211, 188, 0.5), transparent 68%);
+      top: -110px;
+      right: -40px;
+      pointer-events: none;
+    }
+    .hero-divider {
+      width: 56px;
+      border-radius: 999px;
+    }
+    .home-layout {
+      align-items: flex-start;
+      gap: 2rem;
+    }
+    .photo-wall-sidebar {
+      padding: 1.2rem;
+      margin-left: 0;
+      border-radius: 28px;
+    }
+    .home-planner-section {
+      border-radius: 26px;
+      border-width: 1px;
+      transform: translateX(18px);
+    }
+    .pw-container {
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,0.65), transparent 30%),
+        linear-gradient(180deg, rgba(255,255,255,0.32), rgba(250,238,227,0.56));
+      border: 1px dashed rgba(171, 93, 66, 0.16);
+    }
+    .pw-bg-settings,
+    .backup-post-list,
+    .planner-note-area,
+    .planner-day,
+    .photo-modal-canvas-wrap,
+    .editor-toolbar,
+    .editor-area,
+    .profile-edit-form,
+    .post-item,
+    .book-cover,
+    .ebook-toc-panel {
+      box-shadow: var(--shadow-card);
+    }
+    .post-item {
+      padding: 1.25rem 1.2rem;
+      border-radius: 18px;
+      transition: background 0.22s ease, transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    }
+    .post-item:hover {
+      margin: 0;
+      background: rgba(255, 251, 246, 0.96);
+      transform: translateY(-2px);
+      border-color: transparent;
+      box-shadow: var(--shadow-card);
+    }
+    .btn-action,
+    .backup-btn,
+    .planner-tab-btn,
+    .planner-today-btn,
+    .planner-nav-btn,
+    .btn-edit-profile,
+    .btn-upload-avatar,
+    .btn-reset,
+    .post-page-btn,
+    .pw-toolbar-btn,
+    .photo-ctrl-btn,
+    .ebook-size-btn,
+    .ebook-weight-btn {
+      border-radius: 999px;
+      background: rgba(255,255,255,0.72);
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .btn-action:hover,
+    .backup-btn:hover,
+    .planner-tab-btn:hover,
+    .planner-today-btn:hover,
+    .planner-nav-btn:hover,
+    .btn-edit-profile:hover,
+    .btn-upload-avatar:hover,
+    .btn-reset:hover,
+    .post-page-btn:not(:disabled):hover,
+    .pw-toolbar-btn:hover,
+    .photo-ctrl-btn:hover,
+    .ebook-size-btn:hover,
+    .ebook-weight-btn:hover {
+      border-color: var(--accent);
+      color: var(--ink);
+      background: rgba(255,255,255,0.94);
+      transform: translateY(-1px);
+    }
+    .submit-btn,
+    .pw-add-btn,
+    .bookshelf-import-btn,
+    .planner-add-btn,
+    .todo-input-row button,
+    .photo-modal-actions .pm-save,
+    .btn-save-profile,
+    .planner-note-save,
+    .backup-btn.primary,
+    .audio-url-panel button {
+      background: linear-gradient(135deg, var(--accent-strong), var(--accent));
+      color: #fff;
+      border-color: transparent;
+      border-radius: 999px;
+      box-shadow: 0 12px 24px rgba(171, 93, 66, 0.20);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    }
+    .submit-btn:hover,
+    .pw-add-btn:hover,
+    .bookshelf-import-btn:hover,
+    .planner-add-btn:hover,
+    .todo-input-row button:hover,
+    .photo-modal-actions .pm-save:hover,
+    .btn-save-profile:hover,
+    .planner-note-save:hover,
+    .backup-btn.primary:hover,
+    .audio-url-panel button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 28px rgba(171, 93, 66, 0.28);
+      filter: saturate(1.06);
+    }
+    .cancel-btn,
+    .btn-cancel-profile {
+      border-radius: 999px;
+      background: rgba(255,255,255,0.7);
+    }
+    input[type="text"],
+    select,
+    textarea.edit-textarea,
+    .photo-text-input,
+    .audio-url-panel input,
+    .todo-input-row input {
+      background: rgba(255,255,255,0.86);
+      border-radius: 14px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+    input:focus,
+    select:focus,
+    textarea.edit-textarea:focus,
+    .photo-text-input:focus,
+    .audio-url-panel input:focus,
+    .todo-input-row input:focus,
+    .editor-area:focus,
+    .planner-note-area:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(204, 122, 91, 0.12);
+      background: rgba(255,255,255,0.96);
+    }
+    .editor-toolbar {
+      background: rgba(255,255,255,0.88);
+      border-radius: 18px 18px 0 0;
+    }
+    .editor-area {
+      background: rgba(255,255,255,0.88);
+      border-radius: 0 0 18px 18px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+    .planner-day {
+      background: rgba(255,255,255,0.82);
+      border-radius: 14px;
+    }
+    .planner-day:hover {
+      background: rgba(255, 247, 239, 0.98);
+      transform: translateY(-1px);
+    }
+    .planner-day.selected {
+      background: linear-gradient(135deg, var(--accent-strong), var(--accent));
+    }
+    .audio-player-bar {
+      height: 72px;
+      background: rgba(52, 38, 28, 0.9);
+      box-shadow: 0 -10px 30px rgba(52, 38, 28, 0.18);
+      backdrop-filter: blur(16px);
+    }
+    .audio-play-btn {
+      border-color: rgba(255,255,255,0.55);
+    }
+    .audio-url-panel,
+    .trash-panel,
+    .ebook-settings-panel,
+    .ebook-toc-panel,
+    .photo-modal {
+      border-radius: 24px;
+    }
+    .ebook-toc-panel {
+      background: rgba(255,255,255,0.94);
+    }
+    #epub-viewer {
+      border-radius: 18px;
+    }
+    .book-card {
+      transition: transform 0.2s ease, filter 0.2s ease;
+    }
+    .book-card:hover {
+      transform: translateY(-4px);
+      filter: saturate(1.03);
+    }
+    .book-cover,
+    .polaroid {
+      border-radius: 14px;
+    }
+    .polaroid {
+      box-shadow: 0 8px 24px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .polaroid:hover {
+      box-shadow: 0 16px 32px rgba(87, 61, 45, 0.18);
+    }
+    .trash-fab {
+      background: rgba(255,255,255,0.92);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.10);
+      transition: transform 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+    .trash-fab:hover {
+      transform: translateY(-2px);
+    }
+    .app-version-badge {
+      background: rgba(255,255,255,0.42);
+      border: 1px solid rgba(160,160,160,0.18);
+      backdrop-filter: blur(10px);
+    }
+    .bear-image-widget img {
+      filter: drop-shadow(0 20px 28px rgba(95, 73, 59, 0.22));
+    }
+    @media (max-width: 960px) {
+      .photo-wall-sidebar {
+        width: 100%;
+      }
+      .home-planner-section {
+        transform: none;
+      }
+      .header-inner {
+        border-radius: 28px;
+      }
+    }
+    @media (max-width: 640px) {
+      main {
+        padding: 2rem 1rem 6rem;
+      }
+      .hero-section,
+      .photo-wall-sidebar,
+      .home-planner-section,
+      .backup-card {
+        border-radius: 22px;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+      body::after {
+        display: none;
+      }
+    }
   </style>
 </head>
 <body>
@@ -4444,6 +4834,43 @@
     document.body.appendChild(script);
   }
 
+  function initPointerAmbient() {
+    if (!window.matchMedia || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+    var root = document.documentElement;
+    var body = document.body;
+    var rafId = 0;
+    var nextX = window.innerWidth * 0.5;
+    var nextY = window.innerHeight * 0.18;
+    var idleTimer = null;
+
+    function paint() {
+      rafId = 0;
+      root.style.setProperty('--mx', nextX + 'px');
+      root.style.setProperty('--my', nextY + 'px');
+    }
+
+    function setActivePointer() {
+      body.setAttribute('data-pointer', 'active');
+      window.clearTimeout(idleTimer);
+      idleTimer = window.setTimeout(function() {
+        body.setAttribute('data-pointer', 'idle');
+      }, 1400);
+    }
+
+    function onPointerMove(e) {
+      nextX = e.clientX;
+      nextY = e.clientY;
+      if (!rafId) rafId = window.requestAnimationFrame(paint);
+      setActivePointer();
+    }
+
+    body.setAttribute('data-pointer', 'idle');
+    window.addEventListener('pointermove', onPointerMove, { passive: true });
+    window.addEventListener('pointerdown', onPointerMove, { passive: true });
+  }
+
   // ─── Initialize ───
   var backupInputEl = document.getElementById('backup-import-input');
   if (backupInputEl) {
@@ -4460,6 +4887,7 @@
   }
 
   applyRandomQuote();
+  initPointerAmbient();
   initSlingshotGodot();
   var editorEl = document.getElementById('editor-area');
   if (editorEl) {
