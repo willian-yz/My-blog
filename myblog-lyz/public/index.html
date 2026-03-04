@@ -1047,6 +1047,20 @@
     .doodle-toolbar button:hover { border-color: var(--ink); }
     .doodle-board-wrap { border:1px solid var(--line); border-radius: 8px; overflow:auto; background:#fff; padding:0.6rem; }
     #doodle-canvas { background:#fff; display:block; margin:0 auto; cursor:crosshair; max-width:100%; touch-action: none; }
+
+    /* ─── Godot Slingshot Input Boundary ─── */
+    #slingshot-container,
+    #godot-container,
+    [data-godot-sling] {
+      position: relative;
+      pointer-events: none;
+    }
+    #slingshot-container canvas,
+    #godot-container canvas,
+    [data-godot-sling] canvas {
+      pointer-events: auto;
+      touch-action: none;
+    }
     .doodle-gallery { margin-top: 1rem; display:grid; grid-template-columns: repeat(auto-fill,minmax(170px,1fr)); gap: 0.8rem; }
     .doodle-card { border:1px solid var(--line); border-radius: 8px; padding:0.5rem; background:#fff; }
     .doodle-card img { width:100%; height:120px; object-fit:cover; border-radius:6px; display:block; }
@@ -2534,6 +2548,7 @@
     var panel = document.getElementById('trash-panel');
     if (panel) panel.classList.remove('show');
     currentView = name;
+    setGodotVisibilityState(name === 'list');
     if (name === 'list') { renderList(); renderPhotoWall(); renderPlannerCalendar(); renderPlannerDetail(); renderCalendar(); renderWritingHistory(); }
     if (name === 'about') { renderProfile(); }
     if (name === 'backup') { renderBackupPostList(); }
@@ -2544,6 +2559,110 @@
       document.getElementById('submit-btn').innerHTML = '发布文章 &#8594;';
       document.getElementById('cancel-edit-btn').style.display = 'none';
       resetWriteTimer();
+    }
+  }
+
+  function resolveSlingshotContainer() {
+    return document.getElementById('slingshot-container') ||
+      document.getElementById('godot-container') ||
+      document.querySelector('[data-godot-sling]');
+  }
+
+  function resolveSlingshotCanvas() {
+    var container = resolveSlingshotContainer();
+    return container ? container.querySelector('canvas') : null;
+  }
+
+  function markSlingshotDragging(flag) {
+    window.__slingshotDragging = !!flag;
+  }
+
+  function bindSlingshotTouchPolicy() {
+    var container = resolveSlingshotContainer();
+    var canvas = resolveSlingshotCanvas();
+    if (!container || !canvas || container.__slingshotTouchBound) return;
+    container.__slingshotTouchBound = true;
+
+    function stopDrag() {
+      markSlingshotDragging(false);
+    }
+
+    canvas.addEventListener('pointerdown', function() {
+      markSlingshotDragging(true);
+    });
+    canvas.addEventListener('pointerup', stopDrag);
+    canvas.addEventListener('pointercancel', stopDrag);
+    canvas.addEventListener('lostpointercapture', stopDrag);
+
+    container.addEventListener('touchmove', function(e) {
+      if (!window.__slingshotDragging) return;
+      e.preventDefault();
+    }, { passive: false });
+  }
+
+  function setGodotVisibilityState(visible) {
+    var container = resolveSlingshotContainer();
+    if (!container) return;
+
+    container.style.visibility = visible ? 'visible' : 'hidden';
+    container.style.pointerEvents = 'none';
+
+    var instance = window.__slingshotGodotInstance;
+    if (!instance) return;
+
+    if (visible) {
+      if (typeof instance.resume === 'function') instance.resume();
+      else if (typeof instance.setPaused === 'function') instance.setPaused(false);
+      else if (typeof instance.setLowProcessorUsageMode === 'function') instance.setLowProcessorUsageMode(false);
+    } else {
+      if (typeof instance.pause === 'function') instance.pause();
+      else if (typeof instance.setPaused === 'function') instance.setPaused(true);
+      else if (typeof instance.setLowProcessorUsageMode === 'function') instance.setLowProcessorUsageMode(true);
+    }
+  }
+
+  function destroySlingshotGodot() {
+    var instance = window.__slingshotGodotInstance;
+    if (!instance) {
+      window.__slingshotBooted = false;
+      return;
+    }
+
+    if (typeof instance.destroy === 'function') instance.destroy();
+    else if (typeof instance.quit === 'function') instance.quit();
+
+    window.__slingshotGodotInstance = null;
+    window.__slingshotBooted = false;
+  }
+
+  function initSlingshotGodot() {
+    var container = resolveSlingshotContainer();
+    if (!container) return;
+    if (window.__slingshotBooted) return;
+
+    window.__slingshotBooted = true;
+    container.dataset.godotBooted = '1';
+    bindSlingshotTouchPolicy();
+
+    if (typeof window.startSlingshotGodot === 'function') {
+      try {
+        var maybeInstance = window.startSlingshotGodot(container);
+        if (maybeInstance && typeof maybeInstance.then === 'function') {
+          maybeInstance.then(function(instance) {
+            window.__slingshotGodotInstance = instance || null;
+            setGodotVisibilityState(currentView === 'list');
+          }).catch(function(err) {
+            console.error('Failed to boot slingshot Godot:', err);
+            window.__slingshotBooted = false;
+          });
+        } else {
+          window.__slingshotGodotInstance = maybeInstance || null;
+          setGodotVisibilityState(currentView === 'list');
+        }
+      } catch (err) {
+        console.error('Failed to boot slingshot Godot:', err);
+        window.__slingshotBooted = false;
+      }
     }
   }
 
@@ -5063,6 +5182,8 @@
 
   loadAllData();
   initDoodleBoard();
+  initSlingshotGodot();
+  window.addEventListener('beforeunload', destroySlingshotGodot);
 
   // Init photo wall background settings on page load
   setTimeout(function() {
