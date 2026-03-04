@@ -1873,6 +1873,7 @@
 
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/epubjs@0.3.93/dist/epub.min.js"></script>
+<script src="/godot/slingshot/bootstrap.js"></script>
 <script>
   // ─── State ───
   var APP_BUILD = "2026-03-02-b386d2a-hotfix";
@@ -2635,6 +2636,12 @@
     window.__slingshotBooted = false;
   }
 
+  function showSlingshotFallback(message) {
+    var container = resolveSlingshotContainer();
+    if (!container) return;
+    container.innerHTML = '<div class="godot-fallback-msg">' + escapeHtml(message || '弹弓加载失败，请刷新') + '</div>';
+  }
+
   function initSlingshotGodot() {
     var container = resolveSlingshotContainer();
     if (!container) return;
@@ -2644,25 +2651,31 @@
     container.dataset.godotBooted = '1';
     bindSlingshotTouchPolicy();
 
-    if (typeof window.startSlingshotGodot === 'function') {
-      try {
-        var maybeInstance = window.startSlingshotGodot(container);
-        if (maybeInstance && typeof maybeInstance.then === 'function') {
-          maybeInstance.then(function(instance) {
-            window.__slingshotGodotInstance = instance || null;
-            setGodotVisibilityState(currentView === 'list');
-          }).catch(function(err) {
-            console.error('Failed to boot slingshot Godot:', err);
-            window.__slingshotBooted = false;
-          });
-        } else {
-          window.__slingshotGodotInstance = maybeInstance || null;
+    if (typeof window.startSlingshotGodot !== 'function') {
+      window.__slingshotBooted = false;
+      showSlingshotFallback('弹弓加载失败，请刷新');
+      return;
+    }
+
+    try {
+      var maybeInstance = window.startSlingshotGodot(container);
+      if (maybeInstance && typeof maybeInstance.then === 'function') {
+        maybeInstance.then(function(instance) {
+          window.__slingshotGodotInstance = instance || null;
           setGodotVisibilityState(currentView === 'list');
-        }
-      } catch (err) {
-        console.error('Failed to boot slingshot Godot:', err);
-        window.__slingshotBooted = false;
+        }).catch(function(err) {
+          console.error('Failed to boot slingshot Godot:', err);
+          window.__slingshotBooted = false;
+          showSlingshotFallback('弹弓加载失败，请刷新');
+        });
+      } else {
+        window.__slingshotGodotInstance = maybeInstance || null;
+        setGodotVisibilityState(currentView === 'list');
       }
+    } catch (err) {
+      console.error('Failed to boot slingshot Godot:', err);
+      window.__slingshotBooted = false;
+      showSlingshotFallback('弹弓加载失败，请刷新');
     }
   }
 
