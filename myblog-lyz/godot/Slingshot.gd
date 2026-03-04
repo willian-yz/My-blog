@@ -9,6 +9,7 @@ const RELEASING := 2
 @export var min_drag_threshold: float = 14.0
 @export var impulse_scale: float = 8.0
 @export var max_impulse: float = 1000.0
+@export var pickup_radius: float = 34.0
 
 @onready var anchor_left: Node2D = $AnchorLeft
 @onready var anchor_right: Node2D = $AnchorRight
@@ -31,7 +32,7 @@ func _ready() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
-			if state == IDLE:
+			if state == IDLE and _can_start_drag(event.position):
 				state = DRAGGING
 				_update_drag(event.position)
 		else:
@@ -67,6 +68,9 @@ func _release_slingshot() -> void:
 	band_mid.global_position = rest_mid
 	_update_band_visual()
 	state = IDLE
+
+func _can_start_drag(mouse_pos: Vector2) -> bool:
+	return mouse_pos.distance_to(band_mid.global_position) <= pickup_radius
 
 func _update_band_visual() -> void:
 	band_left_line.clear_points()
