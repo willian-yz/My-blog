@@ -1,9 +1,0 @@
-# Exclude development/build artifacts and source-only files from Worker assets upload
-node_modules/
-functions/
-test/
-worker.js
-wrangler.toml
-package.json
-package-lock.json
-README.md
