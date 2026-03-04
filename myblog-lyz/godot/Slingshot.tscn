@@ -2,45 +2,74 @@
 
 [ext_resource type="Script" path="res://godot/Slingshot.gd" id="1"]
 
-[sub_resource type="CircleShape2D" id="1"]
-radius = 12.0
+[sub_resource type="RectangleShape2D" id="1"]
+size = Vector2(22, 22)
 
 [node name="Slingshot" type="Node2D"]
 script = ExtResource("1")
 
+[node name="PlayfieldBorder" type="Line2D" parent="."]
+default_color = Color(0.05, 0.05, 0.05, 1)
+width = 7.0
+closed = true
+points = PackedVector2Array(-220, -190, 220, -190, 220, 130, -220, 130)
+
 [node name="YFrame" type="Node2D" parent="."]
 
 [node name="Trunk" type="Line2D" parent="YFrame"]
-default_color = Color(0.431373, 0.278431, 0.145098, 1)
-width = 12.0
-points = PackedVector2Array(0, 90, 0, 180)
+default_color = Color(0.1, 0.1, 0.1, 1)
+width = 8.0
+points = PackedVector2Array(0, 90, 0, 182)
 
 [node name="BranchLeft" type="Line2D" parent="YFrame"]
-default_color = Color(0.431373, 0.278431, 0.145098, 1)
-width = 12.0
-points = PackedVector2Array(0, 90, -60, 30)
+default_color = Color(0.1, 0.1, 0.1, 1)
+width = 8.0
+points = PackedVector2Array(0, 90, -58, 34)
 
 [node name="BranchRight" type="Line2D" parent="YFrame"]
-default_color = Color(0.431373, 0.278431, 0.145098, 1)
-width = 12.0
-points = PackedVector2Array(0, 90, 60, 30)
+default_color = Color(0.1, 0.1, 0.1, 1)
+width = 8.0
+points = PackedVector2Array(0, 90, 58, 34)
 
 [node name="AnchorLeft" type="Marker2D" parent="."]
-position = Vector2(-60, 30)
+position = Vector2(-58, 34)
 
 [node name="AnchorRight" type="Marker2D" parent="."]
-position = Vector2(60, 30)
+position = Vector2(58, 34)
 
 [node name="BandMid" type="Marker2D" parent="."]
 position = Vector2(0, 90)
 
 [node name="BandLeftLine" type="Line2D" parent="."]
-default_color = Color(0.101961, 0.101961, 0.101961, 1)
-width = 5.0
+default_color = Color(0.06, 0.06, 0.06, 1)
+width = 4.0
 
 [node name="BandRightLine" type="Line2D" parent="."]
-default_color = Color(0.101961, 0.101961, 0.101961, 1)
-width = 5.0
+default_color = Color(0.06, 0.06, 0.06, 1)
+width = 4.0
+
+[node name="Blocks" type="Node2D" parent="."]
+
+[node name="LeftBottomA" type="Polygon2D" parent="Blocks"]
+color = Color(0.82, 0.82, 0.82, 1)
+polygon = PackedVector2Array(-205, 130, -177, 130, -177, 102, -205, 102)
+
+[node name="LeftBottomB" type="Polygon2D" parent="Blocks"]
+color = Color(0.82, 0.82, 0.82, 1)
+polygon = PackedVector2Array(-174, 130, -146, 130, -146, 102, -174, 102)
+
+[node name="LeftUpper" type="Polygon2D" parent="Blocks"]
+color = Color(0.82, 0.82, 0.82, 1)
+polygon = PackedVector2Array(-205, 99, -177, 99, -177, 71, -205, 71)
+
+[node name="RightBottom" type="Polygon2D" parent="Blocks"]
+color = Color(0.82, 0.82, 0.82, 1)
+polygon = PackedVector2Array(140, 130, 168, 130, 168, 102, 140, 102)
+
+[node name="BlockOutlines" type="Line2D" parent="Blocks"]
+default_color = Color(0.07, 0.07, 0.07, 1)
+width = 3.0
+points = PackedVector2Array(-205, 130, -177, 130, -177, 102, -205, 102, -205, 130, -174, 130, -146, 130, -146, 102, -174, 102, -174, 130, -205, 99, -177, 99, -177, 71, -205, 71, -205, 99, 140, 130, 168, 130, 168, 102, 140, 102, 140, 130)
 
 [node name="Projectile" type="RigidBody2D" parent="."]
 position = Vector2(0, 90)
@@ -52,5 +81,11 @@ angular_damp = 1.5
 shape = SubResource("1")
 
 [node name="BodyVisual" type="Polygon2D" parent="Projectile"]
-color = Color(0.905882, 0.254902, 0.286275, 1)
-polygon = PackedVector2Array(12, 0, 9.7082, 7.05342, 3.7082, 11.4127, -3.7082, 11.4127, -9.7082, 7.05342, -12, 0, -9.7082, -7.05342, -3.7082, -11.4127, 3.7082, -11.4127, 9.7082, -7.05342)
+color = Color(0.82, 0.82, 0.82, 1)
+polygon = PackedVector2Array(-11, -11, 11, -11, 11, 11, -11, 11)
+
+[node name="BodyOutline" type="Line2D" parent="Projectile"]
+default_color = Color(0.06, 0.06, 0.06, 1)
+width = 3.0
+closed = true
+points = PackedVector2Array(-11, -11, 11, -11, 11, 11, -11, 11)
