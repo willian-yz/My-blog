@@ -189,6 +189,41 @@
       max-width: 420px; margin: 0 auto;
     }
 
+
+    .home-godot-block {
+      grid-column: 1;
+      grid-row: 2;
+      margin-top: 0.2rem;
+      max-width: 640px;
+    }
+    #slingshot-godot-host {
+      width: 100%;
+      min-height: 260px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.8rem;
+    }
+    #slingshot-godot-host canvas {
+      width: 100% !important;
+      max-width: 100%;
+      height: auto !important;
+      border-radius: 6px;
+      background: #111;
+      aspect-ratio: 16 / 9;
+    }
+    .godot-fallback-msg {
+      color: var(--muted);
+      font-size: 0.84rem;
+      text-align: center;
+      line-height: 1.7;
+      padding: 0.6rem 0.2rem;
+    }
+
     /* ─── Post List ─── */
     .section-label {
       font-size: 0.75rem; text-transform: uppercase;
@@ -829,7 +864,7 @@
       .home-layout { flex-direction: column; }
       .photo-wall-sidebar { width: 100%; margin-left: 0; }
       .home-top-grid { grid-template-columns: 1fr; }
-      .home-posts-block { margin-top: 0; max-width: 100%; }
+      .home-godot-block, .home-posts-block { margin-top: 0; max-width: 100%; }
       .home-planner-section { transform: none; margin-left: 0; }
       nav { gap: 1rem; flex-wrap: wrap; justify-content: flex-end; }
       .backup-grid { grid-template-columns: 1fr; }
@@ -866,9 +901,16 @@
     }
     .home-posts-block {
       grid-column: 1;
-      grid-row: 2;
+      grid-row: 3;
       margin-top: -8px;
       max-width: 640px;
+    }
+
+    @media (max-width: 640px) {
+      #slingshot-godot-host {
+        min-height: 200px;
+        padding: 0.6rem;
+      }
     }
     .post-pagination {
       display: flex;
@@ -1355,6 +1397,13 @@
             <div class="hero-desc">
               用文字记录生活的呼吸，用心感受每一个平凡的瞬间。<br>
               欢迎来到我的小角落，这里收藏着关于生活、思考与梦想的文字。
+            </div>
+          </div>
+
+          <div class="home-godot-block">
+            <p class="section-label">弹弓小游戏</p>
+            <div id="slingshot-godot-host" aria-live="polite">
+              <div class="godot-fallback-msg">弹弓加载中...</div>
             </div>
           </div>
 
@@ -4351,6 +4400,50 @@
     el.addEventListener('pointerdown', onPointerDown);
   }
 
+
+  function showGodotFallback(message) {
+    var host = document.getElementById('slingshot-godot-host');
+    if (!host) return;
+    host.innerHTML = '<div class="godot-fallback-msg">' + escapeHtml(message || '弹弓加载失败，请刷新') + '</div>';
+  }
+
+  function initSlingshotGodot() {
+    var host = document.getElementById('slingshot-godot-host');
+    if (!host) return;
+
+    var canvas = document.createElement('canvas');
+    canvas.id = 'slingshot-godot-canvas';
+    canvas.width = 960;
+    canvas.height = 540;
+    host.innerHTML = '';
+    host.appendChild(canvas);
+
+    var script = document.createElement('script');
+    script.src = '/godot/slingshot/slingshot.js';
+    script.async = true;
+    script.onload = function() {
+      if (typeof Engine !== 'function') {
+        showGodotFallback('弹弓加载失败，请刷新');
+        return;
+      }
+      var config = {
+        args: [],
+        canvas: canvas,
+        executable: '/godot/slingshot/slingshot',
+        mainPack: '/godot/slingshot/slingshot.pck'
+      };
+      var engine = new Engine(config);
+      Promise.resolve(engine.startGame({})).catch(function(err) {
+        console.error('Godot init failed:', err);
+        showGodotFallback('弹弓加载失败，请刷新');
+      });
+    };
+    script.onerror = function() {
+      showGodotFallback('弹弓加载失败，请刷新');
+    };
+    document.body.appendChild(script);
+  }
+
   // ─── Initialize ───
   var backupInputEl = document.getElementById('backup-import-input');
   if (backupInputEl) {
@@ -4367,6 +4460,7 @@
   }
 
   applyRandomQuote();
+  initSlingshotGodot();
   var editorEl = document.getElementById('editor-area');
   if (editorEl) {
     editorEl.addEventListener('input', startWriteTimerIfNeeded);
