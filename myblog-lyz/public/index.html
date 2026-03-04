@@ -601,8 +601,9 @@
 
     .fireworks-btn {
       position: fixed;
-      right: 14px;
-      bottom: 128px;
+      right: 24px;
+      top: 108px;
+      bottom: auto;
       z-index: 3600;
       border: 1px solid var(--line);
       background: #fff;
@@ -1483,13 +1484,15 @@
     .home-planner-section {
       border-radius: 26px;
       border-width: 1px;
-      transform: translateX(18px);
+      transform: translateX(150px);
     }
     .home-posts-block {
-      grid-column: 1 / span 2;
+      grid-column: 1;
       grid-row: 2;
-      max-width: none;
+      width: min(100%, 720px);
+      max-width: min(720px, calc(100% - 120px));
       margin-top: 0;
+      transform: translateY(-100px);
     }
     .pw-container {
       border-radius: 22px;
@@ -1726,6 +1729,9 @@
       .home-posts-block {
         grid-column: 1;
         grid-row: auto;
+        width: 100%;
+        max-width: 100%;
+        transform: none;
       }
       .header-inner {
         border-radius: 28px;
@@ -1734,6 +1740,10 @@
     @media (max-width: 640px) {
       main {
         padding: 2rem 1rem 6rem;
+      }
+      .fireworks-btn {
+        right: 16px;
+        top: 154px;
       }
       .hero-section,
       .photo-wall-sidebar,
