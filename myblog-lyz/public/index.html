@@ -2281,7 +2281,7 @@
       var p = deletedPosts[i];
       var d = p.deletedAt ? new Date(p.deletedAt) : new Date();
       html += "<div style=\"display:flex;justify-content:space-between;gap:0.5rem;padding:0.35rem 0;border-bottom:1px solid #f0f0f0;\">" +
-        "<span style=\"overflow:hidden;text-overflow:ellipsis;white-space:nowrap;\">" + escapeHtml(p.title || "未命名文章") + " <em style=\"color:#999;\">" + d.toLocaleDateString() + "</em></span>" +
+        "<span style=\"overflow:hidden;text-overflow:ellipsis;white-space:nowrap;\">" + escapeHtml(p.title || "未命名文章") + " <em style=\"color:#999;\">" + formatDateGMT8(d) + "</em></span>" +
         "<span style=\"display:flex;gap:6px;\"><button onclick=\"restorePost(" + p.id + ")\" style=\"border:1px solid #ddd;background:#fff;border-radius:8px;padding:2px 8px;cursor:pointer;\">恢复</button><button onclick=\"deleteTrashPost(" + p.id + ")\" style=\"border:1px solid #f0caca;background:#fff7f7;color:#a44;border-radius:8px;padding:2px 8px;cursor:pointer;\">删除</button></span>" +
         "</div>";
     }
@@ -2738,7 +2738,7 @@
 
   function renderCalendar() {
     var container = document.getElementById('calendar-grid');
-    var today = new Date();
+    var today = getGMT8DateObj();
     var todayStr = formatDateGMT8(today);
     var cellSize = 13;
     var cellGap = 3;
@@ -2747,9 +2747,9 @@
     // Only show last ~91 days (3 months)
     var daysToShow = 91;
     var startDate = new Date(today);
-    startDate.setDate(startDate.getDate() - (daysToShow - 1));
-    var dayOfWeek = startDate.getDay();
-    startDate.setDate(startDate.getDate() - dayOfWeek);
+    startDate.setUTCDate(startDate.getUTCDate() - (daysToShow - 1));
+    var dayOfWeek = startDate.getUTCDay();
+    startDate.setUTCDate(startDate.getUTCDate() - dayOfWeek);
 
     var totalDays = daysToShow + dayOfWeek;
     var weeks = Math.ceil(totalDays / 7);
@@ -2772,12 +2772,12 @@
     for (var w = 0; w < weeks; w++) {
       for (var day = 0; day < 7; day++) {
         var cellDate = new Date(startDate);
-        cellDate.setDate(cellDate.getDate() + w * 7 + day);
+        cellDate.setUTCDate(cellDate.getUTCDate() + w * 7 + day);
         var cellDateStr = formatDateGMT8(cellDate);
         if (cellDateStr > todayStr) continue;
 
         var threeMonthsAgo = new Date(today);
-        threeMonthsAgo.setDate(threeMonthsAgo.getDate() - (daysToShow - 1));
+        threeMonthsAgo.setUTCDate(threeMonthsAgo.getUTCDate() - (daysToShow - 1));
         if (cellDate < threeMonthsAgo) {
           // Render empty cells for alignment but skip data
           var x = 30 + w * totalSize;
@@ -2793,7 +2793,7 @@
         var x = 30 + w * totalSize;
         var y = 25 + day * totalSize;
 
-        var month = cellDate.getMonth();
+        var month = cellDate.getUTCMonth();
         if (day === 0 && month !== lastMonth) {
           svg += '<text x="' + x + '" y="15" font-size="10" fill="#8c7b6b" font-family="Noto Sans SC, sans-serif">' + monthNames[month] + '</text>';
           lastMonth = month;
