@@ -1,0 +1,90 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="PackedScene" path="res://godot/Slingshot.tscn" id="1"]
+
+[sub_resource type="RectangleShape2D" id="1"]
+size = Vector2(904, 24)
+
+[sub_resource type="RectangleShape2D" id="2"]
+size = Vector2(24, 484)
+
+[sub_resource type="RectangleShape2D" id="3"]
+size = Vector2(840, 420)
+
+[node name="Main" type="Node2D"]
+
+[node name="Backdrop" type="Polygon2D" parent="."]
+color = Color(0.984314, 0.952941, 0.913725, 1)
+polygon = PackedVector2Array(0, 0, 960, 0, 960, 540, 0, 540)
+
+[node name="PlayfieldPanel" type="Polygon2D" parent="."]
+color = Color(0.996078, 0.980392, 0.956863, 1)
+polygon = PackedVector2Array(60, 48, 900, 48, 900, 468, 60, 468)
+
+[node name="PlayfieldBorder" type="Line2D" parent="."]
+default_color = Color(0.886275, 0.741176, 0.603922, 1)
+width = 6.0
+closed = true
+points = PackedVector2Array(60, 48, 900, 48, 900, 468, 60, 468)
+
+[node name="GroundShadow" type="Line2D" parent="."]
+default_color = Color(0.929412, 0.835294, 0.705882, 0.7)
+width = 14.0
+points = PackedVector2Array(110, 428, 850, 428)
+
+[node name="Instructions" type="Label" parent="."]
+offset_left = 88.0
+offset_top = 68.0
+offset_right = 506.0
+offset_bottom = 112.0
+theme_override_colors/font_color = Color(0.329412, 0.239216, 0.160784, 1)
+theme_override_font_sizes/font_size = 22
+text = "拖动橡皮筋中点，松手后弹丸会按偏移量发射。"
+
+[node name="Hint" type="Label" parent="."]
+offset_left = 88.0
+offset_top = 104.0
+offset_right = 430.0
+offset_bottom = 136.0
+theme_override_colors/font_color = Color(0.560784, 0.447059, 0.352941, 1)
+theme_override_font_sizes/font_size = 15
+text = "Y 字形躯干固定不变，发射后橡皮筋立刻回位。"
+
+[node name="Arena" type="Node2D" parent="."]
+
+[node name="TopWall" type="StaticBody2D" parent="Arena"]
+position = Vector2(480, 48)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Arena/TopWall"]
+shape = SubResource("1")
+
+[node name="BottomWall" type="StaticBody2D" parent="Arena"]
+position = Vector2(480, 468)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Arena/BottomWall"]
+shape = SubResource("1")
+
+[node name="LeftWall" type="StaticBody2D" parent="Arena"]
+position = Vector2(60, 258)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Arena/LeftWall"]
+shape = SubResource("2")
+
+[node name="RightWall" type="StaticBody2D" parent="Arena"]
+position = Vector2(900, 258)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Arena/RightWall"]
+shape = SubResource("2")
+
+[node name="TargetBackdrop" type="Polygon2D" parent="."]
+color = Color(0.972549, 0.909804, 0.839216, 0.95)
+polygon = PackedVector2Array(650, 100, 860, 100, 860, 320, 650, 320)
+
+[node name="TargetBorder" type="Line2D" parent="."]
+default_color = Color(0.866667, 0.682353, 0.498039, 1)
+width = 3.0
+closed = true
+points = PackedVector2Array(650, 100, 860, 100, 860, 320, 650, 320)
+
+[node name="Slingshot" parent="." instance=ExtResource("1")]
+position = Vector2(270, 250)

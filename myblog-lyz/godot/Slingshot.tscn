@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://godot/Slingshot.gd" id="1"]
 
@@ -47,6 +47,7 @@ position = Vector2(0, 90)
 gravity_scale = 1.0
 linear_damp = 0.3
 angular_damp = 1.5
+can_sleep = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Projectile"]
 shape = SubResource("1")
@@ -54,3 +55,5 @@ shape = SubResource("1")
 [node name="BodyVisual" type="Polygon2D" parent="Projectile"]
 color = Color(0.905882, 0.254902, 0.286275, 1)
 polygon = PackedVector2Array(12, 0, 9.7082, 7.05342, 3.7082, 11.4127, -3.7082, 11.4127, -9.7082, 7.05342, -12, 0, -9.7082, -7.05342, -3.7082, -11.4127, 3.7082, -11.4127, 9.7082, -7.05342)
+
+[node name="ResetTimer" type="Timer" parent="."]

@@ -1,0 +1,22 @@
+; Engine configuration file.
+; Minimal Godot 4 project for the homepage slingshot game source.
+
+config_version=5
+
+[application]
+config/name="My Blog Slingshot"
+run/main_scene="res://godot/Main.tscn"
+config/features=PackedStringArray("4.2")
+
+[display]
+window/size/viewport_width=960
+window/size/viewport_height=540
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+textures/canvas_textures/default_texture_filter=0
+
+[physics]
+common/physics_ticks_per_second=60
