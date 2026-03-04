@@ -877,7 +877,7 @@
     }
     .home-planner-section {
       grid-column: 2;
-      grid-row: 1 / span 2;
+      grid-row: 1 / span 3;
       margin-top: 0;
       margin-left: auto;
       transform: translateX(34px);
@@ -889,9 +889,43 @@
     }
     .home-posts-block {
       grid-column: 1;
-      grid-row: 2;
-      margin-top: -8px;
+      grid-row: 3;
+      margin-top: 0.2rem;
       max-width: 640px;
+    }
+    .home-godot-block {
+      grid-column: 1;
+      grid-row: 2;
+      margin-top: 0.2rem;
+      max-width: 640px;
+    }
+    #slingshot-container {
+      width: 100%;
+      min-height: 260px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.8rem;
+      position: relative;
+    }
+    #slingshot-container canvas {
+      width: 100% !important;
+      max-width: 100%;
+      height: auto !important;
+      border-radius: 6px;
+      background: #111;
+      aspect-ratio: 16 / 9;
+    }
+    .godot-fallback-msg {
+      color: var(--muted);
+      font-size: 0.84rem;
+      text-align: center;
+      line-height: 1.7;
+      padding: 0.6rem 0.2rem;
     }
     .post-pagination {
       display: flex;
@@ -1421,6 +1455,13 @@
             <div class="hero-desc">
               用文字记录生活的呼吸，用心感受每一个平凡的瞬间。<br>
               欢迎来到我的小角落，这里收藏着关于生活、思考与梦想的文字。
+            </div>
+          </div>
+
+          <div class="home-godot-block">
+            <p class="section-label">弹弓小游戏</p>
+            <div id="slingshot-container" aria-live="polite" data-godot-sling>
+              <div class="godot-fallback-msg">弹弓加载中...</div>
             </div>
           </div>
 
@@ -2606,7 +2647,7 @@
     if (!container) return;
 
     container.style.visibility = visible ? 'visible' : 'hidden';
-    container.style.pointerEvents = 'none';
+    container.style.pointerEvents = visible ? 'auto' : 'none';
 
     var instance = window.__slingshotGodotInstance;
     if (!instance) return;
@@ -2662,6 +2703,7 @@
       if (maybeInstance && typeof maybeInstance.then === 'function') {
         maybeInstance.then(function(instance) {
           window.__slingshotGodotInstance = instance || null;
+          bindSlingshotTouchPolicy();
           setGodotVisibilityState(currentView === 'list');
         }).catch(function(err) {
           console.error('Failed to boot slingshot Godot:', err);
@@ -2670,6 +2712,7 @@
         });
       } else {
         window.__slingshotGodotInstance = maybeInstance || null;
+        bindSlingshotTouchPolicy();
         setGodotVisibilityState(currentView === 'list');
       }
     } catch (err) {
