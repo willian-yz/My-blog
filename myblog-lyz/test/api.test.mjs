@@ -121,6 +121,20 @@ test("photos API can save and read photos", async () => {
   assert.equal(getRes.body[0].id, 7);
 });
 
+test("doodles API can save and read doodles", async () => {
+  const env = makeEnv();
+  const doodle = { id: 77, title: "涂鸦测试", dataUrl: "data:image/png;base64,abc" };
+
+  const createRes = await call(env, "/api/doodles", "POST", doodle);
+  assert.equal(createRes.status, 200);
+  assert.equal(createRes.body.ok, true);
+
+  const getRes = await call(env, "/api/doodles");
+  assert.equal(getRes.status, 200);
+  assert.equal(getRes.body.length, 1);
+  assert.equal(getRes.body[0].id, 77);
+});
+
 test("D1 binding persists diary data and can be read after reload", async () => {
   const db = new MockD1();
   const env = makeEnv({ BLOG_DB: db, BLOG_DATA: undefined });
@@ -166,6 +180,62 @@ test("version endpoint exposes build version", async () => {
   const body = await res.json();
   assert.equal(typeof body.version, "string");
   assert.equal(body.version.includes("hotfix"), true);
+});
+
+test("health endpoint reports active storage binding", async () => {
+  const envMemory = makeEnv({ BLOG_DATA: undefined });
+  const resMemory = await worker.fetch(new Request("https://example.com/api/health"), envMemory, {});
+  assert.equal(resMemory.status, 200);
+  const bodyMemory = await resMemory.json();
+  assert.equal(bodyMemory.storeMode, "memory");
+  assert.equal(bodyMemory.bindings.BLOG_DB, false);
+  assert.equal(bodyMemory.bindings.BLOG_DATA, false);
+
+  const envKv = makeEnv();
+  const resKv = await worker.fetch(new Request("https://example.com/api/health"), envKv, {});
+  const bodyKv = await resKv.json();
+  assert.equal(bodyKv.storeMode, "kv");
+  assert.equal(bodyKv.bindings.BLOG_DATA, true);
+
+  const envD1 = makeEnv({ BLOG_DB: new MockD1(), BLOG_DATA: undefined });
+  const resD1 = await worker.fetch(new Request("https://example.com/api/health"), envD1, {});
+  const bodyD1 = await resD1.json();
+  assert.equal(bodyD1.storeMode, "d1");
+  assert.equal(bodyD1.bindings.BLOG_DB, true);
+});
+
+test("book-search endpoint maps public epub search results", async () => {
+  const env = makeEnv();
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () =>
+    new Response(
+      JSON.stringify({
+        results: [
+          {
+            title: "Pride and Prejudice",
+            authors: [{ name: "Jane Austen" }],
+            formats: {
+              "application/epub+zip": "https://example.com/pride.epub",
+              "image/jpeg": "https://example.com/cover.jpg",
+            },
+          },
+        ],
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
+
+  try {
+    const request = new Request("https://example.com/api/book-search?q=pride");
+    const res = await worker.fetch(request, env, {});
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.equal(Array.isArray(body.items), true);
+    assert.equal(body.items.length, 1);
+    assert.equal(body.items[0].source, "gutendex");
+    assert.equal(body.items[0].epubUrl.includes(".epub"), true);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });
 
 test("index response has anti-cache header", async () => {

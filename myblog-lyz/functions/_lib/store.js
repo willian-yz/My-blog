@@ -75,6 +75,18 @@ export async function getStore(env) {
   return memoryKV;
 }
 
+export function detectStoreMode(env) {
+  if (env?.BLOG_DB && typeof env.BLOG_DB.prepare === "function") {
+    return "d1";
+  }
+
+  if (env?.BLOG_DATA && typeof env.BLOG_DATA.get === "function") {
+    return "kv";
+  }
+
+  return "memory";
+}
+
 export async function readKVJson(env, key, fallbackValue) {
   const value = await (await getStore(env)).get(key, { type: "json" });
   return value ?? fallbackValue;

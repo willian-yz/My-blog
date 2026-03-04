@@ -599,6 +599,29 @@
       pointer-events: none;
     }
 
+    .fireworks-btn {
+      position: fixed;
+      right: 14px;
+      bottom: 128px;
+      z-index: 3600;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 0.45rem 0.75rem;
+      font-size: 0.82rem;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    }
+    .fireworks-btn:hover { border-color: var(--accent); color: var(--accent); }
+    #fireworks-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 3500;
+      pointer-events: none;
+      display: none;
+    }
+
 
     .trash-fab {
       position: fixed;
@@ -1015,6 +1038,34 @@
     .photo-modal-actions .pm-save {
       background: var(--ink); color: var(--paper); border-color: var(--ink);
     }
+
+    .doodle-wrap { max-width: 1100px; margin: 0 auto; }
+    .doodle-toolbar { display:flex; flex-wrap:wrap; gap:0.7rem; align-items:center; margin-bottom: 1rem; }
+    .doodle-toolbar label { font-size: 0.82rem; color: var(--muted); display:flex; align-items:center; gap:0.4rem; }
+    .doodle-toolbar input[type="range"] { width: 140px; accent-color: var(--accent); }
+    .doodle-toolbar button { border:1px solid var(--line); background:#fff; border-radius: 6px; padding: 0.45rem 0.75rem; cursor:pointer; }
+    .doodle-toolbar button:hover { border-color: var(--ink); }
+    .doodle-board-wrap { border:1px solid var(--line); border-radius: 8px; overflow:auto; background:#fff; padding:0.6rem; }
+    #doodle-canvas { background:#fff; display:block; margin:0 auto; cursor:crosshair; max-width:100%; touch-action: none; }
+    .doodle-gallery { margin-top: 1rem; display:grid; grid-template-columns: repeat(auto-fill,minmax(170px,1fr)); gap: 0.8rem; }
+    .doodle-card { border:1px solid var(--line); border-radius: 8px; padding:0.5rem; background:#fff; }
+    .doodle-card img { width:100%; height:120px; object-fit:cover; border-radius:6px; display:block; }
+    .doodle-card-title { font-size:0.75rem; color:var(--muted); margin-top:0.4rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .doodle-palette { display:flex; gap:0.45rem; align-items:center; }
+    .doodle-color-chip { width:22px; height:22px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 0 1px var(--line); cursor:pointer; }
+    .doodle-color-chip.active { box-shadow:0 0 0 2px var(--ink); }
+    .doodle-brush-group { display:flex; gap:0.45rem; align-items:center; }
+    .doodle-brush-btn.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+    .doodle-card-actions { display:flex; gap:0.4rem; margin-top:0.35rem; }
+    .doodle-card-actions button { flex:1; border:1px solid var(--line); background:#fff; border-radius:6px; padding:0.3rem 0.4rem; font-size:0.72rem; cursor:pointer; }
+
+    .bookshelf-search { margin-bottom: 1rem; border:1px solid var(--line); border-radius:8px; padding:0.8rem; background:#fff; }
+    .bookshelf-search-row { display:flex; gap:0.6rem; }
+    .bookshelf-search-row input { flex:1; border:1px solid var(--line); border-radius:6px; padding:0.5rem 0.7rem; }
+    .bookshelf-search-row button { border:1px solid var(--line); background:#fff; border-radius:6px; padding:0.45rem 0.75rem; cursor:pointer; }
+    .bookshelf-search-results { margin-top:0.7rem; display:grid; gap:0.5rem; }
+    .book-search-item { border:1px dashed var(--line); border-radius:6px; padding:0.5rem; display:flex; justify-content:space-between; gap:0.6rem; }
+    .book-search-item button { border:1px solid var(--line); background:#fff; border-radius:6px; padding:0.35rem 0.6rem; cursor:pointer; white-space:nowrap; }
     .crop-overlay {
       position: absolute; border: 2px dashed var(--accent);
       background: rgba(192,57,43,0.1); pointer-events: none; display: none;
@@ -1305,6 +1356,7 @@
       <button class="active" data-view="list" onclick="showView('list', this)">全部文章</button>
       <button data-view="write" onclick="showView('write', this)">写新文章</button>
       <button data-view="backup" onclick="showView('backup', this)">备份日记</button>
+      <button data-view="doodle" onclick="showView('doodle', this)">涂鸦板</button>
       <button data-view="reader" onclick="showView('reader', this)">阅读</button>
       <button data-view="about" onclick="showView('about', this)">关于我</button>
     </nav>
@@ -1391,6 +1443,7 @@
         </div>
       </div>
     </div>
+  </div>
   </div>
 
   <!-- 阅读文章 -->
@@ -1507,12 +1560,45 @@
     </div>
   </div>
 
+  <!-- 涂鸦板 -->
+  <div id="doodle-view" class="view">
+    <div class="doodle-wrap">
+      <p class="section-label">涂鸦板</p>
+      <div class="doodle-toolbar">
+        <div class="doodle-palette" id="doodle-palette"></div>
+        <label>画笔颜色 <input type="color" id="doodle-color" value="#c0392b" onchange="setDoodleColor(this.value)"></label>
+        <div class="doodle-brush-group">
+          <button class="doodle-brush-btn active" data-brush="pen" onclick="setDoodleBrush('pen', this)">钢笔</button>
+          <button class="doodle-brush-btn" data-brush="marker" onclick="setDoodleBrush('marker', this)">马克笔</button>
+          <button class="doodle-brush-btn" data-brush="pencil" onclick="setDoodleBrush('pencil', this)">铅笔</button>
+        </div>
+        <label>画笔粗细 <input type="range" id="doodle-size" min="1" max="40" value="6" oninput="setDoodleSize(this.value)"><span id="doodle-size-label">6px</span></label>
+        <button onclick="toggleDoodleEraser()" id="doodle-eraser-btn">橡皮擦</button>
+        <button onclick="clearDoodleCanvas()">清空画布</button>
+        <button onclick="document.getElementById('doodle-upload-input').click()">上传图片底图</button>
+        <button onclick="saveDoodleImage()">保存涂鸦</button>
+      </div>
+      <div class="doodle-board-wrap">
+        <canvas id="doodle-canvas" width="980" height="580"></canvas>
+      </div>
+      <input type="file" id="doodle-upload-input" accept="image/*" style="display:none;">
+      <div class="doodle-gallery" id="doodle-gallery"></div>
+    </div>
+  </div>
+
   <!-- 电子书阅读 -->
   <div id="reader-view" class="view">
     <div class="bookshelf" id="bookshelf-section">
       <div class="bookshelf-header">
         <div class="bookshelf-title">我的书架</div>
         <button class="bookshelf-import-btn" onclick="document.getElementById('epub-input').click()">导入电子书</button>
+      </div>
+      <div class="bookshelf-search">
+        <div class="bookshelf-search-row">
+          <input type="text" id="book-search-input" placeholder="搜索公开 EPUB（例如书名/作者）...">
+          <button onclick="searchBooksOnline()">在线搜索</button>
+        </div>
+        <div class="bookshelf-search-results" id="bookshelf-search-results"></div>
       </div>
       <div class="bookshelf-grid" id="bookshelf-grid">
         <div class="empty-state">&#128218;<p>书架空空如也，导入一本电子书开始阅读吧！</p></div>
@@ -1747,6 +1833,8 @@
   <iframe id="audio-external-frame" title="external-audio" allow="autoplay; fullscreen" referrerpolicy="no-referrer-when-downgrade"></iframe>
 </div>
 <button class="player-sidebar-toggle" id="player-sidebar-toggle" onclick="showAudioPlayer()">&#9835;</button>
+<button class="fireworks-btn" id="fireworks-btn" onclick="launchTripleFireworks()">🎆 放烟花</button>
+<canvas id="fireworks-canvas"></canvas>
 
 <!-- Audio URL Panel -->
 <div class="audio-url-panel" id="audio-url-panel">
@@ -1780,6 +1868,7 @@
   var calendarData = {};
   var todosData = {};
   var photosData = [];
+  var doodlesData = [];
   var booksData = [];
   var postPage = 1;
   var postPageSize = 5;
@@ -1809,6 +1898,19 @@
   var cropMode = false;
   var cropStart = null;
   var cropRect = null;
+
+  // Doodle state
+  var doodleCtx = null;
+  var doodleDrawing = false;
+  var doodleBrushColor = '#c0392b';
+  var doodleBrushSize = 6;
+  var doodleEraser = false;
+  var doodleBrushType = 'pen';
+  var doodleLastX = 0;
+  var doodleLastY = 0;
+  var doodleLastTime = 0;
+  var doodlePaletteColors = ['#1a1008','#c0392b','#2563eb','#16a34a','#f59e0b','#7c3aed','#ec4899','#ffffff'];
+  var fireworksRunning = false;
 
   // E-book state
   var currentBook = null;
@@ -1894,6 +1996,29 @@
       startTop: 0
     };
 
+    var clickTimer = null;
+    var clickCount = 0;
+    var holdTimer = null;
+    var holdActive = false;
+
+    function jumpBear(distance) {
+      var rect = bear.getBoundingClientRect();
+      var angle = Math.random() * Math.PI * 2;
+      var nx = rect.left + Math.cos(angle) * distance;
+      var ny = rect.top + Math.sin(angle) * distance;
+      var maxLeft = window.innerWidth - bear.offsetWidth;
+      var maxTop = window.innerHeight - bear.offsetHeight;
+      nx = Math.max(0, Math.min(maxLeft, nx));
+      ny = Math.max(0, Math.min(maxTop, ny));
+      bear.style.transition = 'left 0.28s ease, top 0.28s ease, transform 0.18s ease';
+      bear.style.left = nx + 'px';
+      bear.style.top = ny + 'px';
+      bear.style.right = 'auto';
+      bear.style.transform = 'scale(0.96)';
+      setTimeout(function(){ bear.style.transform = 'scale(1)'; }, 120);
+      setTimeout(function(){ bear.style.transition = ''; }, 320);
+    }
+
     bear.addEventListener('pointerdown', function (e) {
       drag.active = true;
       drag.pointerId = e.pointerId;
@@ -1910,6 +2035,12 @@
 
       bear.classList.add('dragging');
       bear.setPointerCapture(e.pointerId);
+
+      holdActive = false;
+      clearTimeout(holdTimer);
+      holdTimer = setTimeout(function(){
+        holdActive = true;
+      }, 450);
       e.preventDefault();
     });
 
@@ -1936,6 +2067,19 @@
       drag.active = false;
       bear.classList.remove('dragging');
       bear.releasePointerCapture(e.pointerId);
+
+      clearTimeout(holdTimer);
+      var movedFar = Math.abs(e.clientX - drag.startX) > 6 || Math.abs(e.clientY - drag.startY) > 6;
+      if (holdActive) return;
+      if (movedFar) return;
+
+      clickCount += 1;
+      clearTimeout(clickTimer);
+      clickTimer = setTimeout(function() {
+        if (clickCount >= 2) jumpBear(260);
+        else jumpBear(130);
+        clickCount = 0;
+      }, 210);
     }
 
     bear.addEventListener('pointerup', stopDrag);
@@ -1984,16 +2128,18 @@
         apiFetch('/api/calendar'),
         apiFetch('/api/todos'),
         apiFetch('/api/photos'),
+        apiFetch('/api/doodles'),
         apiFetch('/api/books'),
         apiFetch('/api/trash')
       ]);
-      posts = results[0] || [];
+      posts = ensurePostsArray(results[0]);
       profile = results[1] || profile;
       calendarData = results[2] || {};
       todosData = results[3] || {};
       photosData = results[4] || [];
-      booksData = results[5] || [];
-      deletedPosts = results[6] || [];
+      doodlesData = results[5] || [];
+      booksData = results[6] || [];
+      deletedPosts = results[7] || [];
       purgeExpiredTrash();
       renderList();
       renderTrashBin();
@@ -2005,6 +2151,7 @@
       renderCalendar();
       renderWritingHistory();
       renderBackupPostList();
+      renderDoodleGallery();
     } catch (e) {
       console.error('Failed to load data:', e);
       renderList();
@@ -2017,14 +2164,44 @@
       renderCalendar();
       renderWritingHistory();
       renderBackupPostList();
+      renderDoodleGallery();
     }
     dataReady = true;
     checkReady();
     initAudioPlayer();
   }
 
+  function normalizePost(raw) {
+    var post = raw && typeof raw === 'object' ? Object.assign({}, raw) : {};
+    var now = new Date();
+    if (!post.id) post.id = Date.now() + Math.floor(Math.random() * 1000);
+    post.type = post.type === 'blog' ? 'blog' : 'diary';
+    if (typeof post.date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(post.date)) {
+      var parsedDate = post.date ? new Date(post.date) : now;
+      post.date = isNaN(parsedDate.getTime()) ? formatDateGMT8(now) : formatDateGMT8(parsedDate);
+    }
+    post.time = typeof post.time === 'string' ? post.time : '';
+    post.title = (post.title || '未命名文章').toString();
+    post.body = (typeof post.body === 'string' && post.body) ? post.body : (typeof post.content === 'string' ? post.content : '<p></p>');
+    if (!post.excerpt) {
+      var tmp = document.createElement('div');
+      tmp.innerHTML = post.body;
+      var text = (tmp.textContent || tmp.innerText || '').trim();
+      post.excerpt = (text ? text.slice(0, 60) : '无摘要') + '...';
+    } else {
+      post.excerpt = post.excerpt.toString();
+    }
+    return post;
+  }
+
+  function ensurePostsArray(raw) {
+    if (!Array.isArray(raw)) return [];
+    return raw.map(function(item) { return normalizePost(item); });
+  }
+
   // ─── Render Post List ───
   function renderList() {
+    posts = ensurePostsArray(posts);
     var ul = document.getElementById('post-list');
     var pager = document.getElementById('post-pagination');
     if (posts.length === 0) {
@@ -2042,16 +2219,17 @@
     var pageItems = sorted.slice(startIdx, startIdx + postPageSize);
 
     ul.innerHTML = pageItems.map(function(p) {
-      var timeStr = p.time ? ' ' + p.time : '';
-      return '<li class="post-item" onclick="openPost(' + p.id + ')">' +
+      var safePost = normalizePost(p);
+      var timeStr = safePost.time ? ' ' + safePost.time : '';
+      return '<li class="post-item" onclick="openPost(' + safePost.id + ')">' +
         '<div class="post-date">' +
-          p.date.replace(/-/g, '/') + timeStr +
+          safePost.date.replace(/-/g, '/') + timeStr +
           '<br>' +
-          '<span class="post-tag tag-' + p.type + '">' + (p.type === 'blog' ? '博客' : '日记') + '</span>' +
+          '<span class="post-tag tag-' + safePost.type + '">' + (safePost.type === 'blog' ? '博客' : '日记') + '</span>' +
         '</div>' +
         '<div>' +
-          '<div class="post-title">' + escapeHtml(p.title) + '</div>' +
-          '<div class="post-excerpt">' + escapeHtml(p.excerpt) + '</div>' +
+          '<div class="post-title">' + escapeHtml(safePost.title) + '</div>' +
+          '<div class="post-excerpt">' + escapeHtml(safePost.excerpt) + '</div>' +
         '</div>' +
       '</li>';
     }).join('');
@@ -2113,7 +2291,7 @@
   async function restorePost(id) {
     var post = deletedPosts.find(function(p){ return p.id === id; });
     if (!post) return;
-    var restoreData = Object.assign({}, post);
+    var restoreData = normalizePost(Object.assign({}, post));
     delete restoreData.deletedAt;
     try {
       await apiFetch('/api/posts', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(restoreData) });
@@ -2161,6 +2339,7 @@
   function openPost(id) {
     var post = posts.find(function(p) { return p.id === id; });
     if (!post) return;
+    post = normalizePost(post);
     currentPostId = id;
     var timeStr = post.time ? ' ' + post.time : '';
     document.getElementById('detail-meta').textContent =
@@ -2342,6 +2521,7 @@
     if (name === 'list') { renderList(); renderPhotoWall(); renderPlannerCalendar(); renderPlannerDetail(); renderCalendar(); renderWritingHistory(); }
     if (name === 'about') { renderProfile(); }
     if (name === 'backup') { renderBackupPostList(); }
+    if (name === 'doodle') { initDoodleBoard(); renderDoodleGallery(); }
     if (name === 'reader') { renderBookshelf(); }
     if (name === 'write' && !editingPostId) {
       document.getElementById('write-label').textContent = '写一篇新文章';
@@ -3143,7 +3323,7 @@
   }
 
   function getDayPostsHtml(dateStr) {
-    var datePosts = posts.filter(function(p) { return p.date === dateStr; });
+    var datePosts = ensurePostsArray(posts).filter(function(p) { return p.date === dateStr; });
     if (datePosts.length === 0) {
       return '<div class="planner-diary-empty">这一天还没有发表文章。</div>';
     }
@@ -4336,6 +4516,500 @@
     el.addEventListener('pointerdown', onPointerDown);
   }
 
+  function initDoodleBoard() {
+    var canvas = document.getElementById('doodle-canvas');
+    if (!canvas || canvas.__doodleInited) return;
+    doodleCtx = canvas.getContext('2d');
+    doodleCtx.lineCap = 'round';
+    doodleCtx.lineJoin = 'round';
+    doodleCtx.fillStyle = '#ffffff';
+    doodleCtx.fillRect(0, 0, canvas.width, canvas.height);
+    canvas.__doodleInited = true;
+    initDoodlePalette();
+
+    function getPoint(e) {
+      var rect = canvas.getBoundingClientRect();
+      var clientX = e.clientX;
+      var clientY = e.clientY;
+      if (e.touches && e.touches[0]) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      }
+      return {
+        x: (clientX - rect.left) * (canvas.width / rect.width),
+        y: (clientY - rect.top) * (canvas.height / rect.height)
+      };
+    }
+
+    function startDraw(e) {
+      e.preventDefault();
+      var p = getPoint(e);
+      doodleDrawing = true;
+      doodleLastX = p.x;
+      doodleLastY = p.y;
+      doodleLastTime = Date.now();
+    }
+
+    function moveDraw(e) {
+      if (!doodleDrawing || !doodleCtx) return;
+      e.preventDefault();
+      var p = getPoint(e);
+      var now = Date.now();
+      var dt = Math.max(1, now - doodleLastTime);
+      var dist = Math.hypot(p.x - doodleLastX, p.y - doodleLastY);
+      var speed = dist / dt;
+
+      doodleCtx.globalCompositeOperation = doodleEraser ? 'destination-out' : 'source-over';
+      doodleCtx.strokeStyle = doodleBrushColor;
+      doodleCtx.lineWidth = getDoodleStrokeWidth(speed);
+      doodleCtx.globalAlpha = getDoodleBrushAlpha();
+      doodleCtx.beginPath();
+      doodleCtx.moveTo(doodleLastX, doodleLastY);
+      doodleCtx.lineTo(p.x, p.y);
+      doodleCtx.stroke();
+
+      if (!doodleEraser && doodleBrushType === 'pencil') {
+        doodleCtx.globalAlpha = 0.08;
+        doodleCtx.fillStyle = doodleBrushColor;
+        doodleCtx.beginPath();
+        doodleCtx.arc(p.x + (Math.random() - 0.5) * 2, p.y + (Math.random() - 0.5) * 2, Math.max(0.5, doodleBrushSize * 0.12), 0, Math.PI * 2);
+        doodleCtx.fill();
+      }
+
+      doodleLastX = p.x;
+      doodleLastY = p.y;
+      doodleLastTime = now;
+    }
+
+    function stopDraw() {
+      doodleDrawing = false;
+      doodleCtx.globalAlpha = 1;
+    }
+
+    canvas.addEventListener('pointerdown', startDraw);
+    canvas.addEventListener('pointermove', moveDraw);
+    canvas.addEventListener('pointerup', stopDraw);
+    canvas.addEventListener('pointerleave', stopDraw);
+  }
+
+  function initDoodlePalette() {
+    var wrap = document.getElementById('doodle-palette');
+    if (!wrap) return;
+    wrap.innerHTML = doodlePaletteColors.map(function(c, idx){
+      var border = c.toLowerCase() === '#ffffff' ? ' style="box-shadow:0 0 0 1px #bbb;"' : '';
+      return '<button class="doodle-color-chip ' + (idx === 1 ? 'active' : '') + '" data-color="' + c + '" onclick="selectDoodleChip(\'' + c + '\', this)"' + border + '></button>';
+    }).join('');
+    var chips = wrap.querySelectorAll('.doodle-color-chip');
+    for (var i = 0; i < chips.length; i++) {
+      chips[i].style.background = chips[i].getAttribute('data-color');
+    }
+  }
+
+  function selectDoodleChip(color, btn) {
+    setDoodleColor(color);
+    document.querySelectorAll('.doodle-color-chip').forEach(function(ch){ ch.classList.remove('active'); });
+    if (btn) btn.classList.add('active');
+    var input = document.getElementById('doodle-color');
+    if (input) input.value = color;
+  }
+
+  function setDoodleBrush(type, btn) {
+    doodleBrushType = type || 'pen';
+    document.querySelectorAll('.doodle-brush-btn').forEach(function(b){ b.classList.remove('active'); });
+    if (btn) btn.classList.add('active');
+  }
+
+  function getDoodleStrokeWidth(speed) {
+    if (doodleEraser) return doodleBrushSize * 1.5;
+    if (doodleBrushType === 'marker') return doodleBrushSize * 1.35;
+    if (doodleBrushType === 'pencil') return Math.max(1, doodleBrushSize * (0.65 + Math.min(0.45, speed * 0.1)));
+    return Math.max(1, doodleBrushSize * (1.05 - Math.min(0.45, speed * 0.12)));
+  }
+
+  function getDoodleBrushAlpha() {
+    if (doodleEraser) return 1;
+    if (doodleBrushType === 'marker') return 0.35;
+    if (doodleBrushType === 'pencil') return 0.55;
+    return 0.95;
+  }
+
+  function setDoodleColor(color) {
+    doodleBrushColor = color || '#c0392b';
+    doodleEraser = false;
+    var eraserBtn = document.getElementById('doodle-eraser-btn');
+    if (eraserBtn) eraserBtn.textContent = '橡皮擦';
+  }
+
+  function setDoodleSize(size) {
+    doodleBrushSize = Math.max(1, parseInt(size, 10) || 6);
+    var label = document.getElementById('doodle-size-label');
+    if (label) label.textContent = doodleBrushSize + 'px';
+  }
+
+  function toggleDoodleEraser() {
+    doodleEraser = !doodleEraser;
+    var eraserBtn = document.getElementById('doodle-eraser-btn');
+    if (eraserBtn) eraserBtn.textContent = doodleEraser ? '画笔模式' : '橡皮擦';
+  }
+
+  function clearDoodleCanvas() {
+    var canvas = document.getElementById('doodle-canvas');
+    if (!canvas || !doodleCtx) return;
+    doodleCtx.globalCompositeOperation = 'source-over';
+    doodleCtx.fillStyle = '#ffffff';
+    doodleCtx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+  function renderDoodleGallery() {
+    var el = document.getElementById('doodle-gallery');
+    if (!el) return;
+    if (!Array.isArray(doodlesData) || doodlesData.length === 0) {
+      el.innerHTML = '<div class="empty-state">🎨<p>还没有保存的涂鸦作品，开始创作吧！</p></div>';
+      return;
+    }
+    var sorted = doodlesData.slice().sort(function(a, b){ return (b.id || 0) - (a.id || 0); });
+    el.innerHTML = sorted.map(function(item){
+      var title = item.title || ('涂鸦 ' + (item.id || ''));
+      return '<div class="doodle-card">' +
+        '<img src="' + item.dataUrl + '" alt="doodle">' +
+        '<div class="doodle-card-title">' + escapeHtml(title) + '</div>' +
+        '<div class="doodle-card-actions"><button onclick="openSavedDoodle(' + item.id + ')">继续编辑</button><button onclick="downloadDoodle(' + item.id + ')">下载</button></div>' +
+      '</div>';
+    }).join('');
+  }
+
+  async function saveDoodleImage() {
+    var canvas = document.getElementById('doodle-canvas');
+    if (!canvas) return;
+    var dataUrl = canvas.toDataURL('image/png');
+    var item = {
+      id: Date.now(),
+      title: '涂鸦作品 ' + formatDateGMT8() + ' ' + formatTimeGMT8(),
+      dataUrl: dataUrl,
+      createdAt: Date.now()
+    };
+    var existingIndex = doodlesData.findIndex(function(it){ return it.id === item.id; });
+    if (window.editingDoodleId) {
+      item.id = window.editingDoodleId;
+      existingIndex = doodlesData.findIndex(function(it){ return it.id === item.id; });
+    }
+    if (existingIndex >= 0) doodlesData[existingIndex] = item;
+    else doodlesData.push(item);
+    renderDoodleGallery();
+    try {
+      await apiFetch('/api/doodles', {
+        method: existingIndex >= 0 ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(item)
+      });
+      window.editingDoodleId = item.id;
+      alert('涂鸦已保存！');
+    } catch (e) {
+      alert('保存失败，请稍后再试。');
+    }
+  }
+
+  function openSavedDoodle(id) {
+    var item = doodlesData.find(function(it){ return it.id === id; });
+    if (!item) return;
+    var img = new Image();
+    img.onload = function() {
+      var canvas = document.getElementById('doodle-canvas');
+      if (!canvas) return;
+      initDoodleBoard();
+      doodleCtx.globalCompositeOperation = 'source-over';
+      doodleCtx.fillStyle = '#ffffff';
+      doodleCtx.fillRect(0, 0, canvas.width, canvas.height);
+      doodleCtx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      window.editingDoodleId = id;
+      showView('doodle', document.querySelector("button[data-view='doodle']"));
+    };
+    img.src = item.dataUrl;
+  }
+
+  function downloadDoodle(id) {
+    var item = doodlesData.find(function(it){ return it.id === id; });
+    if (!item) return;
+    var a = document.createElement('a');
+    a.href = item.dataUrl;
+    a.download = (item.title || 'doodle') + '.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  async function searchBooksOnline() {
+    var input = document.getElementById('book-search-input');
+    var q = (input && input.value || '').trim();
+    var resultsEl = document.getElementById('bookshelf-search-results');
+    if (!resultsEl) return;
+    if (!q) {
+      resultsEl.innerHTML = '<div class="backup-note">请输入关键词后再搜索。</div>';
+      return;
+    }
+    resultsEl.innerHTML = '<div class="backup-note">搜索中...</div>';
+    try {
+      var res = await apiFetch('/api/book-search?q=' + encodeURIComponent(q));
+      var items = Array.isArray(res.items) ? res.items : [];
+      if (items.length === 0) {
+        resultsEl.innerHTML = '<div class="backup-note">没有找到可下载的 EPUB 结果。</div>';
+        return;
+      }
+      resultsEl.innerHTML = items.map(function(it, idx){
+        return '<div class="book-search-item">' +
+          '<div><div style="font-weight:600;font-size:0.85rem;">' + escapeHtml(it.title) + '</div><div style="font-size:0.78rem;color:var(--muted);">' + escapeHtml(it.author || '未知作者') + '</div></div>' +
+          '<button onclick="downloadSearchedEpub(' + idx + ')">下载并导入</button>' +
+        '</div>';
+      }).join('');
+      window._bookSearchItems = items;
+    } catch (e) {
+      resultsEl.innerHTML = '<div class="backup-note">搜索失败，请稍后重试。</div>';
+    }
+  }
+
+  async function downloadSearchedEpub(index) {
+    var items = window._bookSearchItems || [];
+    var it = items[index];
+    if (!it || !it.epubUrl) return;
+    try {
+      var resp = await fetch(it.epubUrl);
+      if (!resp.ok) throw new Error('下载失败');
+      var blob = await resp.blob();
+      var arrayBuffer = await blob.arrayBuffer();
+      var bookId = Date.now();
+      await saveBookFile(bookId, arrayBuffer);
+      var meta = {
+        id: bookId,
+        title: it.title || '未知书名',
+        author: it.author || '',
+        cover: it.coverUrl || '',
+        progress: 0,
+        currentCfi: '',
+        lastRead: formatDateGMT8(),
+      };
+      booksData.push(meta);
+      await apiFetch('/api/books', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(meta)
+      });
+      renderBookshelf();
+      alert('已下载并导入《' + meta.title + '》');
+    } catch (e) {
+      alert('下载导入失败，请稍后重试。');
+    }
+  }
+
+  function loadDoodleBaseImage(file) {
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      var img = new Image();
+      img.onload = function() {
+        var canvas = document.getElementById('doodle-canvas');
+        if (!canvas) return;
+        initDoodleBoard();
+        var scale = Math.min(canvas.width / img.width, canvas.height / img.height);
+        var w = Math.round(img.width * scale);
+        var h = Math.round(img.height * scale);
+        var x = Math.round((canvas.width - w) / 2);
+        var y = Math.round((canvas.height - h) / 2);
+        doodleCtx.globalCompositeOperation = 'source-over';
+        doodleCtx.fillStyle = '#ffffff';
+        doodleCtx.fillRect(0, 0, canvas.width, canvas.height);
+        doodleCtx.drawImage(img, x, y, w, h);
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function launchTripleFireworks() {
+    if (fireworksRunning) return;
+    var canvas = document.getElementById('fireworks-canvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    fireworksRunning = true;
+    canvas.style.display = 'block';
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    var colors = ['#ff4d4f', '#ffd666', '#40a9ff', '#73d13d', '#9254de', '#ff85c0', '#ffa940', '#36cfc9'];
+    var particles = [];
+    var rockets = [];
+    var gravity = 0.045;
+    var friction = 0.985;
+    var audioCtx = null;
+
+    function getAudioCtx() {
+      try {
+        if (!audioCtx) {
+          var AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) audioCtx = new AC();
+        }
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+      } catch (e) {}
+      return audioCtx;
+    }
+
+    function playWhoosh() {
+      var ac = getAudioCtx();
+      if (!ac) return;
+      var now = ac.currentTime;
+      var osc = ac.createOscillator();
+      var gain = ac.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(220 + Math.random() * 80, now);
+      osc.frequency.exponentialRampToValueAtTime(60 + Math.random() * 20, now + 0.35);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.07, now + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+      osc.connect(gain).connect(ac.destination);
+      osc.start(now);
+      osc.stop(now + 0.38);
+    }
+
+    function playBurst() {
+      var ac = getAudioCtx();
+      if (!ac) return;
+      var now = ac.currentTime;
+      var noiseBuffer = ac.createBuffer(1, ac.sampleRate * 0.22, ac.sampleRate);
+      var data = noiseBuffer.getChannelData(0);
+      for (var i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
+      var src = ac.createBufferSource();
+      src.buffer = noiseBuffer;
+      var gain = ac.createGain();
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.18, now + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.24);
+      src.connect(gain).connect(ac.destination);
+      src.start(now);
+      src.stop(now + 0.25);
+    }
+
+    function burst(cx, cy, count, baseColor, spreadBoost) {
+      playBurst();
+      for (var i = 0; i < count; i++) {
+        var a = (Math.PI * 2 * i) / count + Math.random() * 0.12;
+        var speed = 2.8 + Math.random() * (4.8 + (spreadBoost || 0));
+        particles.push({
+          x: cx,
+          y: cy,
+          vx: Math.cos(a) * speed,
+          vy: Math.sin(a) * speed,
+          life: 70 + Math.random() * 30,
+          age: 0,
+          color: baseColor || colors[(Math.random() * colors.length) | 0],
+          size: 1.8 + Math.random() * 2.8,
+        });
+      }
+    }
+
+    function launchRocket(startX, delayMs, wave) {
+      setTimeout(function() {
+        playWhoosh();
+        var waveFactor = 1 + wave * 0.28;
+        rockets.push({
+          x: startX,
+          y: canvas.height + 10,
+          vx: (Math.random() - 0.5) * (1.2 + wave * 0.2),
+          vy: -(6.8 + Math.random() * 1.4) * waveFactor,
+          targetY: canvas.height * (0.18 + Math.random() * 0.2),
+          color: colors[(Math.random() * colors.length) | 0],
+          trail: [],
+          wave: wave,
+        });
+      }, delayMs);
+    }
+
+    function launchWave(wave, baseDelay) {
+      launchRocket(canvas.width * 0.2, baseDelay + 0, wave);
+      launchRocket(canvas.width * 0.5, baseDelay + 180, wave);
+      launchRocket(canvas.width * 0.8, baseDelay + 360, wave);
+    }
+
+    // 三轮烟花：一轮比一轮更盛大
+    launchWave(0, 0);
+    launchWave(1, 1300);
+    launchWave(2, 2700);
+
+    var start = performance.now();
+    function tick() {
+      ctx.fillStyle = 'rgba(3, 8, 20, 0.16)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      for (var r = rockets.length - 1; r >= 0; r--) {
+        var rk = rockets[r];
+        rk.vy += gravity * 0.08;
+        rk.x += rk.vx;
+        rk.y += rk.vy;
+        rk.trail.push({ x: rk.x, y: rk.y, a: 1 });
+        if (rk.trail.length > 12) rk.trail.shift();
+
+        for (var t = 0; t < rk.trail.length; t++) {
+          var tr = rk.trail[t];
+          var ta = (t + 1) / rk.trail.length;
+          ctx.globalAlpha = 0.14 * ta;
+          ctx.fillStyle = rk.color;
+          ctx.beginPath();
+          ctx.arc(tr.x, tr.y, 1.5 + ta, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(rk.x, rk.y, 2.1, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (rk.y <= rk.targetY || rk.vy > -0.6) {
+          var count = 120 + rk.wave * 55;
+          var spread = rk.wave * 1.7;
+          burst(rk.x, rk.y, count, rk.color, spread);
+          // 额外副爆：后两轮更盛大
+          if (rk.wave >= 1) {
+            burst(rk.x + (Math.random() - 0.5) * 40, rk.y + (Math.random() - 0.5) * 24, 60 + rk.wave * 25, colors[(Math.random() * colors.length) | 0], 1 + rk.wave);
+          }
+          if (rk.wave >= 2) {
+            burst(rk.x + (Math.random() - 0.5) * 70, rk.y + (Math.random() - 0.5) * 36, 80, colors[(Math.random() * colors.length) | 0], 2.4);
+          }
+          rockets.splice(r, 1);
+        }
+      }
+
+      for (var i = particles.length - 1; i >= 0; i--) {
+        var p = particles[i];
+        p.age += 1;
+        if (p.age >= p.life) {
+          particles.splice(i, 1);
+          continue;
+        }
+        p.vx *= friction;
+        p.vy = p.vy * friction + gravity;
+        p.x += p.vx;
+        p.y += p.vy;
+        var alpha = 1 - p.age / p.life;
+        ctx.globalAlpha = Math.max(0, alpha);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+
+      if (particles.length > 0 || rockets.length > 0 || performance.now() - start < 5600) {
+        requestAnimationFrame(tick);
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        canvas.style.display = 'none';
+        fireworksRunning = false;
+      }
+    }
+
+    requestAnimationFrame(tick);
+  }
+
   // ─── Initialize ───
   var backupInputEl = document.getElementById('backup-import-input');
   if (backupInputEl) {
@@ -4347,6 +5021,15 @@
         if (statusEl) statusEl.textContent = '上传失败：' + (err && err.message ? err.message : '未知错误');
         alert('上传失败，请检查文件格式。');
       });
+      e.target.value = '';
+    });
+  }
+
+  var doodleUploadEl = document.getElementById('doodle-upload-input');
+  if (doodleUploadEl) {
+    doodleUploadEl.addEventListener('change', function(e) {
+      var file = e.target.files && e.target.files[0];
+      loadDoodleBaseImage(file);
       e.target.value = '';
     });
   }
@@ -4363,6 +5046,7 @@
   initTopNavFallback();
 
   loadAllData();
+  initDoodleBoard();
 
   // Init photo wall background settings on page load
   setTimeout(function() {
